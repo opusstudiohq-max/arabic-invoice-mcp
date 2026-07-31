@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تجنب غرامات ZATCA Wave 24 في 30 دقيقة | Arabic Invoice MCP</title>
+<meta name="description" content="أدوات فوترة عربية مفتوحة المصدر: توليد QR بصيغة TLV، تفقيط عربي صحيح نحوياً، وحسابات ضريبية — مغطاة بـ160 اختباراً آلياً.">
+<meta name="keywords" content="mcp, claude, zatca, invoice, tafgeet, vat, saudi arabia, egypt, uae, arabic mcp, غرامات الزكاة">
+<meta property="og:title" content="تجنب غرامات ZATCA Wave 24 في 30 دقيقة | Arabic Invoice MCP">
+<meta property="og:description" content="أدوات فوترة عربية مفتوحة المصدر: توليد QR بصيغة TLV، تفقيط عربي صحيح نحوياً، وحسابات ضريبية — مغطاة بـ160 اختباراً آلياً.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://github.com/opusstudiohq-max/arabic-invoice-mcp">
+<meta property="og:image" content="https://raw.githubusercontent.com/opusstudiohq-max/arabic-invoice-mcp/main/assets/icon.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="تجنب غرامات ZATCA Wave 24 في 30 دقيقة | Arabic Invoice MCP">
+<meta name="twitter:description" content="أدوات فوترة عربية مفتوحة المصدر مغطاة بـ160 اختباراً آلياً.">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Kufi+Arabic:wght@300;400;500;600;700;800&display=swap');
+
+  :root {
+    --navy: #0f172a;
+    --navy-light: #1e293b;
+    --blue: #2563eb;
+    --blue-glow: rgba(37, 99, 235, 0.15);
+    --purple: #8b5cf6;
+    --light-blue: #eff6ff;
+    --green: #10b981;
+    --gray: #64748b;
+    --light-gray: #f8fafc;
+    --orange: #f97316;
+    --white: #ffffff;
+    --border: rgba(226, 232, 240, 0.8);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Kufi Arabic', 'Outfit', sans-serif;
+    line-height: 1.8;
+    color: #334155;
+    background: #f8fafc;
+    overflow-x: hidden;
+  }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+
+  /* HEADER */
+  header {
+    background: radial-gradient(circle at 10% 20%, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.98) 90%), url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><circle cx="50" cy="50" r="1" fill="rgba(255,255,255,0.07)"/></svg>');
+    color: white;
+    padding: 6rem 0 7rem;
+    position: relative;
+    overflow: hidden;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    text-align: center;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    left: -20%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.2) 0%, rgba(37, 99, 235, 0) 70%);
+    z-index: 1;
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -20%;
+    right: -20%;
+    width: 60%;
+    height: 60%;
+    background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, rgba(139, 92, 246, 0) 70%);
+    z-index: 1;
+  }
+  header .container {
+    position: relative;
+    z-index: 2;
+  }
+  header h1 {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    margin-bottom: 1.5rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    background: linear-gradient(135deg, #ffffff 30%, #bfdbfe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  header p.lead {
+    font-size: clamp(1.1rem, 2vw, 1.35rem);
+    opacity: 0.9;
+    max-width: 800px;
+    margin: 0 auto 2.5rem;
+    font-weight: 300;
+    color: #cbd5e1;
+  }
+  .badges {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin: 2rem 0;
+  }
+  .badge {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0.35rem 1rem;
+    border-radius: 9999px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    backdrop-filter: blur(8px);
+    color: #e2e8f0;
+    transition: all 0.3s;
+  }
+  .badge:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
+  }
+  .cta-buttons {
+    display: flex;
+    gap: 1.25rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 2.5rem;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.85rem 2rem;
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    color: white;
+    box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.3);
+  }
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px 0 rgba(37, 99, 235, 0.4);
+  }
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.03);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(8px);
+  }
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+  }
+
+  /* SECTIONS */
+  section { padding: 6rem 0; position: relative; }
+  section h2 {
+    font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+    text-align: center;
+    margin-bottom: 1rem;
+    color: var(--navy);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  section h2 + p.subtitle {
+    text-align: center;
+    color: var(--gray);
+    max-width: 600px;
+    margin: 0 auto 4rem;
+    font-size: 1.1rem;
+    font-weight: 400;
+  }
+
+  /* FEATURES GRID */
+  .features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2rem;
+  }
+  .feature {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.01);
+    border: 1px solid var(--border);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .feature:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+    border-color: rgba(37, 99, 235, 0.3);
+  }
+  .feature .icon {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    width: 60px;
+    height: 60px;
+    background: var(--light-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    transition: all 0.3s;
+  }
+  .feature:hover .icon {
+    background: var(--blue);
+    transform: scale(1.05);
+    color: white;
+  }
+  .feature h3 {
+    color: var(--navy);
+    margin-bottom: 0.75rem;
+    font-size: 1.35rem;
+    font-weight: 700;
+  }
+  .feature p {
+    color: var(--gray);
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+
+  /* CODE BLOCK */
+  .code-section {
+    background: var(--navy);
+    color: #f1f5f9;
+    padding: 2.5rem;
+    border-radius: 16px;
+    margin: 3rem 0;
+    overflow-x: auto;
+    direction: ltr;
+    text-align: left;
+    box-shadow: 0 20px 25px -5px rgba(15, 23, 42, 0.15);
+    border: 1px solid rgba(255,255,255,0.05);
+  }
+  .code-section pre {
+    font-family: 'Fira Code', 'Consolas', 'Monaco', monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+
+  /* STATS */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+  }
+  .stat {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    text-align: center;
+    transition: all 0.3s;
+  }
+  .stat:hover {
+    transform: translateY(-2px);
+    border-color: rgba(37, 99, 235, 0.2);
+  }
+  .stat .number {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: var(--blue);
+    line-height: 1;
+  }
+  .stat .label {
+    color: var(--gray);
+    margin-top: 0.75rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+
+  /* PRICING */
+  .pricing {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+  .price-card {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 3rem 2rem;
+    text-align: center;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .price-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+  }
+  .price-card.featured {
+    border-color: var(--blue);
+    box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.05), 0 4px 6px -2px rgba(37, 99, 235, 0.02);
+    transform: scale(1.03);
+  }
+  .price-card.featured:hover {
+    transform: scale(1.03) translateY(-4px);
+    box-shadow: 0 25px 30px -5px rgba(37, 99, 235, 0.1);
+  }
+  .price-card.featured::before {
+    content: "الأكثر طلباً";
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--blue);
+    color: white;
+    padding: 0.35rem 1.25rem;
+    border-radius: 9999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+  }
+  .price-card h3 {
+    color: var(--navy);
+    margin-bottom: 1.25rem;
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+  .price-card .price {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--blue);
+    margin: 1.5rem 0;
+    line-height: 1;
+  }
+  .price-card .price small {
+    font-size: 1.1rem;
+    color: var(--gray);
+    font-weight: 400;
+  }
+  .price-card ul {
+    list-style: none;
+    margin: 2rem 0;
+    text-align: right;
+  }
+  .price-card ul li {
+    padding: 0.75rem 0;
+    color: var(--gray);
+    border-bottom: 1px solid var(--light-gray);
+    font-size: 0.95rem;
+  }
+  .price-card ul li::before {
+    content: "✓ ";
+    color: var(--green);
+    font-weight: bold;
+    margin-left: 0.5rem;
+  }
+
+  /* DEMO QR */
+  .demo-section {
+    background: radial-gradient(circle at 50% 50%, rgba(239, 246, 255, 0.5) 0%, rgba(248, 250, 252, 0.8) 100%);
+    text-align: center;
+  }
+  .qr-demo {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 20px;
+    display: inline-block;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--border);
+  }
+  .qr-demo img {
+    width: 260px;
+    height: 260px;
+    display: block;
+    border-radius: 8px;
+    border: 1px solid #f1f5f9;
+  }
+  .qr-demo p {
+    color: var(--navy);
+    margin-top: 1.25rem;
+    font-weight: 600;
+  }
+
+  /* FOOTER */
+  footer {
+    background: var(--navy);
+    color: #94a3b8;
+    padding: 4rem 0;
+    text-align: center;
+    border-top: 1px solid rgba(255,255,255,0.05);
+  }
+  footer p {
+    font-size: 0.95rem;
+  }
+  footer a {
+    color: #e2e8f0;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  footer a:hover {
+    color: var(--blue);
+  }
+  footer .links {
+    display: flex;
+    gap: 2.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin: 1.5rem 0;
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <h1>تجنب غرامات ZATCA Wave 24 في 30 دقيقة</h1>
+    <p class="lead">
+      الحل الأسرع والمتخصص للتوافق مع متطلبات هيئة الزكاة والضريبة والجمارك السعودية دون الاشتراك في أنظمة ERP باهظة التكلفة (>1000$/سنة). تفقيط مالي فصيح وفواتير إلكترونية معتمدة لشركتك.
+    </p>
+    <div class="badges">
+      <span class="badge">ZATCA Phase 1 ✓</span>
+      <span class="badge">160 Tests Passing ✓</span>
+      <span class="badge">MIT License</span>
+      <span class="badge">Python 3.10+</span>
+      <span class="badge">7 دول عربية</span>
+    </div>
+    <div class="cta-buttons">
+      <a href="#install" class="btn btn-primary">ابدأ الآن</a>
+      <a href="https://github.com/opusstudiohq-max/arabic-invoice-mcp" class="btn btn-secondary">GitHub ⭐</a>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="container">
+    <h2>✨ كيف نحمي شركتك ونوفر وقتك؟</h2>
+    <p class="subtitle">تكامل ذكي يضمن توافق فواتيرك ويوفر وقتك اليومي دون أي تكاليف خفية أو تعقيدات ERP</p>
+    <div class="features">
+      <div class="feature">
+        <div class="icon">🔢</div>
+        <h3>تفقيط أرقام عربي فصيح</h3>
+        <p>تحويل أي رقم إلى كلمات عربية مع نحوية صحيحة: تمييز مفرد، جمع، مثنى. دعم العملات العربية الخمس.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">🧾</div>
+        <h3>فواتير متوافقة ZATCA</h3>
+        <p>توليد فواتير مع QR code رسمي بصيغة TLV + Base64، متوافق مع Phase 1 (B2C) ومتطلبات B2B قريباً.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">🏷️</div>
+        <h3>حساب VAT 7 دول</h3>
+        <p>السعودية (15%)، مصر (14%)، الإمارات (5%)، البحرين، الكويت، قطر، عُمان. تلقائي حسب الدولة.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">💼</div>
+        <h3>11 أداة (Tool) جاهزة</h3>
+        <p>من إنشاء الفاتورة إلى حساب التأمينات الاجتماعية و Reverse Charge Mechanism.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">🛡️</div>
+        <h3>آمن ومُختبَر</h3>
+        <p>160 unit test، type hints كاملة، input validation صارمة، لا side effects.</p>
+      </div>
+      <div class="feature">
+        <div class="icon">🌍</div>
+        <h3>يعمل مع كل MCP Client</h3>
+        <p>Claude Desktop، Claude Code، Cursor، Windsurf. إعداد في 3 دقائق.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="background: var(--light-gray);">
+  <div class="container">
+    <h2>⚡ ابدأ في 3 دقائق وتجنّب غرامات الهيئة</h2>
+    <p class="subtitle">خطوات تثبيت سريعة ومباشرة للمطورين والشركات لتأمين الفوترة الإلكترونية</p>
+    <div class="code-section">
+<pre># 1) ثبّت الـ package
+pip install arabic-invoice-mcp[qr]
+
+# 2) أضف لـ Claude Desktop config
+# %APPDATA%\Claude\claude_desktop_config.json
+{
+  "mcpServers": {
+    "arabic-invoice": {
+      "command": "python",
+      "args": ["-m", "arabic_invoice_mcp.server"]
+    }
+  }
+}
+
+# 3) أعد تشغيل Claude Desktop
+# 4) اسأل Claude: "فقع لي 1234.56 ريال سعودي"</pre>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>📊 بالأرقام</h2>
+    <div class="stats">
+      <div class="stat">
+        <div class="number">11</div>
+        <div class="label">MCP Tools</div>
+      </div>
+      <div class="stat">
+        <div class="number">160</div>
+        <div class="label">Unit Tests</div>
+      </div>
+      <div class="stat">
+        <div class="number">7</div>
+        <div class="label">دول عربية</div>
+      </div>
+      <div class="stat">
+        <div class="number">5</div>
+        <div class="label">عملات مدعومة</div>
+      </div>
+      <div class="stat">
+        <div class="number">100%</div>
+        <div class="label">مفتوح المصدر</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="demo-section">
+  <div class="container">
+    <h2>🎯 كود QR معتمد ومطابق للاشتراطات الرسمية</h2>
+    <p class="subtitle">الناتج الفعلي المشفر (TLV + Base64) لفاتورة مبسطة مطابقة لاشتراطات الفحص الإلكتروني لهيئة ZATCA</p>
+    <div class="qr-demo">
+      <img src="sample-invoice-qr.png" alt="ZATCA QR Code">
+      <p>فاتورة #INV-2026-DEMO-001 — Opus Studio</p>
+    </div>
+  </div>
+</section>
+
+<section style="background: var(--light-gray);">
+  <div class="container">
+    <h2>💎 وفر أكثر من 1000$ سنوياً مقارنة بالأنظمة التقليدية</h2>
+    <p class="subtitle">باقات مرنة ومجانية للمطورين، وحلول سريعة واقتصادية للمؤسسات والشركات</p>
+    <div class="pricing">
+      <div class="price-card">
+        <h3>مجاني</h3>
+        <div class="price">$0<small>/ للأبد</small></div>
+        <ul>
+          <li>كل الـ 11 أداة</li>
+          <li>مفتوح المصدر (MIT)</li>
+          <li>تعديل وتطوير</li>
+          <li>مجتمع Discord</li>
+        </ul>
+      </div>
+      <div class="price-card featured">
+        <h3>Hosted (سحابي)</h3>
+        <div class="price">$29<small>/ شهر</small></div>
+        <ul>
+          <li>بدون تثبيت — يعمل في السحابة</li>
+          <li>500 فاتورة / شهر</li>
+          <li>ZATCA Phase 2 (B2B)</li>
+          <li>دعم فني خلال 24 ساعة</li>
+          <li>SLA 99.9%</li>
+        </ul>
+      </div>
+      <div class="price-card">
+        <h3>Enterprise</h3>
+        <div class="price">$499<small>+ / شهر</small></div>
+        <ul>
+          <li>استضافة مخصصة</li>
+          <li>فواتير غير محدودة</li>
+          <li>دمج مع ERP الخاص بك</li>
+          <li>SLA مخصص</li>
+          <li>مدير حساب مخصص</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="faq-section" style="background: var(--white); padding: 5rem 0; border-top: 1px solid var(--border);">
+  <div class="container">
+    <h2 style="text-align: center; margin-bottom: 1rem; color: var(--navy);">🙋 الأسئلة الشائعة / FAQ</h2>
+    <p class="subtitle" style="text-align: center; margin-bottom: 3rem; color: var(--gray);">كل ما تود معرفته عن خوادم الفواتير والتفقيط العربية</p>
+    <div style="max-width: 800px; margin: 0 auto; display: flex; flex-direction: column; gap: 1.5rem;">
+      <div style="background: var(--light-gray); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border);">
+        <h4 style="color: var(--navy); margin-bottom: 0.5rem; font-size: 1.1rem;">ما هو خادم الـ MCP؟</h4>
+        <p style="color: var(--gray); font-size: 0.95rem; line-height: 1.6;">هو بروتوكول اتصال (Model Context Protocol) يتيح للنماذج اللغوية الكبيرة مثل Claude قراءة بيانات واستخدام أدوات خارجية مثل أداة التفقيط أو مولدات الفواتير مباشرة من سياق المحادثة.</p>
+      </div>
+      <div style="background: var(--light-gray); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border);">
+        <h4 style="color: var(--navy); margin-bottom: 0.5rem; font-size: 1.1rem;">هل يدعم متطلبات هيئة الزكاة والضريبة والجمارك (ZATCA)؟</h4>
+        <p style="color: var(--gray); font-size: 0.95rem; line-height: 1.6;">الخادم يولّد رمز QR بترميز TLV/Base64 بحقول المرحلة الأولى (الوسوم 1-5) ويغطيه 160 اختباراً آلياً. لا يشمل الوسوم التشفيرية للمرحلة الثانية (6-9) ولا الربط بمنصة فاتورة، ولا يؤكد قبول الهيئة لأي فاتورة — فحالة القبول تعيش في استجابة المنصة.</p>
+      </div>
+      <div style="background: var(--light-gray); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border);">
+        <h4 style="color: var(--navy); margin-bottom: 0.5rem; font-size: 1.1rem;">ما هي العملات واللهجات المدعومة في التفقيط؟</h4>
+        <p style="color: var(--gray); font-size: 0.95rem; line-height: 1.6;">ندعم 7 عملات عربية رئيسية تشمل الريال السعودي، الجنيه المصري، الدرهم الإماراتي، الدينار الكويتي، الدينار البحريني، الريال العماني، والريال القطري مع مراعاة قواعد النحو العربي والتأنيث والتذكير والتثنية.</p>
+      </div>
+      <div style="background: var(--light-gray); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border);">
+        <h4 style="color: var(--navy); margin-bottom: 0.5rem; font-size: 1.1rem;">كيف يمكنني تثبيت واستخدام الخادم؟</h4>
+        <p style="color: var(--gray); font-size: 0.95rem; line-height: 1.6;">يمكنك تثبيته بلمح البصر عبر سطر الأوامر <code>pip install arabic-invoice-mcp[qr]</code> وإضافته لملف إعدادات Claude Desktop Config الموضح في دليل الإعداد السريع.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>صنع بـ ❤️ للمجتمع العربي — MIT License</p>
+    <div class="links">
+      <a href="https://github.com/opusstudiohq-max/arabic-invoice-mcp">GitHub</a>
+      <a href="https://pypi.org/project/arabic-invoice-mcp/">PyPI</a>
+      <a href="./CHANGELOG.md">Changelog</a>
+      <a href="./CONTRIBUTING.md">Contributing</a>
+      <a href="./SECURITY.md">Security</a>
+    </div>
+    <p style="margin-top: 1rem;">© 2026 Opus Studio</p>
+  </div>
+</footer>
+
+</body>
+</html>

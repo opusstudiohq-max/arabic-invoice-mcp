@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- SEO -->
+  <title>فاحص QR للفاتورة الإلكترونية (المرحلة الأولى) — فحص بنيوي مجاني يعمل في متصفحك | مُتوافِق</title>
+  <meta name="description" content="أداة مجانية تفحص بنية رمز QR للفاتورة الإلكترونية (حقول المرحلة الأولى) وتكشف الأخطاء الشائعة قبل الإرسال. تعمل بالكامل داخل متصفحك — بياناتك لا تُرفع لأي خادم.">
+  <meta name="keywords" content="فحص فاتورة زاتكا, توافق الفوترة الإلكترونية, غرامات ZATCA, فاتورة إلكترونية سعودية, QR code فاتورة, هيئة الزكاة والضريبة, ZATCA Phase 1, ZATCA Wave 24">
+  <meta name="author" content="Arabic Invoice MCP">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://opus-studio.github.io/zatca-checker/">
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="فحص توافق فاتورتك مع ZATCA — أداة مجانية">
+  <meta property="og:description" content="فحص بنيوي فوري لرمز QR — يعمل داخل متصفحك دون رفع أي بيانات.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ar_SA">
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23073A2D'/><path d='M32 8 L52 16 V31 C52 43 44 51 32 55 C20 51 12 43 12 31 V16 Z' fill='%23fff'/><path d='M23 33 L30 40 L43 26' fill='none' stroke='%230A4D3C' stroke-width='5.5' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/style.css">
+
+  <!-- Structured Data (JSON-LD) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "فحص توافق فاتورة ZATCA",
+    "description": "أداة مجانية لفحص توافق الفواتير الإلكترونية مع متطلبات هيئة الزكاة والضريبة والجمارك السعودية",
+    "applicationCategory": "BusinessApplication",
+    "operatingSystem": "Any",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "SAR" },
+    "inLanguage": "ar"
+  }
+  </script>
+</head>
+<body>
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- HERO -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <section class="hero">
+    <div class="container">
+      <div class="hero__badge">أداة مجانية — بدون تسجيل</div>
+      <h1 class="hero__title">
+        افحص توافق فاتورتك مع
+        <span class="highlight">ZATCA</span>
+      </h1>
+      <p class="hero__subtitle">
+        الصق محتوى QR code واكتشف الأخطاء البنيوية الشائعة قبل أن تصل لمدققك —
+        <strong>كل الفحص يجري داخل متصفحك، ولا تغادر بياناتك جهازك إطلاقاً.</strong>
+      </p>
+      <p class="hero__subtitle" style="font-size: 0.82em; opacity: 0.85; margin-top: 0.6rem;">
+        ⚠️ نطاق الأداة: فحص <strong>بنية</strong> حقول QR للمرحلة الأولى (الوسوم 1-5). لا تفحص الوسوم التشفيرية للمرحلة الثانية (6-9)،
+        <strong>ولا يمكنها تأكيد أن الهيئة قبلت فاتورتك</strong> — فحالة القبول تعيش في استجابة منصة فاتورة لا في الملف.
+      </p>
+    </div>
+  </section>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- CHECKER TOOL -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <main class="container">
+    <div class="card" id="checker-card">
+      <div class="card__title">
+        <span class="icon">🔍</span>
+        فحص QR Code الفاتورة
+      </div>
+
+      <!-- Demo buttons -->
+      <div class="demo-buttons">
+        <button class="demo-btn" id="demo-valid">🟢 تجربة فاتورة سليمة</button>
+        <button class="demo-btn demo-btn--error" id="demo-bad-vat">🔴 رقم ضريبي خاطئ</button>
+        <button class="demo-btn demo-btn--error" id="demo-bad-ts">🔴 تاريخ غير صالح</button>
+        <a class="demo-btn" href="batch.html" style="text-decoration:none;">🏢 مكتب محاسبة؟ افحص محفظتك كلها دفعة واحدة ←</a>
+      </div>
+
+      <div class="input-group">
+        <label for="qr-input">محتوى QR Code بصيغة Base64</label>
+        <textarea
+          id="qr-input"
+          placeholder="الصق نص Base64 من QR code الفاتورة هنا...&#10;&#10;مثال: AQ5jLi4u..."
+          spellcheck="false"
+          autocomplete="off"
+        ></textarea>
+      </div>
+
+      <button class="btn btn--primary btn--full" id="check-btn">
+        <span class="spinner"></span>
+        <span class="btn-text">🛡️ افحص الآن</span>
+      </button>
+
+      <p style="text-align: center; font-size: 0.78rem; color: var(--clr-text-dim); margin-top: 0.75rem;">
+        Ctrl+Enter للفحص السريع — كل شيء يعمل محلياً في متصفحك ولا تُرسل بياناتك لأي سيرفر.
+      </p>
+    </div>
+
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- RESULTS -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <section id="results-section">
+      <div class="card">
+        <div class="card__title">
+          <span class="icon">📊</span>
+          نتيجة الفحص
+        </div>
+        <div id="results-container"></div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- FAQ -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <section class="card" id="faq-section" style="animation-delay: 0.2s;">
+      <div class="card__title">
+        <span class="icon">❓</span>
+        أسئلة شائعة
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          ما هي متطلبات ZATCA للفاتورة الإلكترونية (Phase 1)؟
+          <span class="chevron">▼</span>
+        </button>
+        <div class="faq-answer">
+          <p>
+            المرحلة الأولى (B2C) تتطلب أن يحتوي QR code الفاتورة على 5 حقول بصيغة TLV
+            (Tag-Length-Value): اسم البائع، الرقم الضريبي (15 رقم يبدأ بـ3)، تاريخ ووقت
+            الإصدار بصيغة ISO 8601، الإجمالي شامل الضريبة، ومبلغ ضريبة القيمة المضافة.
+            يُرمّز الكل بـ Base64 ويُحوّل لصورة QR.
+          </p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          ما هي غرامات عدم الامتثال مع ZATCA؟
+          <span class="chevron">▼</span>
+        </button>
+        <div class="faq-answer">
+          <p>
+            <strong>الصورة الدقيقة (وكثيرون ينقلونها خطأً):</strong> العقوبة لا تبدأ بغرامة.
+            السلّم المعلن يبدأ بـ<strong>إشعار ومهلة 3 أشهر للتصحيح</strong> عند المخالفة الأولى،
+            ثم يتدرّج عند التكرار خلال 12 شهراً: 1,000 → 5,000 → 10,000 → <strong>40,000 ريال</strong>
+            كحد أقصى. ويعود العدّاد لمرحلة الإشعار بعد مرور 12 شهراً دون تكرار.
+          </p>
+          <p>
+            <strong>والأهم حالياً:</strong> مبادرة إلغاء الغرامات والإعفاء من العقوبات
+            <strong>مُمدَّدة حتى 31 ديسمبر 2026</strong>. لذلك نحن لا نبيع لك خوفاً —
+            نقدّم أداة تكشف الأخطاء البنيوية مبكراً لأن ذلك <em>عملياً أوفر لوقتك</em>، لا لأن غرامة وشيكة.
+          </p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          ما هو Wave 24 وكيف يؤثر على منشأتي؟
+          <span class="chevron">▼</span>
+        </button>
+        <div class="faq-answer">
+          <p>
+            الموجات هي دفعات تطبيق مرحلة الربط والتكامل (المرحلة الثانية) مع منصة «فاتورة».
+            الموجة 24 (إيرادات تتجاوز 375,000 ريال) كان موعدها <strong>30 يونيو 2026</strong> وقد مضى.
+            وأحدث ما أُعلن هو <strong>الموجة 25</strong>: عتبة <strong>187,500 ريال</strong>
+            وموعد ربط <strong>1 فبراير 2027</strong>.
+          </p>
+          <p>
+            إن كنت ضمن موجة مُفعّلة فأنت بحاجة إلى <strong>حل متكامل مع منصة فاتورة</strong>
+            (توقيع تشفيري وإرسال فعلي) — وهذه الأداة ليست ذلك ولا تدّعيه؛ هي فحص بنيوي مساعد فقط.
+          </p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          هل هذه الأداة معتمدة رسمياً من ZATCA؟
+          <span class="chevron">▼</span>
+        </button>
+        <div class="faq-answer">
+          <p>
+            لا — هذه أداة استرشادية مفتوحة المصدر تساعدك على الكشف المبكر عن أخطاء QR code
+            الشائعة. للتحقق الرسمي، استخدم
+            <a href="https://zatca.gov.sa" target="_blank" rel="noopener">موقع هيئة الزكاة والضريبة والجمارك</a>
+            أو اتصل بمزود نظام الفوترة المعتمد لديك.
+          </p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          هل تستطيع الأداة إخباري بأن فاتورتي «مقبولة» لدى الهيئة؟
+          <span class="chevron">▼</span>
+        </button>
+        <div class="faq-answer">
+          <p>
+            <strong>لا — ولا تستطيع أي أداة محلية ذلك.</strong> قبول الفاتورة حدثٌ يقع على
+            خوادم الهيئة، ودليله الوحيد هو استجابة منصة «فاتورة» (حالة التخليص أو الإبلاغ)
+            المحفوظة في نظامك — وليس داخل ملف الفاتورة ولا داخل رمز QR.
+          </p>
+          <p>
+            الهيئة نفسها تنص على أن اجتياز أدواتها الرسمية للتحقق <em>لا يعني</em> أن الفواتير
+            اعتُمدت منها. لذلك أقصى ما نقوله بصدق: <strong>«هذا الملف اجتاز/لم يجتز فحوصات بنيوية محددة»</strong>.
+          </p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          الهيئة توفّر أداة تحقق مجانية — لماذا أستخدم أداتكم؟
+          <span class="chevron">▼</span>
+        </button>
+        <div class="faq-answer">
+          <p>
+            سؤال عادل، وجوابنا صريح: <strong>إن كنت مطوّراً تتحقق من ملف XML واحد، فاستخدم
+            أدوات الهيئة الرسمية — فهي المرجع.</strong> أداتنا لا تنافسها ولا تحلّ محلّها.
+          </p>
+          <p>
+            نحن نخدم حالة مختلفة: فحص <strong>دفعة كبيرة</strong> من الفواتير عبر عملاء متعددين
+            في ثوانٍ، بواجهة عربية لغير التقنيين، وتقرير جاهز للمشاركة — دون تثبيت أي شيء
+            ودون رفع البيانات لأي خادم. إن لم تكن هذه حالتك، فلا تدفع لنا شيئاً.
+          </p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          أنا محاسب / أدير مكتب محاسبة — هل أفحص عملائي دفعة واحدة؟
+          <span class="chevron">▼</span>
+        </button>
+        <div class="faq-answer">
+          <p>
+            نعم — بنينا <a href="batch.html">أداة الفحص الجماعي</a> خصيصاً لمكاتب المحاسبة:
+            الصق فواتير محفظتك كلها (سطر لكل فاتورة مع اسم العميل) واحصل على خريطة الأخطاء
+            البنيوية لكل عملائك في دقائق. والأهم لك مهنياً: <strong>لا تُرفع بيانات عملائك
+            إلى أي خادم</strong> — تبقى داخل جهازك، وهذا يجنّبك تعقيدات نقل البيانات خارج المملكة.
+          </p>
+        </div>
+      </div>
+
+      <div class="faq-item">
+        <button class="faq-question">
+          كيف أحصل على نص Base64 من QR code الفاتورة؟
+          <span class="chevron">▼</span>
+        </button>
+        <div class="faq-answer">
+          <p>
+            استخدم أي تطبيق مسح QR code (مثل Google Lens أو تطبيق الكاميرا) لمسح QR
+            الفاتورة — سيظهر لك نص طويل من أحرف وأرقام. انسخ هذا النص والصقه في المربع
+            أعلاه. بدلاً من ذلك، يمكنك تصدير البيانات من نظام الفوترة الإلكتروني مباشرة.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════ -->
+    <!-- DISCLAIMER -->
+    <!-- ════════════════════════════════════════════════════════ -->
+    <div class="disclaimer">
+      <span class="icon">⚠️</span>
+      <p>
+        <strong>إخلاء مسؤولية:</strong>
+        هذه أداة استرشادية مفتوحة المصدر وليست جهة رسمية ولا تُغني عن الرجوع إلى
+        <a href="https://zatca.gov.sa" target="_blank" rel="noopener">هيئة الزكاة والضريبة والجمارك</a>.
+        النتائج تقريبية وقد لا تغطي جميع متطلبات الربط والتكامل (Phase 2).
+        استشر مختصاً معتمداً قبل اتخاذ قرارات تجارية بناءً على هذه النتائج.
+      </p>
+    </div>
+  </main>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- FOOTER -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <footer class="footer">
+    <p>
+      صُنع بـ ❤️ بواسطة <strong>OPUS Studio</strong> —
+      <a href="https://github.com/opusstudiohq-max/arabic-invoice-mcp" target="_blank" rel="noopener">Arabic Invoice MCP</a>
+      أداة مفتوحة المصدر لتمكين الأعمال العربية
+    </p>
+    <p style="margin-top: 0.5rem; font-size: 0.75rem;">
+      جميع الفحوصات تعمل محلياً في متصفحك — لا تُرسل بياناتك لأي خادم خارجي.
+    </p>
+  </footer>
+
+  <!-- Scripts (order matters: validator → app) -->
+  <script src="js/zatca-validator.js"></script>
+  <script src="js/app.js"></script>
+  <!-- اختبارات التطوير: أضف ?test=1 للرابط لتشغيلها في console -->
+  <script>
+    if (new URLSearchParams(location.search).has('test')) {
+      const s = document.createElement('script');
+      s.src = 'js/tests.js';
+      document.body.appendChild(s);
+    }
+  </script>
+</body>
+</html>

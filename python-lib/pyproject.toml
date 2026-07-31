@@ -1,0 +1,125 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "arabic-invoice-mcp"
+version = "1.0.0"
+description = "خادم MCP للفواتير الإلكترونية العربية وتفقيط الأرقام - متوافق مع ZATCA السعودية"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [
+    {name = "Arabic MCP Studio"},
+]
+keywords = [
+    "mcp", "claude", "arabic", "invoice", "zatca", "tafgeet", "vat",
+    "qr-code", "e-invoice", "model-context-protocol", "anthropic",
+    "fastmcp", "saudi-arabia", "egypt", "uae",
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Natural Language :: Arabic",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Topic :: Office/Business :: Financial :: Accounting",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "mcp>=1.0.0",
+    "typer>=0.9.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+    "mypy>=1.0",
+    "ruff>=0.1",
+    "black>=23.0",
+    "reportlab>=4.0",  # for PDF guide generation
+    "openpyxl>=3.1",  # for CRM XLSX generation
+    "Pillow>=10.0",   # for QR code generation
+]
+qr = [
+    "qrcode[pil]>=7.4",
+    "Pillow>=10.0",
+]
+
+[project.scripts]
+arabic-invoice-mcp = "arabic_invoice_mcp.server:main"
+
+[project.urls]
+Homepage = "https://github.com/opusstudiohq-max/arabic-invoice-mcp"
+Repository = "https://github.com/opusstudiohq-max/arabic-invoice-mcp"
+Documentation = "https://github.com/opusstudiohq-max/arabic-invoice-mcp#readme"
+Issues = "https://github.com/opusstudiohq-max/arabic-invoice-mcp/issues"
+Changelog = "https://github.com/opusstudiohq-max/arabic-invoice-mcp/blob/main/CHANGELOG.md"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/arabic_invoice_mcp"]
+
+# ----- Black (code formatter) -----
+[tool.black]
+line-length = 100
+target-version = ["py310", "py311", "py312"]
+
+# ----- Ruff (linter) -----
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+extend-exclude = [".pytest_cache", "node_modules"]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "B",   # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long (handled by black)
+    "B008",  # do not perform function calls in argument defaults
+]
+
+# ----- MyPy (type checker) -----
+[tool.mypy]
+python_version = "3.10"
+strict_optional = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+disallow_incomplete_defs = false
+ignore_missing_imports = true
+
+# ----- Pytest -----
+[tool.pytest.ini_options]
+minversion = "7.0"
+addopts = "-v --tb=short --strict-markers --cov=src --cov-report=term-missing"
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+# ----- Coverage -----
+[tool.coverage.run]
+source = ["src"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if __name__ == .__main__.:",
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+]

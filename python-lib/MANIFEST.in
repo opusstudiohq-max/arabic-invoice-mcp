@@ -1,0 +1,16 @@
+# MANIFEST.in — files to include in the source distribution
+# Read by setuptools/hatchling when building sdist
+
+# Documentation
+include README.md
+include CHANGELOG.md
+include CONTRIBUTING.md
+include SECURITY.md
+include LICENSE
+
+# Examples
+recursive-include examples *.py
+recursive-include tests *.py
+
+# Include Arabic text files
+include *.md

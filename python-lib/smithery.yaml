@@ -1,0 +1,44 @@
+# Smithery deployment configuration
+# https://smithery.ai/docs/deployments
+
+runtime: python
+build:
+  dockerfile: Dockerfile
+startCommand:
+  type: stdio
+  cmd: ["python", "-m", "arabic_invoice_mcp.server"]
+  configSchema:
+    type: object
+    properties: {}
+    description: لا يحتاج configuration حالياً
+
+# Metadata
+displayName: Arabic Invoice & Tafgeet
+description: |
+  خادم MCP للفواتير الإلكترونية العربية مع دعم ZATCA الكامل.
+  - تفقيط الأرقام بالعربية (7 لهجات)
+  - إنشاء فواتير متوافقة مع ZATCA السعودية
+  - QR code generation (Phase 1 B2C)
+  - حساب VAT لـ 7 دول عربية
+icon: https://raw.githubusercontent.com/opusstudiohq-max/arabic-invoice-mcp/main/assets/icon.png
+tags:
+  - arabic
+  - invoice
+  - tafgeet
+  - zatca
+  - vat
+  - finance
+  - saudi-arabia
+pricing:
+  type: per-call
+  price: 0.01
+  freeCalls: 100
+
+# Examples
+examples:
+  - name: تفقيط مبلغ
+    prompt: "فقع لي مبلغ 1234.56 ريال سعودي"
+  - name: حساب VAT
+    prompt: "احسب ضريبة القيمة المضافة على مبلغ 10000 ريال في السعودية"
+  - name: فاتورة ZATCA
+    prompt: "أنشئ فاتورة ZATCA متوافقة من Opus Studio"

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>الفحص الجماعي لمكاتب المحاسبة — فحص بنيوي لرموز QR لكل عملائك دفعة واحدة | مُتوافِق</title>
+  <meta name="description" content="أداة لمكاتب المحاسبة: افحص بنية رموز QR لفواتير كل عملائك دفعة واحدة واحصل على خريطة الأخطاء في دقائق. تعمل داخل متصفحك — بيانات عملائك لا تُرفع لأي خادم." />
+  <meta name="keywords" content="فحص جماعي فواتير, مكاتب المحاسبة السعودية, توافق ZATCA للمحاسبين, محفظة عملاء, الفوترة الإلكترونية" />
+  <meta name="robots" content="index, follow" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%23073A2D'/><path d='M32 8 L52 16 V31 C52 43 44 51 32 55 C20 51 12 43 12 31 V16 Z' fill='%23fff'/><path d='M23 33 L30 40 L43 26' fill='none' stroke='%230A4D3C' stroke-width='5.5' stroke-linecap='round' stroke-linejoin='round'/></svg>" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    /* إضافات خاصة بصفحة الفحص الجماعي (تستخدم توكنات البراند من style.css) */
+    .batch-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .sum-card { background: var(--clr-surface); border: 1px solid var(--clr-border); border-radius: var(--radius-md); padding: 1.1rem; text-align: center; }
+    .sum-card b { display: block; font-size: 2rem; font-weight: 700; }
+    .sum-card span { font-size: 0.85rem; color: var(--clr-text-muted); }
+    .sum-pass b { color: var(--clr-success); } .sum-fail b { color: var(--clr-error); } .sum-warn b { color: var(--clr-warning); }
+    .batch-table { width: 100%; border-collapse: collapse; font-size: 0.92rem; overflow: hidden; border-radius: var(--radius-md); }
+    .batch-table th, .batch-table td { padding: 0.7rem 0.9rem; text-align: right; border-bottom: 1px solid var(--clr-border); }
+    .batch-table th { background: var(--clr-surface); color: var(--clr-text); font-weight: 600; }
+    .batch-table td.detail { color: var(--clr-text-muted); font-size: 0.85rem; }
+    .pill { display: inline-block; padding: 0.2rem 0.7rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600; white-space: nowrap; }
+    .pill-pass { background: rgba(47,169,111,0.15); color: var(--clr-success); }
+    .pill-fail { background: rgba(229,84,75,0.15); color: var(--clr-error); }
+    .pill-warn { background: rgba(232,161,58,0.15); color: var(--clr-warning); }
+    #batch-results { display: none; } #batch-results.visible { display: block; }
+    .table-wrap { overflow-x: auto; }
+
+    /* ===== صندوق تقرير المكتب ===== */
+    #report-box { display: none; }
+    .office-row { display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; margin: 0.8rem 0; }
+    .office-row input[type=text] { flex: 1; min-width: 200px; padding: 0.7rem; border-radius: 10px;
+      border: 1.5px solid var(--clr-border); background: var(--clr-bg); color: var(--clr-text); font-family: inherit; }
+    .logo-btn { display: inline-block; padding: 0.6rem 1rem; border: 1.5px dashed var(--clr-border);
+      border-radius: 10px; cursor: pointer; color: var(--clr-text-muted); font-size: 0.88rem; }
+    #logo-preview { display: none; max-height: 46px; border-radius: 6px; background: #fff; padding: 3px; }
+
+    /* ===== التقرير المطبوع (يظهر عند الطباعة فقط) ===== */
+    #report-area { display: none; }
+    @media print {
+      body * { visibility: hidden !important; }
+      #report-area, #report-area * { visibility: visible !important; }
+      #report-area { display: block !important; position: absolute; inset: 0; width: 100%;
+        background: #fff; color: #111; font-family: 'IBM Plex Sans Arabic', sans-serif; padding: 0; }
+      @page { size: A4; margin: 14mm; }
+    }
+    #report-area .rep-head { display: flex; justify-content: space-between; align-items: flex-start;
+      border-bottom: 3px solid #0A4D3C; padding-bottom: 10px; margin-bottom: 16px; }
+    #report-area .rep-office { display: flex; gap: 12px; align-items: center; }
+    #report-area .rep-logo { max-height: 56px; max-width: 160px; }
+    #report-area h1 { font-size: 20px; margin: 0; color: #0A4D3C; }
+    #report-area .rep-office p { margin: 2px 0 0; font-size: 13px; color: #444; }
+    #report-area .rep-meta { font-size: 11px; color: #444; text-align: left; }
+    #report-area .rep-stats { display: flex; gap: 10px; margin-bottom: 14px; }
+    #report-area .rep-stats div { flex: 1; border: 1px solid #d8e2df; border-radius: 8px; padding: 8px; text-align: center; }
+    #report-area .rep-stats b { display: block; font-size: 20px; color: #0A4D3C; }
+    #report-area .rep-stats span { font-size: 10px; color: #555; }
+    #report-area .rep-stats .ok b { color: #177A47; } #report-area .rep-stats .bad b { color: #B3261E; }
+    #report-area .rep-stats .warn b { color: #B45309; }
+    #report-area .rep-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+    #report-area .rep-table th { background: #E7F2EE; color: #0A4D3C; padding: 7px; text-align: right; border: 1px solid #cfdedb; }
+    #report-area .rep-table td { padding: 6px 7px; border: 1px solid #e3ebe9; text-align: right; vertical-align: top; }
+    #report-area .rep-table td.num { width: 26px; color: #888; }
+    #report-area .rep-note { color: #555; font-size: 10px; }
+    #report-area .rep-pill { padding: 2px 8px; border-radius: 999px; font-size: 10px; font-weight: 700; white-space: nowrap; }
+    #report-area .rep-pass { background: #e6f4ea; color: #177A47; }
+    #report-area .rep-fail { background: #fdeceb; color: #B3261E; }
+    #report-area .rep-warn { background: #fdf4e3; color: #B45309; }
+    #report-area .rep-scope { margin-top: 14px; padding: 9px 11px; background: #f6faf8;
+      border-right: 3px solid #0A4D3C; font-size: 10px; line-height: 1.7; color: #333; }
+    #report-area .rep-foot { display: flex; justify-content: space-between; margin-top: 16px;
+      padding-top: 8px; border-top: 1px solid #d8e2df; font-size: 10px; color: #666; }
+  </style>
+</head>
+<body>
+  <section class="hero">
+    <div class="container">
+      <div class="hero__badge">🏢 لمكاتب المحاسبة — مجاني</div>
+      <h1 class="hero__title">افحص فواتير <span class="highlight">كل عملائك</span> دفعة واحدة</h1>
+      <p class="hero__subtitle">
+        بدل فحص فاتورة فاتورة — الصق فواتير محفظتك كاملة واحصل على خريطة الأخطاء البنيوية
+        لكل عميل في دقائق. <strong>كل شيء يعمل داخل متصفحك: بيانات عملائك لا تغادر جهازك ولا تُرفع لأي خادم.</strong>
+      </p>
+    </div>
+  </section>
+
+  <main class="container">
+    <div class="card">
+      <div class="card__title"><span class="icon">📋</span> فحص المحفظة</div>
+      <div class="demo-buttons">
+        <button class="demo-btn" id="batch-demo">🧪 جرّب على محفظة تجريبية</button>
+        <a class="demo-btn" href="index.html" style="text-decoration:none;">↩︎ فحص فاتورة واحدة</a>
+      </div>
+      <div class="input-group">
+        <label for="batch-input">الصق سطراً لكل فاتورة — بالصيغة: <code>اسم العميل | نص QR</code> (أو نص QR فقط)</label>
+        <textarea id="batch-input" style="min-height:180px;" spellcheck="false" autocomplete="off"
+          placeholder="مؤسسة النور | ASTZ...&#10;متجر السلام | AQlU...&#10;..."></textarea>
+      </div>
+      <button class="btn btn--primary btn--full" id="batch-check"><span class="btn-text">🛡️ افحص المحفظة</span></button>
+      <p style="text-align:center;font-size:0.78rem;color:var(--clr-text-dim);margin-top:0.75rem;">
+        نطاق الفحص: بنية حقول QR للمرحلة الأولى (الوسوم 1-5) فقط. لا يشمل الوسوم التشفيرية للمرحلة الثانية (6-9)، <strong>ولا يؤكد قبول الهيئة للفاتورة</strong> — فحالة القبول تعيش في استجابة منصة فاتورة.
+      </p>
+    </div>
+
+    <section id="batch-results" aria-live="polite"></section>
+
+    <div class="card" id="report-box">
+      <div class="card__title"><span class="icon">📄</span> تقرير مكتبك — جاهز للإرسال لعملائك</div>
+      <p style="color:var(--clr-text-muted);font-size:0.9rem;margin-bottom:0.4rem;">
+        حوّل نتيجة الفحص إلى تقرير احترافي <strong>باسم مكتبك وشعارك</strong> — تسلّمه لعميلك كأنه من إعدادك، لأنه كذلك.
+        الشعار والاسم يُحفظان في متصفحك فقط ولا يغادران جهازك.
+      </p>
+      <div class="office-row">
+        <input type="text" id="office-name" placeholder="اسم المكتب (مثال: مكتب الأمانة للمحاسبة)" />
+        <label class="logo-btn" for="logo-input">🖼️ اختر شعار المكتب (اختياري)</label>
+        <input type="file" id="logo-input" accept="image/*" style="display:none" />
+        <img id="logo-preview" alt="" />
+      </div>
+      <button class="btn btn--primary btn--full" id="make-report">
+        <span class="btn-text">📄 أنشئ التقرير واحفظه PDF</span>
+      </button>
+      <p style="text-align:center;font-size:0.75rem;color:var(--clr-text-dim);margin-top:0.6rem;">
+        ستفتح نافذة الطباعة — اختر «حفظ بصيغة PDF» كوجهة.
+      </p>
+    </div>
+
+    <div id="report-area"></div>
+
+    <div class="disclaimer">
+      <span class="icon">⚠️</span>
+      <p><strong>إخلاء مسؤولية:</strong> أداة استرشادية مستقلة من OPUS Studio — غير تابعة لهيئة الزكاة والضريبة والجمارك (ZATCA) ولا معتمدة منها، ولا تُغني عن التحقق الرسمي عبر منصة فاتورة أو أدوات الهيئة. تغطي فحوصات بنيوية لحقول المرحلة الأولى فقط، ولا تؤكد قبول أي فاتورة. المسؤولية النظامية عن الامتثال تقع على المنشأة المكلَّفة.</p>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>مُتوافِق — من <strong>OPUS Studio</strong>. أدوات توافق ذكية لمكاتب المحاسبة والأعمال العربية.</p>
+    <p style="margin-top:0.5rem;font-size:0.75rem;">كل الفحوصات تعمل محلياً في متصفحك — لا تُرسل بياناتك لأي خادم.</p>
+  </footer>
+
+  <script src="js/zatca-validator.js"></script>
+  <script src="js/report.js"></script>
+  <script src="js/batch.js"></script>
+</body>
+</html>
