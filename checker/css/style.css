@@ -664,3 +664,15 @@ a:hover { text-decoration: underline; }
   .demo-btn { text-align: center; }
   .score-circle { width: 110px; height: 110px; font-size: 2rem; }
 }
+
+/* ---------- تنبيه فاتورة المرحلة الثانية ---------- */
+.phase2-notice {
+  background: rgba(232, 161, 58, 0.10);
+  border: 1.5px solid var(--clr-warning);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.2rem;
+  margin: 1rem 0 1.5rem;
+}
+.phase2-notice strong { color: var(--clr-warning); display: block; margin-bottom: 0.5rem; font-size: 1.02rem; }
+.phase2-notice p { color: var(--clr-text-muted); font-size: 0.88rem; line-height: 1.8; margin-bottom: 0.5rem; }
+.phase2-notice p:last-child { margin-bottom: 0; }

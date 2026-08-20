@@ -54,6 +54,12 @@ const CURRENCY_UNITS: Record<string, {
   QAR: { singular: "ريال", dual: "ريالان", plural: "ريالات", fraction_singular: "درهم", fraction_plural: "دراهم" },
 };
 
+// عدد المنازل العشرية لكل عملة — الدينار الكويتي والبحريني والريال العُماني ثلاث منازل (1000 وحدة فرعية)
+const CURRENCY_DECIMALS: Record<string, number> = {
+  SAR: 2, EGP: 2, AED: 2, USD: 2, QAR: 2,
+  KWD: 3, BHD: 3, OMR: 3,
+};
+
 const VAT_RATES: Record<string, number> = {
   SA: 0.15, EG: 0.14, AE: 0.05,
   BH: 0.10, KW: 0.00, QA: 0.00, OM: 0.05,
@@ -169,8 +175,10 @@ export function tafgeet(amount: number, currency: string = "SAR"): string {
   }
 
   const unit = CURRENCY_UNITS[currency];
+  const decimals = CURRENCY_DECIMALS[currency] ?? 2;
+  const scale = Math.pow(10, decimals);
   const integerPart = Math.trunc(amount);
-  const decimalPart = Math.abs(Math.round((amount - integerPart) * 100));
+  const decimalPart = Math.abs(Math.round((amount - integerPart) * scale));
 
   const intWords = numberToArabicWords(integerPart);
   const absIntegerPart = Math.abs(integerPart);

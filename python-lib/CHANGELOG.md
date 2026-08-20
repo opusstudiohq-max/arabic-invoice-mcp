@@ -25,7 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CI/CD with GitHub Actions
 - Comprehensive test suite (**156 tests**, all passing)
 - Type hints for all functions
-- Optional `[qr]` extra: `pip install arabic-invoice-mcp[qr]`
+- Optional `[qr]` extra: `pip install git+https://github.com/opusstudiohq-max/arabic-invoice-mcp.git#subdirectory=python-lib`
 - Optional `[dev]` extra: pytest, mypy, ruff, black
 - **PyPI Trusted Publishing workflow** (`.github/workflows/publish.yml`) — two-job pattern with OIDC, TestPyPI first, manual approval for production
 - **Pre-publish version check script** (`scripts/check_version.py`) — validates PEP 440, version sync, CHANGELOG entry

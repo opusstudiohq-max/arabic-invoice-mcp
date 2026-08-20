@@ -95,3 +95,33 @@ class TestArabicGrammarAndTafqeet:
         assert number_to_arabic_words(2000000) == "مليونان"
         assert number_to_arabic_words(1000000000) == "مليار"
         assert number_to_arabic_words(2000000000) == "ملياران"
+
+
+class TestCompoundNumberTamyiz:
+    """
+    تمييز العدد المعطوف: يتبع آخر عدد مذكور.
+
+    عيب سابق نجا من 160 اختباراً لأن النطاق 101-110 لم يكن مغطى إطلاقاً:
+    كان 3 يعطي «ثلاثة ريالات» بينما 103 يعطي «مائة وثلاثة ريالاً» —
+    تناقض داخلي في تطبيق نفس القاعدة.
+    """
+
+    @pytest.mark.parametrize("amount", [103, 105, 108, 110, 1105, 2103])
+    def test_remainder_3_to_10_takes_plural(self, amount):
+        out = tafgeet_amount(float(amount), "SAR")
+        assert "ريالات" in out, f"{amount} -> {out}"
+        assert "ريالاً" not in out, f"{amount} -> {out}"
+
+    @pytest.mark.parametrize("amount", [11, 25, 47, 99, 111, 125])
+    def test_remainder_11_to_99_keeps_accusative_singular(self, amount):
+        out = tafgeet_amount(float(amount), "SAR")
+        assert "ريالاً" in out, f"{amount} -> {out}"
+
+    @pytest.mark.parametrize("amount,expected", [(100, "مائة ريال"), (200, "مئتا ريال"), (1000, "ألف ريال")])
+    def test_round_hundreds_use_idafa(self, amount, expected):
+        assert tafgeet_amount(float(amount), "SAR") == expected
+
+    def test_standalone_and_compound_agree(self):
+        """نفس العدد الأخير يجب أن يعطي نفس التمييز مفرداً أو معطوفاً."""
+        assert "ريالات" in tafgeet_amount(3.0, "SAR")
+        assert "ريالات" in tafgeet_amount(103.0, "SAR")

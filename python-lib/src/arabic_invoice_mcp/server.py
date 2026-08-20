@@ -252,8 +252,19 @@ def _currency_grammar(
         if count % 100 == 0:
             adjusted_words = _adjust_duals_for_idafa(words)
             return f"{adjusted_words} {singular}"
-        else:
-            return f"{words} {_accusative_form(singular)}"
+
+        # في العدد المعطوف، التمييز يتبع آخر عدد مذكور. فإن كان آخر جزء 3-10
+        # وجب الجمع كما في العدد المفرد تماماً: 3 -> "ثلاثة ريالات"،
+        # و103 -> "مائة وثلاثة ريالات" (لا "ريالاً").
+        # قبل هذا التصحيح كان 3 يعطي الجمع بينما 103 يعطي المفرد المنصوب —
+        # تناقض داخلي في نفس القاعدة.
+        # ملاحظة مفتوحة: صياغة الباقي 1 و2 (101، 102) موضع خلاف نحوي ولم نغيّرها
+        # هنا؛ تحتاج مراجعة مختص قبل الحسم. راجع tests/test_arabic_grammar.py.
+        remainder = count % 100
+        if 3 <= remainder <= 10:
+            return f"{words} {plural}"
+
+        return f"{words} {_accusative_form(singular)}"
 
 
 def _build_dual(singular: str, gender: str) -> str:

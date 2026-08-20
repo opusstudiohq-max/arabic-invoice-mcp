@@ -128,6 +128,25 @@
       </div>
     `;
 
+    // فاتورة مرحلة ثانية: الوسوم 6-9 موجودة وخارج نطاق فحصنا تماماً.
+    // بدون هذا التنبيه يقرأ المستخدم "اجتاز 5/5" على أنها شهادة سلامة كاملة — وهي ليست كذلك.
+    if (result.isPhase2) {
+      html += `
+        <div class="phase2-notice">
+          <strong>⚠️ هذه فاتورة من المرحلة الثانية</strong>
+          <p>
+            رمزك يحتوي الوسوم التشفيرية (${result.phase2TagsPresent.join('، ')}) الخاصة بالمرحلة الثانية:
+            الهاش والتوقيع الرقمي والمفتاح العام. <strong>أداتنا لا تفحص هذه الوسوم إطلاقاً</strong> —
+            نتيجة «${result.score}/${result.total}» أعلاه تخصّ الحقول الخمسة الأساسية فقط.
+          </p>
+          <p>
+            التحقق الحقيقي من المرحلة الثانية يتطلب إعادة حساب الهاش من ملف XML والتحقق من توقيع ECDSA
+            وسلسلة الشهادة — إضافةً إلى حالة التخليص/الإبلاغ في منصة «فاتورة». استخدم أدوات الهيئة الرسمية لذلك.
+          </p>
+        </div>
+      `;
+    }
+
     // Check items
     html += '<div class="checks-list">';
     for (const check of result.checks) {
@@ -198,15 +217,15 @@
           </div>
         `;
       } else {
-        const subject = encodeURIComponent('طلب خطة إصلاح — فحص توافق ZATCA');
+        const subject = encodeURIComponent('طلب مراجعة فنية — نتيجة الفحص البنيوي');
         const body = encodeURIComponent(
           `نتيجة الفحص: ${result.score}/${result.total}\n\nالمشاكل:\n${failedList}\n\nأرغب في خطة إصلاح مجانية.`
         );
         html += `
           <div class="card lead-card" style="margin-top: 2rem; text-align: center;">
-            <div class="card__title"><span class="icon">🛠️</span> فاتورتك بها مخاطر — نساعدك تصلحها قبل الغرامة</div>
+            <div class="card__title"><span class="icon">🛠️</span> ظهرت ملاحظات بنيوية — يمكننا مساعدتك في إصلاحها</div>
             <p style="color: var(--clr-text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
-              نبني حلول توافق ZATCA بسرعة وبجزء بسيط من تكلفة أنظمة ERP الكاملة.
+              نبني تكاملات فوترة إلكترونية ونصلح التكاملات المكسورة — عمل هندسي بنطاق وسعر واضحين.
             </p>
             <a class="btn btn--primary" href="mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}">
               📧 أرسل التقرير واطلب خطة الإصلاح المجانية

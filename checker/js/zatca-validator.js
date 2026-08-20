@@ -392,6 +392,14 @@ function validateZatcaQR(base64Input) {
     decoded[TAG_NAMES[tag] || `Tag ${tag}`] = data.value || '(غير قابل للقراءة)';
   }
 
+  // كشف وسوم المرحلة الثانية (6-9: الهاش، التوقيع، المفتاح العام، توقيع الهيئة).
+  // وجودها يعني أن الفاتورة من المرحلة الثانية، وفحصنا لا يغطي تلك الوسوم إطلاقاً —
+  // فلا يصح أن يرى المستخدم "اجتاز 5/5" وكأن الفاتورة فُحصت بالكامل.
+  const phase2TagsPresent = Object.keys(tlvResult.tags)
+    .map(Number)
+    .filter(t => t >= 6 && t <= 9)
+    .sort((a, b) => a - b);
+
   return {
     valid: passedCount === 5,
     score: passedCount,
@@ -400,6 +408,8 @@ function validateZatcaQR(base64Input) {
     decoded,
     fatalError: null,
     structuralErrors: tlvResult.errors,
+    phase2TagsPresent,
+    isPhase2: phase2TagsPresent.length > 0,
   };
 }
 

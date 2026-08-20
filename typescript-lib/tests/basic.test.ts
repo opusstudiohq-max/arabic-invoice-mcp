@@ -134,11 +134,13 @@ describe("2. Tafgeet Money Engine (tafgeet)", () => {
   });
 
   test("150.75 BHD", () => {
-    expect(tafgeet(150.75, "BHD")).toBe("مائة وخمسون ديناراً وخمسة وسبعون فلساً");
+    // BHD = 1000 fils, so 0.75 => 750 (the previous expectation of 75 encoded the bug)
+    expect(tafgeet(150.75, "BHD")).toBe("مائة وخمسون ديناراً وسبعمائة وخمسون فلساً");
   });
 
   test("1000.25 OMR", () => {
-    expect(tafgeet(1000.25, "OMR")).toBe("ألف ريالاً وخمسة وعشرون بيسة");
+    // OMR = 1000 baisa, so 0.25 => 250 (the previous expectation of 25 encoded the bug)
+    expect(tafgeet(1000.25, "OMR")).toBe("ألف ريالاً ومئتان وخمسون بيسة");
   });
 
   test("500.10 QAR", () => {
@@ -343,5 +345,37 @@ describe("5. Invoicing Tools", () => {
       buyer_name: "المشتري",
       items: [{ description: "سلعة", quantity: 5, unit_price: 10, tax_rate: 1.5 }]
     })).toThrow("نسبة الضريبة للصنف 'سلعة' يجب أن تكون بين 0 و 1");
+  });
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// اختبارات انحدار: المنازل العشرية حسب العملة
+// الدينار الكويتي/البحريني والريال العُماني = 3 منازل (1000 وحدة فرعية).
+// عيب سابق: كان الكسر يُضرب في 100 دائماً، فيُحسب 1.5 KWD كـ50 فلساً بدل 500.
+// ═══════════════════════════════════════════════════════════════════
+describe("currency decimal precision", () => {
+  test("KWD (3 decimals): 1.5 => 500 fils, not 50", () => {
+    const out = tafgeet(1.5, "KWD");
+    expect(out.includes("خمسمائة") || out.includes("خمسمئة")).toBe(true);
+    expect(out.includes("خمسون")).toBe(false);
+  });
+
+  test("BHD (3 decimals): 2.5 => 500 fils", () => {
+    const out = tafgeet(2.5, "BHD");
+    expect(out.includes("خمسمائة") || out.includes("خمسمئة")).toBe(true);
+  });
+
+  test("OMR (3 decimals): 1.25 => 250 baisa", () => {
+    const out = tafgeet(1.25, "OMR");
+    expect(out.includes("مائتان") || out.includes("مئتان") || out.includes("مائتين")).toBe(true);
+  });
+
+  test("SAR (2 decimals) unchanged: 1.5 => 50 halalas", () => {
+    const out = tafgeet(1.5, "SAR");
+    expect(out.includes("خمسون")).toBe(true);
+  });
+
+  test("SAR (2 decimals): 10.75 => 75 halalas", () => {
+    expect(tafgeet(10.75, "SAR").includes("سبعون")).toBe(true);
   });
 });

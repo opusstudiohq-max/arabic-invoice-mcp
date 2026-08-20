@@ -259,7 +259,7 @@ print(invoice["zatca_qr"]["base64_data"])
 ### التثبيت مع دعم QR
 
 ```bash
-pip install arabic-invoice-mcp[qr]
+pip install git+https://github.com/opusstudiohq-max/arabic-invoice-mcp.git#subdirectory=python-lib
 ```
 
 ---
