@@ -1,0 +1,33 @@
+name: اعتراض على حالة في مقياس
+description: حالةٌ تظنّ أنها خاطئة، أو محرّكٌ يستحق القياس
+title: "مقياس: "
+labels: ["المقياس"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        كل حالة في مقاييسنا تحمل **قاعدةً مسمّاة** — نحوية في مقياس التفقيط،
+        ومن UAX #9 في مقياس PDF. فالاعتراض على حالةٍ اعتراضٌ على القاعدة أو
+        على تطبيقها عليها، لا على رأينا.
+
+        **ونصحّح علناً ونذكر من صحّح.** وقد صحّحنا أنفسنا أولاً: أول محرّك
+        رسب في مقياس التفقيط كان محرّكنا — 19 من 50.
+  - type: dropdown
+    id: which
+    attributes:
+      label: أيّ مقياس؟
+      options:
+        - مقياس التفقيط العربي
+        - مقياس النصّ العربي في PDF
+    validations: { required: true }
+  - type: input
+    id: case
+    attributes:
+      label: معرّف الحالة
+      placeholder: "money-in-arabic أو رقم الحالة"
+  - type: textarea
+    id: claim
+    attributes:
+      label: ما الصواب في رأيك؟ وبأي قاعدة؟
+      description: اذكر القاعدة أو المرجع — نصّ يونيكود، أو مرجعاً نحوياً، أو وثيقةً رسمية.
+    validations: { required: true }

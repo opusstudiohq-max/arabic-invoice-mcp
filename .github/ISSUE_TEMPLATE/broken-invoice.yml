@@ -1,0 +1,28 @@
+name: فاتورة خرجت خطأً
+description: مبلغ مقلوب، أو حروف مفكّكة، أو رمز QR مرفوض
+title: "فاتورة: "
+labels: ["فاتورة"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **لا تُرفق فاتورةً حقيقية.** استبدل الأسماء والأرقام الضريبية بقيمٍ
+        وهمية تُظهر العطب نفسه — العطب في الترتيب والرسم، لا في قيمك.
+  - type: textarea
+    id: text
+    attributes:
+      label: النصّ كما كتبتَه
+      placeholder: "الإجمالي 1,234.50 ج.م"
+    validations: { required: true }
+  - type: textarea
+    id: got
+    attributes:
+      label: ما ظهر على الورق
+      placeholder: "م.ج 05.432,1 …"
+    validations: { required: true }
+  - type: input
+    id: stack
+    attributes:
+      label: المكتبة والخطّ
+      placeholder: "pdf-lib 1.17 + Amiri"
+      description: "الخطّ مهمّ: قِسنا ثمانية خطوط مرخَّصة فسقط نصفها بصرياً."
