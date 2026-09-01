@@ -62,6 +62,13 @@
       "url": "https://opusstudiohq-max.github.io/arabic-invoice-mcp/pdf/",
       "published_on": "2026-09-01",
       "source": "pdf-benchmark/"
+    },
+    {
+      "name": "مقياس رمز QR السعودي",
+      "url": "https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/",
+      "published_on": "2026-09-01",
+      "source": "zatca-qr-benchmark/index.html",
+      "note": "اسم المجلد في المستودع العام `zatca-qr/`. سُجّل بعد التحقق من 200 على العنوان الحيّ، لا قبله."
     }
   ],
   "github_repos": [
