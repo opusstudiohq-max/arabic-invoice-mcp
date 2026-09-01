@@ -1,0 +1,101 @@
+/**
+ * حارس الانحراف: النسخة المُودَعة في المقياس تطابق مصدر الحقيقة.
+ *
+ * المقياس يحمل نسخة من محرّك التفقيط (`engine.js`) ليكون قائماً بذاته
+ * وقابلاً لإعادة التشغيل من أي مستودع. والنسخ يُنتج انحرافاً صامتاً: يُصحَّح
+ * المصدر ويبقى المقياس على القديم، فيقيس شيئاً لا نشحنه.
+ *
+ * هذا بالضبط صنف العيب الذي كلّفنا اكتشافاً متأخراً: حزمة npm كانت 38%
+ * بينما المصدر 100%.
+ *
+ * التشغيل:  node tafgeet-benchmark/tests/no-drift.test.mjs
+ */
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync, existsSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const ROOT = join(HERE, "..", "..");
+
+// مصدر الحقيقة موجود في مستودع العمل فقط؛ وفي المستودع العام يُتخطّى الفحص
+// بوضوح بدل أن يفشل — حارسٌ يفشل حيث لا يُفترض أن يعمل يُعلَّم كضجيج فيُهمَل.
+const SOURCE = join(ROOT, "cheque-tool", "js", "tafgeet.js");
+const VENDORED = join(HERE, "..", "engine.js");
+
+/** نُسقط لافتة الإيداع وفروق نهايات الأسطر — لا شيء غيرهما. */
+function body(text) {
+  return text
+    .replace(/^\/\*\*[\s\S]*?نسخة مُودَعة[\s\S]*?\*\/\s*/, "")
+    .replace(/\r\n/g, "\n")
+    .trimEnd();
+}
+
+test("النسخة المُودَعة تطابق مصدر الحقيقة حرفاً بحرف", (t) => {
+  if (!existsSync(SOURCE)) return t.skip("مصدر الحقيقة غير موجود في هذا التخطيط");
+  const src = body(readFileSync(SOURCE, "utf-8"));
+  const ven = body(readFileSync(VENDORED, "utf-8"));
+
+  if (src !== ven) {
+    // نُظهر أول اختلاف بدل إغراق المخرَج
+    const a = src.split("\n"), b = ven.split("\n");
+    const i = a.findIndex((line, idx) => line !== b[idx]);
+    assert.fail(
+      `انحراف عند السطر ${i + 1}:\n` +
+      `  المصدر  : ${a[i] ?? "(غائب)"}\n` +
+      `  المُودَعة: ${b[i] ?? "(غائب)"}\n\n` +
+      `أعد النسخ:  cp cheque-tool/js/tafgeet.js tafgeet-benchmark/engine.js\n` +
+      `ثم أعد إضافة لافتة الإيداع في رأس الملف.`
+    );
+  }
+});
+
+test("النسختان تعطيان المخرَج نفسه على حالات المقياس", async (t) => {
+  if (!existsSync(SOURCE)) return t.skip("مصدر الحقيقة غير موجود في هذا التخطيط");
+  const [srcMod, venMod] = await Promise.all([
+    import(new URL("../../cheque-tool/js/tafgeet.js", import.meta.url).href),
+    import(new URL("../engine.js", import.meta.url).href),
+  ]);
+  const data = JSON.parse(readFileSync(join(HERE, "..", "cases.json"), "utf-8"));
+  const cases = [
+    ...data.cases.map(c => ({ ...c, currency: c.currency || data.currency })),
+    ...data.extra_currency_cases,
+  ];
+  const diffs = cases.filter(c =>
+    srcMod.tafgeet(c.amount, c.currency) !== venMod.tafgeet(c.amount, c.currency));
+  assert.deepEqual(diffs, [], `${diffs.length} اختلاف سلوكي بين المصدر والنسخة`);
+});
+
+test("المقياس يفحص حزمتنا المنشورة، لا محرّكنا الداخلي وحده", () => {
+  // نسبةً لملف الاختبار — اسم المجلد يختلف بين مستودع العمل والعام
+  const run = readFileSync(join(HERE, "..", "run.mjs"), "utf-8");
+  assert.match(run, /mutawafiq-npm/, "حزمة npm ليست ضمن المحرّكات المفحوصة");
+  assert.match(run, /const OURS = \[[^\]]*mutawafiq-npm/,
+    "الحارس لا يشمل حزمة npm — وهي التي رسبت أول مرة");
+});
+
+/**
+ * بوابة الإصدار: لا نصدر ونحن نرسب في مقياسنا.
+ *
+ * المشغّل نفسه أداة عامة يتسامح مع غياب dist، أمّا هنا — في مستودع العمل —
+ * فالتخطّي عيبٌ في بيئتنا: يعني أننا لم نبنِ الحزمة قبل القياس، فنشرنا
+ * نتيجةً لا تشمل ما نشحنه.
+ */
+test("بوابة إصدار: كل محرّك نملكه فُحص واجتاز", (t) => {
+  // بوابة مستودع العمل وحده. في المستودع العام يُعاد تشغيل المقياس بمحرّكات
+  // أقل (لا dist ولا ذاكرة جلب)، فنتيجته المحلية أضعف عمداً ولا تعني رسوباً.
+  if (!existsSync(SOURCE)) return t.skip("ليست بيئة الإصدار");
+  const resultsPath = join(HERE, "..", "results.json");
+  if (!existsSync(resultsPath)) return t.skip("لم يُشغَّل المقياس بعد");
+  const { engines } = JSON.parse(readFileSync(resultsPath, "utf-8"));
+
+  for (const id of ["mutawafiq", "mutawafiq-npm"]) {
+    const e = engines.find(x => x.id === id);
+    assert.ok(e, `المحرّك ${id} غائب عن النتائج`);
+    assert.ok(!e.skipped,
+      `${e.name} تُخطّي (${e.skipped}) — ابنِ الحزمة ثم أعد التشغيل قبل النشر`);
+    assert.equal(e.fail, 0,
+      `${e.name} أخفق في ${e.fail} حالة — لا يُنشر مقياس ونحن نرسب فيه`);
+  }
+});

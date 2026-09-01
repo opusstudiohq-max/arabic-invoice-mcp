@@ -1,0 +1,1434 @@
+{
+  "generated_utc": "2026-09-01",
+  "cases_total": 50,
+  "rules": {
+    "R1": {
+      "name": "المفرد",
+      "text": "العدد واحد يُذكر بعد المعدود مطابقاً له: «جنيه واحد» لا «واحد جنيه»."
+    },
+    "R2": {
+      "name": "المثنى",
+      "text": "العدد اثنان يُؤدَّى بصيغة المثنى وحدها: «جنيهان» — ولا يُقال «اثنان جنيه»، فالتثنية تُغني عن العدد."
+    },
+    "R3": {
+      "name": "جمع القلة (3-10)",
+      "text": "من ثلاثة إلى عشرة: المعدود جمعٌ مجرور، والعدد يخالفه في التذكير والتأنيث. «ثلاثة جنيهات» لا «ثلاثة جنيه»."
+    },
+    "R4": {
+      "name": "التمييز المفرد المنصوب (11-99)",
+      "text": "من أحد عشر إلى تسعة وتسعين: التمييز مفردٌ منصوب. «أحد عشر جنيهاً» لا «أحد عشر جنيه»."
+    },
+    "R5": {
+      "name": "التمييز يتبع آخر عدد معطوف",
+      "text": "في العدد المعطوف يتبع التمييزُ آخرَ جزء مذكور. فـ103 = «مائة وثلاثة جنيهات» بالجمع، لأن آخر عدد فيها ثلاثة."
+    },
+    "R6": {
+      "name": "المائة والألف وما بعدهما — تمييز مفرد مجرور",
+      "text": "المائة والألف والمليون تُضاف إلى مفرد مجرور: «مائة جنيه» و«ألف جنيه» — لا «مائة جنيهاً»."
+    },
+    "R7": {
+      "name": "إسقاط النون من المثنى عند الإضافة",
+      "text": "مثنى المائة والألف يُضاف فتسقط نونه: «مئتا جنيه» و«ألفا جنيه» — لا «مائتان جنيه» ولا «ألفان جنيه»."
+    },
+    "R8": {
+      "name": "الكسور — مذكر ومؤنث",
+      "text": "الوحدة الفرعية تُعرب بقواعدها هي. والقرش مذكر، والهللة مؤنثة: «قرشان» و«هللتان»."
+    },
+    "R9": {
+      "name": "المنازل العشرية بحسب العملة",
+      "text": "الدينار الكويتي والبحريني والريال العُماني ثلاث منازل (1000 وحدة فرعية). فـ0.750 ديناراً = «سبعمائة وخمسون فلساً» لا «خمسة وسبعون»."
+    },
+    "R10": {
+      "name": "سلامة المخرَج",
+      "text": "لا يجوز أن يُخرج المحرّك قيمة غير معرّفة أو نصاً مكسوراً على مبلغ صحيح — فالشيك مستند مالي."
+    }
+  },
+  "engines": [
+    {
+      "id": "mutawafiq",
+      "name": "مُتوافِق",
+      "note": "محرّكنا — منقول عن نسخة بايثون بـ176 اختباراً، ومُثبت التكافؤ على 540 حالة",
+      "total": 50,
+      "pass": 50,
+      "fail": 0,
+      "rate": 100,
+      "broken": 0,
+      "rows": [
+        {
+          "amount": 1,
+          "currency": "EGP",
+          "rule": "R1",
+          "expected": "جنيه واحد",
+          "got": "جنيه واحد",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 2,
+          "currency": "EGP",
+          "rule": "R2",
+          "expected": "جنيهان",
+          "got": "جنيهان",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 3,
+          "currency": "EGP",
+          "rule": "R3",
+          "expected": "ثلاثة جنيهات",
+          "got": "ثلاثة جنيهات",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 7,
+          "currency": "EGP",
+          "rule": "R3",
+          "expected": "سبعة جنيهات",
+          "got": "سبعة جنيهات",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 10,
+          "currency": "EGP",
+          "rule": "R3",
+          "expected": "عشرة جنيهات",
+          "got": "عشرة جنيهات",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 11,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "أحد عشر جنيهاً",
+          "got": "أحد عشر جنيهاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 12,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "اثنا عشر جنيهاً",
+          "got": "اثنا عشر جنيهاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 19,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "تسعة عشر جنيهاً",
+          "got": "تسعة عشر جنيهاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 20,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "عشرون جنيهاً",
+          "got": "عشرون جنيهاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 21,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "واحد وعشرون جنيهاً",
+          "got": "واحد وعشرون جنيهاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 99,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "تسعة وتسعون جنيهاً",
+          "got": "تسعة وتسعون جنيهاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 100,
+          "currency": "EGP",
+          "rule": "R6",
+          "expected": "مائة جنيه",
+          "got": "مائة جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 103,
+          "currency": "EGP",
+          "rule": "R5",
+          "expected": "مائة وثلاثة جنيهات",
+          "got": "مائة وثلاثة جنيهات",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 105,
+          "currency": "EGP",
+          "rule": "R5",
+          "expected": "مائة وخمسة جنيهات",
+          "got": "مائة وخمسة جنيهات",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 111,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "مائة وأحد عشر جنيهاً",
+          "got": "مائة وأحد عشر جنيهاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 200,
+          "currency": "EGP",
+          "rule": "R7",
+          "expected": "مئتا جنيه",
+          "got": "مئتا جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 300,
+          "currency": "EGP",
+          "rule": "R6",
+          "expected": "ثلاثمائة جنيه",
+          "got": "ثلاثمائة جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 999,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "تسعمائة وتسعة وتسعون جنيهاً",
+          "got": "تسعمائة وتسعة وتسعون جنيهاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 1000,
+          "currency": "EGP",
+          "rule": "R6",
+          "expected": "ألف جنيه",
+          "got": "ألف جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 2000,
+          "currency": "EGP",
+          "rule": "R7",
+          "expected": "ألفا جنيه",
+          "got": "ألفا جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 3000,
+          "currency": "EGP",
+          "rule": "R3",
+          "expected": "ثلاثة آلاف جنيه",
+          "got": "ثلاثة آلاف جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 10000,
+          "currency": "EGP",
+          "rule": "R3",
+          "expected": "عشرة آلاف جنيه",
+          "got": "عشرة آلاف جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 11000,
+          "currency": "EGP",
+          "rule": "R6",
+          "expected": "أحد عشر ألف جنيه",
+          "got": "أحد عشر ألف جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 200000,
+          "currency": "EGP",
+          "rule": "R7",
+          "expected": "مئتا ألف جنيه",
+          "got": "مئتا ألف جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 1000000,
+          "currency": "EGP",
+          "rule": "R6",
+          "expected": "مليون جنيه",
+          "got": "مليون جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 2000000,
+          "currency": "EGP",
+          "rule": "R7",
+          "expected": "مليونا جنيه",
+          "got": "مليونا جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 3000000,
+          "currency": "EGP",
+          "rule": "R3",
+          "expected": "ثلاثة ملايين جنيه",
+          "got": "ثلاثة ملايين جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 0.01,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "قرش واحد",
+          "got": "قرش واحد",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 0.02,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "قرشان",
+          "got": "قرشان",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 0.03,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "ثلاثة قروش",
+          "got": "ثلاثة قروش",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 0.25,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "خمسة وعشرون قرشاً",
+          "got": "خمسة وعشرون قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 0.5,
+          "currency": "EGP",
+          "rule": "R10",
+          "expected": "خمسون قرشاً",
+          "got": "خمسون قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 0.75,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "خمسة وسبعون قرشاً",
+          "got": "خمسة وسبعون قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 0.99,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "تسعة وتسعون قرشاً",
+          "got": "تسعة وتسعون قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 1.5,
+          "currency": "EGP",
+          "rule": "R1",
+          "expected": "جنيه واحد وخمسون قرشاً",
+          "got": "جنيه واحد وخمسون قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 2.02,
+          "currency": "EGP",
+          "rule": "R2",
+          "expected": "جنيهان وقرشان",
+          "got": "جنيهان وقرشان",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 3.03,
+          "currency": "EGP",
+          "rule": "R3",
+          "expected": "ثلاثة جنيهات وثلاثة قروش",
+          "got": "ثلاثة جنيهات وثلاثة قروش",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 11.11,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "أحد عشر جنيهاً وأحد عشر قرشاً",
+          "got": "أحد عشر جنيهاً وأحد عشر قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 100.5,
+          "currency": "EGP",
+          "rule": "R6",
+          "expected": "مائة جنيه وخمسون قرشاً",
+          "got": "مائة جنيه وخمسون قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 103.25,
+          "currency": "EGP",
+          "rule": "R5",
+          "expected": "مائة وثلاثة جنيهات وخمسة وعشرون قرشاً",
+          "got": "مائة وثلاثة جنيهات وخمسة وعشرون قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 200.75,
+          "currency": "EGP",
+          "rule": "R7",
+          "expected": "مئتا جنيه وخمسة وسبعون قرشاً",
+          "got": "مئتا جنيه وخمسة وسبعون قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 1250.75,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "ألف ومئتان وخمسون جنيهاً وخمسة وسبعون قرشاً",
+          "got": "ألف ومئتان وخمسون جنيهاً وخمسة وسبعون قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 2000.5,
+          "currency": "EGP",
+          "rule": "R7",
+          "expected": "ألفا جنيه وخمسون قرشاً",
+          "got": "ألفا جنيه وخمسون قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 9876543.21,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "تسعة ملايين وثمانمائة وستة وسبعون ألف وخمسمائة وثلاثة وأربعون جنيهاً وواحد وعشرون قرشاً",
+          "got": "تسعة ملايين وثمانمائة وستة وسبعون ألف وخمسمائة وثلاثة وأربعون جنيهاً وواحد وعشرون قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 2,
+          "currency": "SAR",
+          "rule": "R2",
+          "expected": "ريالان",
+          "got": "ريالان",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 0.02,
+          "currency": "SAR",
+          "rule": "R8",
+          "expected": "هللتان",
+          "got": "هللتان",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 103,
+          "currency": "SAR",
+          "rule": "R5",
+          "expected": "مائة وثلاثة ريالات",
+          "got": "مائة وثلاثة ريالات",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 150.75,
+          "currency": "KWD",
+          "rule": "R9",
+          "expected": "مائة وخمسون ديناراً وسبعمائة وخمسون فلساً",
+          "got": "مائة وخمسون ديناراً وسبعمائة وخمسون فلساً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 3,
+          "currency": "KWD",
+          "rule": "R3",
+          "expected": "ثلاثة دنانير",
+          "got": "ثلاثة دنانير",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 0.75,
+          "currency": "OMR",
+          "rule": "R9",
+          "expected": "سبعمائة وخمسون بيسة",
+          "got": "سبعمائة وخمسون بيسة",
+          "ok": true,
+          "kind": "مطابق"
+        }
+      ]
+    },
+    {
+      "id": "mutawafiq-npm",
+      "name": "مُتوافِق — حزمة npm",
+      "note": "الحزمة المشحونة فعلاً (arabic-invoice-mcp-ts). تُفحص هنا عمداً: من ينشر مقياساً للصحّة يبدأ بنفسه",
+      "total": 50,
+      "pass": 50,
+      "fail": 0,
+      "rate": 100,
+      "broken": 0,
+      "rows": [
+        {
+          "amount": 1,
+          "currency": "EGP",
+          "rule": "R1",
+          "expected": "جنيه واحد",
+          "got": "جنيه واحد",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 2,
+          "currency": "EGP",
+          "rule": "R2",
+          "expected": "جنيهان",
+          "got": "جنيهان",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 3,
+          "currency": "EGP",
+          "rule": "R3",
+          "expected": "ثلاثة جنيهات",
+          "got": "ثلاثة جنيهات",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 7,
+          "currency": "EGP",
+          "rule": "R3",
+          "expected": "سبعة جنيهات",
+          "got": "سبعة جنيهات",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 10,
+          "currency": "EGP",
+          "rule": "R3",
+          "expected": "عشرة جنيهات",
+          "got": "عشرة جنيهات",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 11,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "أحد عشر جنيهاً",
+          "got": "أحد عشر جنيهاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 12,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "اثنا عشر جنيهاً",
+          "got": "اثنا عشر جنيهاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 19,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "تسعة عشر جنيهاً",
+          "got": "تسعة عشر جنيهاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 20,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "عشرون جنيهاً",
+          "got": "عشرون جنيهاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 21,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "واحد وعشرون جنيهاً",
+          "got": "واحد وعشرون جنيهاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 99,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "تسعة وتسعون جنيهاً",
+          "got": "تسعة وتسعون جنيهاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 100,
+          "currency": "EGP",
+          "rule": "R6",
+          "expected": "مائة جنيه",
+          "got": "مائة جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 103,
+          "currency": "EGP",
+          "rule": "R5",
+          "expected": "مائة وثلاثة جنيهات",
+          "got": "مائة وثلاثة جنيهات",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 105,
+          "currency": "EGP",
+          "rule": "R5",
+          "expected": "مائة وخمسة جنيهات",
+          "got": "مائة وخمسة جنيهات",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 111,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "مائة وأحد عشر جنيهاً",
+          "got": "مائة وأحد عشر جنيهاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 200,
+          "currency": "EGP",
+          "rule": "R7",
+          "expected": "مئتا جنيه",
+          "got": "مئتا جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 300,
+          "currency": "EGP",
+          "rule": "R6",
+          "expected": "ثلاثمائة جنيه",
+          "got": "ثلاثمائة جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 999,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "تسعمائة وتسعة وتسعون جنيهاً",
+          "got": "تسعمائة وتسعة وتسعون جنيهاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 1000,
+          "currency": "EGP",
+          "rule": "R6",
+          "expected": "ألف جنيه",
+          "got": "ألف جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 2000,
+          "currency": "EGP",
+          "rule": "R7",
+          "expected": "ألفا جنيه",
+          "got": "ألفا جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 3000,
+          "currency": "EGP",
+          "rule": "R3",
+          "expected": "ثلاثة آلاف جنيه",
+          "got": "ثلاثة آلاف جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 10000,
+          "currency": "EGP",
+          "rule": "R3",
+          "expected": "عشرة آلاف جنيه",
+          "got": "عشرة آلاف جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 11000,
+          "currency": "EGP",
+          "rule": "R6",
+          "expected": "أحد عشر ألف جنيه",
+          "got": "أحد عشر ألف جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 200000,
+          "currency": "EGP",
+          "rule": "R7",
+          "expected": "مئتا ألف جنيه",
+          "got": "مئتا ألف جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 1000000,
+          "currency": "EGP",
+          "rule": "R6",
+          "expected": "مليون جنيه",
+          "got": "مليون جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 2000000,
+          "currency": "EGP",
+          "rule": "R7",
+          "expected": "مليونا جنيه",
+          "got": "مليونا جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 3000000,
+          "currency": "EGP",
+          "rule": "R3",
+          "expected": "ثلاثة ملايين جنيه",
+          "got": "ثلاثة ملايين جنيه",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 0.01,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "قرش واحد",
+          "got": "قرش واحد",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 0.02,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "قرشان",
+          "got": "قرشان",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 0.03,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "ثلاثة قروش",
+          "got": "ثلاثة قروش",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 0.25,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "خمسة وعشرون قرشاً",
+          "got": "خمسة وعشرون قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 0.5,
+          "currency": "EGP",
+          "rule": "R10",
+          "expected": "خمسون قرشاً",
+          "got": "خمسون قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 0.75,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "خمسة وسبعون قرشاً",
+          "got": "خمسة وسبعون قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 0.99,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "تسعة وتسعون قرشاً",
+          "got": "تسعة وتسعون قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 1.5,
+          "currency": "EGP",
+          "rule": "R1",
+          "expected": "جنيه واحد وخمسون قرشاً",
+          "got": "جنيه واحد وخمسون قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 2.02,
+          "currency": "EGP",
+          "rule": "R2",
+          "expected": "جنيهان وقرشان",
+          "got": "جنيهان وقرشان",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 3.03,
+          "currency": "EGP",
+          "rule": "R3",
+          "expected": "ثلاثة جنيهات وثلاثة قروش",
+          "got": "ثلاثة جنيهات وثلاثة قروش",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 11.11,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "أحد عشر جنيهاً وأحد عشر قرشاً",
+          "got": "أحد عشر جنيهاً وأحد عشر قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 100.5,
+          "currency": "EGP",
+          "rule": "R6",
+          "expected": "مائة جنيه وخمسون قرشاً",
+          "got": "مائة جنيه وخمسون قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 103.25,
+          "currency": "EGP",
+          "rule": "R5",
+          "expected": "مائة وثلاثة جنيهات وخمسة وعشرون قرشاً",
+          "got": "مائة وثلاثة جنيهات وخمسة وعشرون قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 200.75,
+          "currency": "EGP",
+          "rule": "R7",
+          "expected": "مئتا جنيه وخمسة وسبعون قرشاً",
+          "got": "مئتا جنيه وخمسة وسبعون قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 1250.75,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "ألف ومئتان وخمسون جنيهاً وخمسة وسبعون قرشاً",
+          "got": "ألف ومئتان وخمسون جنيهاً وخمسة وسبعون قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 2000.5,
+          "currency": "EGP",
+          "rule": "R7",
+          "expected": "ألفا جنيه وخمسون قرشاً",
+          "got": "ألفا جنيه وخمسون قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 9876543.21,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "تسعة ملايين وثمانمائة وستة وسبعون ألف وخمسمائة وثلاثة وأربعون جنيهاً وواحد وعشرون قرشاً",
+          "got": "تسعة ملايين وثمانمائة وستة وسبعون ألف وخمسمائة وثلاثة وأربعون جنيهاً وواحد وعشرون قرشاً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 2,
+          "currency": "SAR",
+          "rule": "R2",
+          "expected": "ريالان",
+          "got": "ريالان",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 0.02,
+          "currency": "SAR",
+          "rule": "R8",
+          "expected": "هللتان",
+          "got": "هللتان",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 103,
+          "currency": "SAR",
+          "rule": "R5",
+          "expected": "مائة وثلاثة ريالات",
+          "got": "مائة وثلاثة ريالات",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 150.75,
+          "currency": "KWD",
+          "rule": "R9",
+          "expected": "مائة وخمسون ديناراً وسبعمائة وخمسون فلساً",
+          "got": "مائة وخمسون ديناراً وسبعمائة وخمسون فلساً",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 3,
+          "currency": "KWD",
+          "rule": "R3",
+          "expected": "ثلاثة دنانير",
+          "got": "ثلاثة دنانير",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 0.75,
+          "currency": "OMR",
+          "rule": "R9",
+          "expected": "سبعمائة وخمسون بيسة",
+          "got": "سبعمائة وخمسون بيسة",
+          "ok": true,
+          "kind": "مطابق"
+        }
+      ]
+    },
+    {
+      "id": "sheekprint",
+      "name": "sheekprint.com",
+      "note": "محرّك أداة طباعة شيكات مجانية مصرية",
+      "total": 50,
+      "pass": 11,
+      "fail": 39,
+      "rate": 22,
+      "broken": 9,
+      "rows": [
+        {
+          "amount": 1,
+          "currency": "EGP",
+          "rule": "R1",
+          "expected": "جنيه واحد",
+          "got": "فقط واحد جنيهاً لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 2,
+          "currency": "EGP",
+          "rule": "R2",
+          "expected": "جنيهان",
+          "got": "فقط اثنان جنيهاً لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 3,
+          "currency": "EGP",
+          "rule": "R3",
+          "expected": "ثلاثة جنيهات",
+          "got": "فقط ثلاثة جنيهات لا غير",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 7,
+          "currency": "EGP",
+          "rule": "R3",
+          "expected": "سبعة جنيهات",
+          "got": "فقط سبعة جنيهات لا غير",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 10,
+          "currency": "EGP",
+          "rule": "R3",
+          "expected": "عشرة جنيهات",
+          "got": "فقط عشرة جنيهات لا غير",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 11,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "أحد عشر جنيهاً",
+          "got": "فقط أحد عشر جنيهاً لا غير",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 12,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "اثنا عشر جنيهاً",
+          "got": "فقط أثني عشر جنيهاً لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 19,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "تسعة عشر جنيهاً",
+          "got": "فقط تسعة عشر جنيهاً لا غير",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 20,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "عشرون جنيهاً",
+          "got": "فقط عشرون جنيهاً لا غير",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 21,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "واحد وعشرون جنيهاً",
+          "got": "فقط واحد وعشرون جنيهاً لا غير",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 99,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "تسعة وتسعون جنيهاً",
+          "got": "فقط تسعة وتسعون جنيهاً لا غير",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 100,
+          "currency": "EGP",
+          "rule": "R6",
+          "expected": "مائة جنيه",
+          "got": "فقط مائة جنيهاً لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 103,
+          "currency": "EGP",
+          "rule": "R5",
+          "expected": "مائة وثلاثة جنيهات",
+          "got": "فقط مائة وثلاثة جنيهاً لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 105,
+          "currency": "EGP",
+          "rule": "R5",
+          "expected": "مائة وخمسة جنيهات",
+          "got": "فقط مائة وخمسة جنيهاً لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 111,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "مائة وأحد عشر جنيهاً",
+          "got": "فقط مائة وأحد عشر جنيهاً لا غير",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 200,
+          "currency": "EGP",
+          "rule": "R7",
+          "expected": "مئتا جنيه",
+          "got": "فقط مائتان جنيهاً لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 300,
+          "currency": "EGP",
+          "rule": "R6",
+          "expected": "ثلاثمائة جنيه",
+          "got": "فقط ثلاثمائة جنيهاً لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 999,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "تسعمائة وتسعة وتسعون جنيهاً",
+          "got": "فقط تسعمائة وتسعة وتسعون جنيهاً لا غير",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 1000,
+          "currency": "EGP",
+          "rule": "R6",
+          "expected": "ألف جنيه",
+          "got": "فقط ألف جنيهاً لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 2000,
+          "currency": "EGP",
+          "rule": "R7",
+          "expected": "ألفا جنيه",
+          "got": "فقط ألفان جنيهاً لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 3000,
+          "currency": "EGP",
+          "rule": "R3",
+          "expected": "ثلاثة آلاف جنيه",
+          "got": "فقط ثلاثة ألآف جنيهاً لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 10000,
+          "currency": "EGP",
+          "rule": "R3",
+          "expected": "عشرة آلاف جنيه",
+          "got": "فقط عشرة ألآف جنيهاً لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 11000,
+          "currency": "EGP",
+          "rule": "R6",
+          "expected": "أحد عشر ألف جنيه",
+          "got": "فقط أحد عشر ألف جنيهاً لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 200000,
+          "currency": "EGP",
+          "rule": "R7",
+          "expected": "مئتا ألف جنيه",
+          "got": "فقط مائتان ألف جنيهاً لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 1000000,
+          "currency": "EGP",
+          "rule": "R6",
+          "expected": "مليون جنيه",
+          "got": "فقط مليون جنيهاً لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 2000000,
+          "currency": "EGP",
+          "rule": "R7",
+          "expected": "مليونا جنيه",
+          "got": "فقط مليونان جنيهاً لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 3000000,
+          "currency": "EGP",
+          "rule": "R3",
+          "expected": "ثلاثة ملايين جنيه",
+          "got": "فقط ثلاثة ملايين جنيهاً لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 0.01,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "قرش واحد",
+          "got": "فقط undefined جنيهاً وواحد قرش لا غير",
+          "ok": false,
+          "kind": "مخرَج مكسور"
+        },
+        {
+          "amount": 0.02,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "قرشان",
+          "got": "فقط undefined جنيهاً واثنان قرش لا غير",
+          "ok": false,
+          "kind": "مخرَج مكسور"
+        },
+        {
+          "amount": 0.03,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "ثلاثة قروش",
+          "got": "فقط undefined جنيهاً وثلاثة قرش لا غير",
+          "ok": false,
+          "kind": "مخرَج مكسور"
+        },
+        {
+          "amount": 0.25,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "خمسة وعشرون قرشاً",
+          "got": "فقط undefined جنيهاً وخمسة وعشرون قرش لا غير",
+          "ok": false,
+          "kind": "مخرَج مكسور"
+        },
+        {
+          "amount": 0.5,
+          "currency": "EGP",
+          "rule": "R10",
+          "expected": "خمسون قرشاً",
+          "got": "فقط undefined جنيهاً وخمسون قرش لا غير",
+          "ok": false,
+          "kind": "مخرَج مكسور"
+        },
+        {
+          "amount": 0.75,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "خمسة وسبعون قرشاً",
+          "got": "فقط undefined جنيهاً وخمسة وسبعون قرش لا غير",
+          "ok": false,
+          "kind": "مخرَج مكسور"
+        },
+        {
+          "amount": 0.99,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "تسعة وتسعون قرشاً",
+          "got": "فقط undefined جنيهاً وتسعة وتسعون قرش لا غير",
+          "ok": false,
+          "kind": "مخرَج مكسور"
+        },
+        {
+          "amount": 1.5,
+          "currency": "EGP",
+          "rule": "R1",
+          "expected": "جنيه واحد وخمسون قرشاً",
+          "got": "فقط واحد جنيهاً وخمسون قرش لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 2.02,
+          "currency": "EGP",
+          "rule": "R2",
+          "expected": "جنيهان وقرشان",
+          "got": "فقط اثنان جنيهاً واثنان قرش لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 3.03,
+          "currency": "EGP",
+          "rule": "R3",
+          "expected": "ثلاثة جنيهات وثلاثة قروش",
+          "got": "فقط ثلاثة جنيهات وثلاثة قروش لا غير",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 11.11,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "أحد عشر جنيهاً وأحد عشر قرشاً",
+          "got": "فقط أحد عشر جنيهاً وأحد عشر قرش لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 100.5,
+          "currency": "EGP",
+          "rule": "R6",
+          "expected": "مائة جنيه وخمسون قرشاً",
+          "got": "فقط مائة جنيهاً وخمسون قرش لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 103.25,
+          "currency": "EGP",
+          "rule": "R5",
+          "expected": "مائة وثلاثة جنيهات وخمسة وعشرون قرشاً",
+          "got": "فقط مائة وثلاثة جنيهاً وخمسة وعشرون قرش لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 200.75,
+          "currency": "EGP",
+          "rule": "R7",
+          "expected": "مئتا جنيه وخمسة وسبعون قرشاً",
+          "got": "فقط مائتان جنيهاً وخمسة وسبعون قرش لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 1250.75,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "ألف ومئتان وخمسون جنيهاً وخمسة وسبعون قرشاً",
+          "got": "فقط ألف ومائتان وخمسون جنيهاً وخمسة وسبعون قرش لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 2000.5,
+          "currency": "EGP",
+          "rule": "R7",
+          "expected": "ألفا جنيه وخمسون قرشاً",
+          "got": "فقط ألفان جنيهاً وخمسون قرش لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 9876543.21,
+          "currency": "EGP",
+          "rule": "R4",
+          "expected": "تسعة ملايين وثمانمائة وستة وسبعون ألف وخمسمائة وثلاثة وأربعون جنيهاً وواحد وعشرون قرشاً",
+          "got": "فقط تسعة ملايين وثمانمائة وستة وسبعون ألف وخمسمائة وثلاثة وأربعون جنيهاً وواحد وعشرون قرش لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 2,
+          "currency": "SAR",
+          "rule": "R2",
+          "expected": "ريالان",
+          "got": "فقط اثنان ريال سعودي لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 0.02,
+          "currency": "SAR",
+          "rule": "R8",
+          "expected": "هللتان",
+          "got": "فقط undefined ريال سعودي واثنان هللة لا غير",
+          "ok": false,
+          "kind": "مخرَج مكسور"
+        },
+        {
+          "amount": 103,
+          "currency": "SAR",
+          "rule": "R5",
+          "expected": "مائة وثلاثة ريالات",
+          "got": "فقط مائة وثلاثة ريال سعودي لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 150.75,
+          "currency": "KWD",
+          "rule": "R9",
+          "expected": "مائة وخمسون ديناراً وسبعمائة وخمسون فلساً",
+          "got": "فقط مائة وخمسون دينار كويتي وخمسة وسبعون فلس لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 3,
+          "currency": "KWD",
+          "rule": "R3",
+          "expected": "ثلاثة دنانير",
+          "got": "فقط ثلاثة دنانير كويتية لا غير",
+          "ok": false,
+          "kind": "اختلاف"
+        },
+        {
+          "amount": 0.75,
+          "currency": "OMR",
+          "rule": "R9",
+          "expected": "سبعمائة وخمسون بيسة",
+          "got": "undefined",
+          "ok": false,
+          "kind": "مخرَج مكسور"
+        }
+      ]
+    }
+  ]
+}

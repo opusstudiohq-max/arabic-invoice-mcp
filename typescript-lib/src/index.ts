@@ -15,204 +15,21 @@ import crypto from "crypto";
 // Core: Arabic Tafgeet Engine (تفقيط الأرقام بالعربية)
 // =============================================================================
 
-const ONES = [
-  "", "واحد", "اثنان", "ثلاثة", "أربعة", "خمسة", "ستة", "سبعة",
-  "ثمانية", "تسعة", "عشرة", "أحد عشر", "اثنا عشر", "ثلاثة عشر",
-  "أربعة عشر", "خمسة عشر", "ستة عشر", "سبعة عشر", "ثمانية عشر",
-  "تسعة عشر"
-];
+// محرّك التفقيط انتقل إلى ملف مستقل بعد أن أخفقت النسخة المضمّنة في 31 من
+// 50 حالة في tafgeet-benchmark. النسخة الجديدة منقولة عن مرجع بايثون
+// وتحرسها اختبارات التكافؤ. راجع src/tafgeet.ts.
+import {
+  tafgeet,
+  numberToArabicWords,
+  CURRENCY_UNITS,
+} from "./tafgeet.js";
 
-const TENS = [
-  "", "", "عشرون", "ثلاثون", "أربعون", "خمسون", "ستون",
-  "سبعون", "ثمانون", "تسعون"
-];
-
-const HUNDREDS = [
-  "", "مائة", "مئتان", "ثلاثمائة", "أربعمائة", "خمسمائة",
-  "ستمائة", "سبعمائة", "ثمانمائة", "تسعمائة"
-];
-
-const SCALES: Array<[number, string]> = [
-  [1, ""],
-  [1000, "ألف"],
-  [1000000, "مليون"],
-  [1000000000, "مليار"],
-  [1000000000000, "تريليون"],
-];
-
-const CURRENCY_UNITS: Record<string, {
-  singular: string; dual: string; plural: string;
-  fraction_singular: string; fraction_plural: string;
-}> = {
-  SAR: { singular: "ريال", dual: "ريالان", plural: "ريالات", fraction_singular: "هللة", fraction_plural: "هللات" },
-  EGP: { singular: "جنيه", dual: "جنيهان", plural: "جنيهات", fraction_singular: "قرش", fraction_plural: "قروش" },
-  AED: { singular: "درهم", dual: "درهمان", plural: "دراهم", fraction_singular: "فلس", fraction_plural: "فلوس" },
-  USD: { singular: "دولار", dual: "دولاران", plural: "دولارات", fraction_singular: "سنت", fraction_plural: "سنتات" },
-  KWD: { singular: "دينار", dual: "ديناران", plural: "دينارات", fraction_singular: "فلس", fraction_plural: "فلوس" },
-  BHD: { singular: "دينار", dual: "ديناران", plural: "دينارات", fraction_singular: "فلس", fraction_plural: "فلوس" },
-  OMR: { singular: "ريال", dual: "ريالان", plural: "ريالات", fraction_singular: "بيسة", fraction_plural: "بيسات" },
-  QAR: { singular: "ريال", dual: "ريالان", plural: "ريالات", fraction_singular: "درهم", fraction_plural: "دراهم" },
-};
-
-// عدد المنازل العشرية لكل عملة — الدينار الكويتي والبحريني والريال العُماني ثلاث منازل (1000 وحدة فرعية)
-const CURRENCY_DECIMALS: Record<string, number> = {
-  SAR: 2, EGP: 2, AED: 2, USD: 2, QAR: 2,
-  KWD: 3, BHD: 3, OMR: 3,
-};
+export { tafgeet, numberToArabicWords };
 
 const VAT_RATES: Record<string, number> = {
   SA: 0.15, EG: 0.14, AE: 0.05,
   BH: 0.10, KW: 0.00, QA: 0.00, OM: 0.05,
 };
-
-/**
- * تحويل آحاد/عشرات/مئات.
- */
-function convertHundreds(n: number): string {
-  if (n === 0) return "";
-  const parts: string[] = [];
-  const h = Math.trunc(n / 100);
-  const remainder = n % 100;
-  if (h > 0) parts.push(HUNDREDS[h]);
-  if (remainder > 0) {
-    if (remainder < 20) {
-      parts.push(ONES[remainder]);
-    } else {
-      const t = Math.trunc(remainder / 10);
-      const o = remainder % 10;
-      if (o > 0) {
-        parts.push(`${ONES[o]} و${TENS[t]}`);
-      } else {
-        parts.push(TENS[t]);
-      }
-    }
-  }
-  return parts.join(" و");
-}
-
-/**
- * تحويل الأرقام إلى كلمات عربية.
- */
-export function numberToArabicWords(n: number): string {
-  if (typeof n !== "number" || isNaN(n) || !isFinite(n)) {
-    throw new Error("الرقم يجب أن يكون قيمة عددية محددة");
-  }
-  if (n === 0) return "صفر";
-
-  const isNegative = n < 0;
-  n = Math.abs(n);
-
-  const integerPart = Math.trunc(n);
-
-  let intWords: string;
-  if (integerPart === 0) {
-    intWords = "صفر";
-  } else {
-    const groups: string[] = [];
-    let num = integerPart;
-    let scaleIdx = 0;
-    while (num > 0 && scaleIdx < SCALES.length) {
-      const group = num % 1000;
-      if (group > 0) {
-        const [scaleValue, scaleWord] = SCALES[scaleIdx];
-        let groupWords = convertHundreds(group);
-        if (scaleValue !== 1) {
-          if (group === 1) {
-            groupWords = scaleWord;
-          } else if (group === 2) {
-            groupWords = `${scaleWord}ان`;
-          } else if (group >= 3 && group <= 10) {
-            const pluralMap: Record<string, string> = {
-              "ألف": "آلاف", "مليون": "ملايين", "مليار": "مليارات", "تريليون": "تريليونات"
-            };
-            const plural = pluralMap[scaleWord] || scaleWord + "ات";
-            groupWords = `${convertHundreds(group)} ${plural}`;
-          } else {
-            groupWords = `${convertHundreds(group)} ${scaleWord}`;
-          }
-        }
-        groups.push(groupWords);
-      }
-      num = Math.trunc(num / 1000);
-      scaleIdx += 1;
-    }
-    groups.reverse();
-    intWords = groups.filter(g => g).join(" و");
-  }
-
-  const decimalPart = Math.round((n - integerPart) * 100);
-  if (decimalPart > 0) {
-    const decWords = convertHundreds(decimalPart);
-    return isNegative
-      ? `سالب ${intWords} و${decWords}`
-      : `${intWords} و${decWords}`;
-  }
-  return isNegative ? `سالب ${intWords}` : intWords;
-}
-
-/**
- * تحويل الكلمة إلى صيغة النصب (تمييز).
- */
-function accusativeForm(word: string): string {
-  if (word.endsWith("ة")) {
-    return word; // مؤنث خماسي - التاء المربوطة تدل على النصب
-  }
-  return word + "اً";
-}
-
-/**
- * تفقيط مبلغ مالي بالعربية.
- */
-export function tafgeet(amount: number, currency: string = "SAR"): string {
-  if (typeof currency !== "string") {
-    return "خطأ: رمز العملة يجب أن يكون نصاً";
-  }
-  if (typeof amount !== "number" || isNaN(amount) || !isFinite(amount)) {
-    return "خطأ: المبلغ يجب أن يكون رقماً محدداً";
-  }
-  if (!(currency in CURRENCY_UNITS)) {
-    return `عملة غير مدعومة: ${currency}`;
-  }
-
-  const unit = CURRENCY_UNITS[currency];
-  const decimals = CURRENCY_DECIMALS[currency] ?? 2;
-  const scale = Math.pow(10, decimals);
-  const integerPart = Math.trunc(amount);
-  const decimalPart = Math.abs(Math.round((amount - integerPart) * scale));
-
-  const intWords = numberToArabicWords(integerPart);
-  const absIntegerPart = Math.abs(integerPart);
-
-  let intStr: string;
-  if (absIntegerPart === 1) {
-    if (integerPart === 1) {
-      intStr = `${unit.singular} واحد`;
-    } else {
-      intStr = `سالب ${unit.singular} واحد`;
-    }
-  } else if (absIntegerPart === 2) {
-    intStr = integerPart < 0 ? `سالب ${unit.dual}` : unit.dual;
-  } else if (absIntegerPart >= 3 && absIntegerPart <= 10) {
-    intStr = `${intWords} ${unit.plural}`;
-  } else {
-    intStr = `${intWords} ${accusativeForm(unit.singular)}`;
-  }
-
-  if (decimalPart === 0) return intStr;
-
-  let decStr: string;
-  if (decimalPart === 1) {
-    decStr = `${unit.fraction_singular} واحدة`;
-  } else if (decimalPart === 2) {
-    decStr = unit.fraction_singular + "تان";
-  } else if (decimalPart >= 3 && decimalPart <= 10) {
-    decStr = `${numberToArabicWords(decimalPart)} ${unit.fraction_plural}`;
-  } else {
-    decStr = `${numberToArabicWords(decimalPart)} ${accusativeForm(unit.fraction_singular)}`;
-  }
-
-  return `${intStr} و${decStr}`;
-}
 
 /**
  * حساب VAT حسب الدولة.

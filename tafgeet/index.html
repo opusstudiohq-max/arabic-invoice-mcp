@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مقياس التفقيط العربي — اختبار محرّكات تحويل المبالغ إلى حروف</title>
+<meta name="description" content="مقياس مفتوح يختبر محرّكات التفقيط العربي على قواعد العدد والمعدود. النتائج والحالات وطريقة إعادة التشغيل منشورة بالكامل.">
+<style>
+  :root{
+    --bg:#f7f8fa; --card:#fff; --ink:#16202b; --muted:#5d6b7a; --line:#e0e6ec;
+    --ok:#0a7d5a; --ok-bg:#e8f5f0; --bad:#b4232a; --bad-bg:#fdeeee;
+    --warn:#8a5a00; --warn-bg:#fff8e8;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{ --bg:#0f1419; --card:#161d25; --ink:#e6edf3; --muted:#9aa8b6; --line:#2a343f;
+           --ok:#3fbf95; --ok-bg:#10281f; --bad:#f2777f; --bad-bg:#2a1416;
+           --warn:#e0b060; --warn-bg:#2a2010; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);line-height:1.75;
+       font-family:"Segoe UI","Noto Naskh Arabic",Tahoma,sans-serif}
+  .wrap{max-width:960px;margin:0 auto;padding:28px 18px 70px}
+  h1{font-size:1.6rem;margin:0 0 6px;line-height:1.4}
+  .sub{color:var(--muted);margin:0 0 26px}
+  h2{font-size:1.15rem;margin:34px 0 12px;padding-top:14px;border-top:1px solid var(--line)}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
+  table{width:100%;border-collapse:collapse;font-size:.94rem}
+  th,td{text-align:right;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:.85rem}
+  .num{font-variant-numeric:tabular-nums;white-space:nowrap}
+  .score{font-size:1.5rem;font-weight:700;font-variant-numeric:tabular-nums}
+  .ok{color:var(--ok)} .bad{color:var(--bad)}
+  .pill{display:inline-block;border-radius:99px;padding:1px 9px;font-size:.76rem;font-weight:600}
+  .pill.ok{background:var(--ok-bg)} .pill.bad{background:var(--bad-bg)}
+  .pill.brk{background:var(--bad-bg);color:var(--bad)}
+  code{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:1px 6px;
+       font-family:ui-monospace,Consolas,monospace;font-size:.88em;direction:ltr;display:inline-block}
+  pre{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:13px;
+      overflow-x:auto;direction:ltr;text-align:left;font-size:.86rem}
+  .note{background:var(--warn-bg);border:1px solid var(--line);border-right:3px solid var(--warn);
+        border-radius:8px;padding:12px 14px;margin:14px 0;font-size:.92rem}
+  .scroll{overflow-x:auto}
+  .rule{font-size:.82rem;color:var(--muted)}
+  footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
+         color:var(--muted);font-size:.86rem}
+  a{color:var(--ok)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>مقياس التفقيط العربي</h1>
+<p class="sub">اختبار مفتوح لمحرّكات تحويل المبالغ إلى حروف، على قواعد العدد والمعدود.
+<span id="meta"></span></p>
+
+<div class="note">
+  <strong>لماذا هذا المقياس؟</strong> التفقيط ليس تجميلاً. في مصر تنصّ
+  <strong>المادة 476 من قانون التجارة 17 لسنة 1999</strong> على أن العبرة عند
+  الاختلاف تكون <strong>بالمبلغ المكتوب بالحروف</strong>. فخطأ التفقيط خطأ في
+  المستند المُعتَدّ به قانوناً.
+</div>
+
+<h2>النتائج</h2>
+<div id="board"></div>
+
+<div class="note">
+  <strong>الحَكَم قاعدة نحوية، لا رأينا.</strong> كل حالة أدناه مرتبطة برقم
+  القاعدة التي تختبرها. ومن يخالف حالةً فليخالف <em>القاعدة</em> — ونحن نرحّب
+  بذلك علناً ونصحّح المقياس إن ثبت الخطأ.
+  <br><br>
+  <strong>وحالات الخلاف النحوي مستبعَدة عمداً.</strong> صيغ مثل «مائة وواحد
+  جنيهاً» موضع اختلاف حقيقي بين النحويين، فلا نُسقط بها محرّكاً.
+</div>
+
+<h2>المقياس عضّ صاحبه أولاً</h2>
+<div class="card">
+  <p>قبل نشر هذه الصفحة سألنا سؤالاً بديهياً: <strong>هل تجتاز حزمتنا المنشورة
+  على npm مقياسَنا نحن؟</strong> فشغّلنا <code>arabic-invoice-mcp-ts</code> —
+  الملف المشحون فعلاً — على الحالات نفسها.</p>
+
+  <div class="scroll"><table>
+    <tr><th>المحرّك</th><th class="num">31 أغسطس 2026 — قبل</th><th class="num">بعد الإصلاح</th></tr>
+    <tr><td>محرّك بايثون / أداة الشيكات</td><td class="num ok">50/50</td><td class="num ok">50/50</td></tr>
+    <tr><td><strong>حزمتنا على npm</strong></td><td class="num bad"><strong>19/50 — 38%</strong></td><td class="num ok">50/50</td></tr>
+  </table></div>
+
+  <p>أي أننا كنّا أفضل من أضعف محرّك في الجدول بـ<strong>ست عشرة نقطة فقط</strong>،
+  ونحن على وشك نشر مقياسٍ للصحّة النحوية. نشرُه حينها كان <strong>كذباً
+  بالإغفال</strong>.</p>
+
+  <p class="rule">ما كان ناقصاً في نسختنا: جداول التذكير والتأنيث، وإسقاط النون
+  عند الإضافة (<code>ألفا جنيه</code> لا <code>ألفان جنيهاً</code>)، وقاعدة
+  «التمييز يتبع آخر عدد معطوف»، وجمع التكسير الصحيح (<code>دنانير</code> لا
+  <code>دينارات</code>). وكان في حزمتنا <strong>اختباران يُشفّران الخطأ نفسه</strong> —
+  يتوقعان «ألف ريالاً»، والصواب «ألف ريال».</p>
+
+  <p>ولذلك <strong>يرفض المشغّل العمل إن أخفق أي محرّك نملكه</strong>. مقياسٌ لا
+  يعضّ صاحبه دعاية لا مقياس.</p>
+</div>
+
+<h2>القواعد المُختبَرة</h2>
+<div id="rules"></div>
+
+<h2>تفصيل الاختلافات</h2>
+<div id="details"></div>
+
+<h2>أعِد التشغيل بنفسك</h2>
+<div class="card">
+<p>المقياس كلّه مفتوح: الحالات، والمشغّل، والنتائج.</p>
+<pre>git clone https://github.com/opusstudiohq-max/arabic-invoice-mcp
+cd arabic-invoice-mcp/tafgeet
+node run.mjs --fetch</pre>
+<p class="rule">المحرّكات العامة تُجلب <strong>مرة واحدة وتُخزَّن</strong> ولا يُكرَّر
+الطلب، وتُشغَّل محلياً في نطاق معزول. والمقارنة تتجاهل التشكيل وصيغ الألف
+والمسافات و«فقط… لا غير»، <strong>ولا تتجاهل التنوين</strong> لأنه موضع الخلاف نفسه.</p>
+</div>
+
+<footer>
+  <p><strong>مُتوافِق</strong> — أدوات عربية دقيقة، مبنيّة على اختبارات لا على وعود.
+  محرّكنا يخضع لـ<strong>176 اختباراً</strong> في نسخة بايثون، و<strong>540 حالة
+  تكافؤ</strong> بين نسختَي بايثون والمتصفح.</p>
+  <p>وجدت خطأً في المقياس نفسه؟ <strong>افتح مشكلة على المستودع</strong> — تصحيحه
+  يخدمنا قبل غيرنا.</p>
+</footer>
+
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+fetch("results.json").then(r => r.json()).then(d => {
+  $("meta").textContent = `آخر تشغيل: ${d.generated_utc} • ${d.cases_total} حالة.`;
+
+  // ── اللوحة ──
+  const rows = d.engines.map(e => {
+    if (e.skipped) return `<tr><td>${e.name}</td><td colspan="4" class="rule">تخطّي: ${e.skipped}</td></tr>`;
+    const cls = e.rate >= 95 ? "ok" : "bad";
+    const brk = e.broken
+      ? `<span class="pill brk">${e.broken} مخرَج مكسور</span>` : "";
+    return `<tr>
+      <td><strong>${e.name}</strong><div class="rule">${e.note}</div></td>
+      <td class="num score ${cls}">${e.rate}%</td>
+      <td class="num">${e.pass} / ${e.total}</td>
+      <td class="num ${e.fail ? "bad" : "ok"}">${e.fail}</td>
+      <td>${brk}</td></tr>`;
+  }).join("");
+  $("board").innerHTML = `<div class="card scroll"><table>
+    <tr><th>المحرّك</th><th>النسبة</th><th>اجتاز</th><th>أخفق</th><th></th></tr>
+    ${rows}</table></div>`;
+
+  // ── القواعد ──
+  $("rules").innerHTML = `<div class="card scroll"><table>
+    <tr><th style="width:70px">الرمز</th><th>القاعدة</th></tr>
+    ${Object.entries(d.rules).map(([k, r]) =>
+      `<tr><td><code>${k}</code></td><td><strong>${r.name}</strong><div class="rule">${r.text}</div></td></tr>`
+    ).join("")}</table></div>`;
+
+  // ── التفصيل ──
+  $("details").innerHTML = d.engines.filter(e => !e.skipped && e.fail > 0).map(e => {
+    const bad = e.rows.filter(r => !r.ok);
+    return `<div class="card">
+      <h3 style="margin:0 0 10px;font-size:1rem">${e.name} — ${bad.length} اختلاف</h3>
+      <div class="scroll"><table>
+        <tr><th class="num">المبلغ</th><th>الصواب بالقاعدة</th><th>ناتج المحرّك</th><th>القاعدة</th></tr>
+        ${bad.map(r => `<tr>
+          <td class="num">${r.amount} ${r.currency}</td>
+          <td class="ok">${r.expected}</td>
+          <td class="bad">${r.got}${r.kind === "مخرَج مكسور" ? ' <span class="pill brk">مكسور</span>' : ""}</td>
+          <td><code>${r.rule}</code></td></tr>`).join("")}
+      </table></div></div>`;
+  }).join("") || `<div class="card">لا اختلافات.</div>`;
+}).catch(e => {
+  $("board").innerHTML = `<div class="card">تعذّر تحميل النتائج. شغّل <code>node tafgeet-benchmark/run.mjs</code> أولاً.</div>`;
+});
+</script>
+</body>
+</html>
