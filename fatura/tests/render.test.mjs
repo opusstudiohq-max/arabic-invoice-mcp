@@ -285,6 +285,55 @@ test("رمز QR المرسوم يقرؤه قارئٌ مستقلّ ويطابق �
   assert.equal(Number(byTag[5]) * 100, totals.vatTotal);
 });
 
+/**
+ * **الحالة التي كسرت رمزنا، من طرف السلسلة إلى طرفها.**
+ *
+ * الحرف العربي بايتان، فاسمٌ من 64 حرفاً يبلغ 128 بايتاً — وعندها ينكسر
+ * ترميز الطول ببايتٍ واحد، وهو ما كان عندنا. والفحوصُ الأخرى كلها بأسماءٍ
+ * قصيرة، فلو عاد العيب لمرّ من هنا كلّه سليماً.
+ *
+ * وهذا الفحص لا يقرأ ما تُعيده الدالة: يبني الملف، ثم **يعيد بناء الرمز من
+ * المستطيلات المرسومة على الصفحة**، ثم يفكّه. أي أنه يقيس ما يصل الماسح في
+ * يد المشتري، لا ما نظنّه أرسلنا.
+ */
+test("اسمٌ سعودي طويل: الرمز المطبوع يُقرأ ويعود الاسم كاملاً", skip, async () => {
+  // اسمان واقعيان يكتنفان الحدّ. والأوّل **على بُعد ثلاث بايتات منه** —
+  // وهذا وحده يبيّن أن 128 بايتاً ليست حالةً حدّية مصطنعة في السعودية.
+  const cases = [
+    { name: "مؤسسة عبد الرحمن بن محمد العتيبي للتجارة والمقاولات العامة والصيانة",
+      bytes: 125, form: "قصير" },
+    { name: "شركة عبد الرحمن بن محمد العتيبي للتجارة والمقاولات العامة والصيانة المحدودة",
+      bytes: 140, form: "0x81" },
+  ];
+
+  for (const { name, bytes, form } of cases) {
+    assert.equal(Buffer.byteLength(name, "utf-8"), bytes,
+      "طول الاسم تغيّر — أعد ضبط الحالة بدل تمريرها");
+
+    const { buffer, qrPayload } = await render({
+      ...INVOICE,
+      seller: { ...INVOICE.seller, name },
+    });
+
+    const read = qrFromDrawnRectangles(buffer);
+    assert.ok(read, `تعذّر إعادة بناء الرمز (${bytes} بايتاً)`);
+    assert.equal(read.data, qrPayload, "ما رُسم على الصفحة يخالف ما بُني");
+
+    const byTag = Object.fromEntries(decodeZatcaQr(read.data).map((f) => [f.tag, f.value]));
+    assert.equal(byTag[1], name,
+      `الاسم عاد مبتوراً عند ${bytes} بايتاً — ترميز الطول كسر`);
+
+    const raw = Buffer.from(qrPayload, "base64");
+    assert.equal(raw[0], 1);
+    if (form === "قصير") {
+      assert.equal(raw[1], bytes, `الطول ${raw[1]} والمتوقَّع ${bytes}`);
+    } else {
+      assert.equal(raw[1], 0x81, `بايت الطول 0x${raw[1].toString(16)} والمتوقَّع 0x81`);
+      assert.equal(raw[2], bytes);
+    }
+  }
+});
+
 test("الرمز يحمل المبلغ بلا فاصلة آلاف — الفاصلة للطباعة لا للترميز", skip, async () => {
   const big = {
     ...INVOICE,

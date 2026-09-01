@@ -40,7 +40,7 @@ npm publish --access public
 ```bash
 cd invoice-pdf
 npm pkg set dependencies.nasq="^0.1.0"
-npm test            # fatura — 38 اختباراً
+npm test            # fatura — 40 اختباراً
 npm publish --access public
 ```
 
