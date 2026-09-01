@@ -217,6 +217,10 @@ const html = `<!DOCTYPE html>
   ul.findings{margin:.4rem 0 0;padding-inline-start:1.2rem}
   ul.findings li{margin-bottom:.3rem;font-size:.9rem}
   a{color:var(--accent)}
+  /* سطرُ التواصل: العنوان **نصّاً** لا رابطاً فقط — من يستعمل بريده عبر
+     المتصفح لا يفتح له رابط mailto شيئاً، فيبقى بلا سبيل. وهو العيب نفسه
+     الذي كان في الفاحص، وكان هنا في أربع صفحاتٍ دفعةً واحدة: لا سبيل أصلاً. */
+  .contact-line code{user-select:all}
   footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--line);
          color:var(--muted);font-size:.88rem}
   .own{background:var(--warn-bg);border:1px solid var(--warn);border-radius:10px;
@@ -367,6 +371,11 @@ node run.mjs --fetch &amp;&amp; node build.mjs</code></pre>
   <p>
     المصدر النصّي: ${esc(r.sources.spec)} —
     والحسم في طول BER: <a href="${esc(r.sources.forum)}">موضوع منتدى الهيئة</a>.
+  </p>
+  <p class="contact-line">
+    نبني تكاملات فوترة إلكترونية ونصلح المكسور منها — بنطاقٍ وسعرٍ واضحين.
+    <a href="mailto:yahya@opus-studio.pro?subject=سؤال%20من%20مقياس%20رمز%20QR%20السعودي">راسلنا</a>
+    أو انسخ العنوان: <bdi dir="ltr"><code>yahya@opus-studio.pro</code></bdi>
   </p>
 </footer>
 

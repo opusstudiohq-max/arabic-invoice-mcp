@@ -41,6 +41,10 @@
            font-size:.85rem;color:var(--warn)}
   code{background:#eef2f6;border-radius:4px;padding:1px 5px;font-size:.85em}
   pre{background:#16202b;color:#dbe6f0;border-radius:8px;padding:12px;overflow-x:auto;font-size:.8rem}
+  /* سطرُ التواصل: العنوان **نصّاً** لا رابطاً فقط — من يستعمل بريده عبر
+     المتصفح لا يفتح له رابط mailto شيئاً، فيبقى بلا سبيل. وهو العيب نفسه
+     الذي كان في الفاحص، وكان هنا في أربع صفحاتٍ دفعةً واحدة: لا سبيل أصلاً. */
+  .contact-line code{user-select:all}
   footer{color:var(--muted);font-size:.8rem;margin-top:30px;border-top:1px solid var(--line);padding-top:14px}
   a{color:var(--ok)}
   @media(prefers-color-scheme:dark){
@@ -350,6 +354,11 @@ node tafgeet-benchmark/build.mjs</pre>
 <p>مقياس مفتوح من <strong>مُتوافِق</strong> — أدوات عربية دقيقة.
 وجدتَ خطأً في حالة أو قاعدة؟ <strong>ننشر التصحيح ونذكر صاحبه.</strong></p>
 <p>المقارنة تخصّ <strong>التفقيط وحده</strong>، ولا تحكم على المنتجات المقارَنة في شيء آخر.</p>
+  <p class="contact-line">
+    نبني تكاملات فوترة إلكترونية ونصلح المكسور منها — بنطاقٍ وسعرٍ واضحين.
+    <a href="mailto:yahya@opus-studio.pro?subject=سؤال%20من%20مقياس%20التفقيط%20العربي">راسلنا</a>
+    أو انسخ العنوان: <bdi dir="ltr"><code>yahya@opus-studio.pro</code></bdi>
+  </p>
 </footer>
 
 </div></body></html>

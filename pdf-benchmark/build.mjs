@@ -147,6 +147,10 @@ const html = `<!DOCTYPE html>
       padding:1rem;overflow-x:auto;direction:ltr;text-align:left}
   pre code{background:none;border:none;padding:0}
   a{color:var(--accent)}
+  /* سطرُ التواصل: العنوان **نصّاً** لا رابطاً فقط — من يستعمل بريده عبر
+     المتصفح لا يفتح له رابط mailto شيئاً، فيبقى بلا سبيل. وهو العيب نفسه
+     الذي كان في الفاحص، وكان هنا في أربع صفحاتٍ دفعةً واحدة: لا سبيل أصلاً. */
+  .contact-line code{user-select:all}
   footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--line);
          color:var(--muted);font-size:.88rem}
   .cta{background:var(--ok-bg);border:1px solid var(--ok);border-radius:10px;
@@ -250,7 +254,11 @@ node run.mjs</code></pre>
     <a href="https://opusstudiohq-max.github.io/arabic-invoice-mcp/tafgeet/">مقياس التفقيط</a> ·
     <a href="https://github.com/opusstudiohq-max/arabic-invoice-mcp">المستودع</a>
   </p>
-  <p>مفتوح المصدر (MIT) — <code>opus.studio.hq@gmail.com</code></p>
+  <p class="contact-line">
+    نبني تكاملات فوترة إلكترونية ونصلح المكسور منها — بنطاقٍ وسعرٍ واضحين.
+    <a href="mailto:yahya@opus-studio.pro?subject=سؤال%20من%20مقياس%20النصّ%20العربي%20في%20PDF">راسلنا</a>
+    أو انسخ العنوان: <bdi dir="ltr"><code>yahya@opus-studio.pro</code></bdi>
+  </p>
 </footer>
 
 </main>
