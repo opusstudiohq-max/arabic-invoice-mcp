@@ -10,6 +10,16 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
+/**
+ * صفحةُ المصدر تحمل `noindex` لأنها منشورةٌ ومكسورة (سكربتها وحدةُ ES
+ * باستيراداتٍ مجرّدة). والمخرَج هو **الأداة الحقيقية**، فيُنزع منه المنع
+ * وإلا أُخرجت الأداةُ نفسها من الفهرسة.
+ */
+const dropNoindex = (html) => html
+  .replace(/<!--[^]*?صفحة المصدر[^]*?-->\s*/g, "")
+  .replace(/<meta name="robots" content="noindex">\s*/g, "")
+  .replace(/<link rel="canonical"[^>]*>\s*/g, "");
+
 const OUT = join(HERE, "dist");
 mkdirSync(join(OUT, "fonts"), { recursive: true });
 
@@ -40,7 +50,8 @@ function place(from, to) {
 for (const f of ["Almarai.ttf", "OFL.txt"]) {
   place(join(HERE, "fonts", f), join(OUT, "fonts", f));
 }
-copyFileSync(join(HERE, "index.html"), join(OUT, "index.html"));
+writeFileSync(join(OUT, "index.html"),
+  dropNoindex(readFileSync(join(HERE, "index.html"), "utf-8")), "utf-8");
 copyFileSync(join(HERE, "style.css"), join(OUT, "style.css"));
 
 const kb = (p) => (statSync(p).size / 1024).toFixed(1);

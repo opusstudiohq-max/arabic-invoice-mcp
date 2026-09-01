@@ -17,6 +17,15 @@ const OUT_DIR = join(HERE, "dist");
 const OUT = join(OUT_DIR, "mutawafiq-cheque.html");
 
 const read = (p) => readFileSync(join(HERE, p), "utf-8");
+/**
+ * صفحةُ المصدر تحمل `noindex` لأنها منشورةٌ ومكسورة (سكربتها وحدةُ ES
+ * باستيراداتٍ مجرّدة). والمخرَج هو **الأداة الحقيقية**، فيُنزع منه المنع
+ * وإلا أُخرجت الأداةُ نفسها من الفهرسة.
+ */
+const dropNoindex = (html) => html
+  .replace(/<!--[^]*?صفحة المصدر[^]*?-->\s*/g, "")
+  .replace(/<meta name="robots" content="noindex">\s*/g, "")
+  .replace(/<link rel="canonical"[^>]*>\s*/g, "");
 
 /** يجرّد `import`/`export` ليصلح الوحدات للدمج في نطاق واحد. */
 function flatten(src) {
@@ -28,7 +37,7 @@ function flatten(src) {
 
 const parts = ["js/tafgeet.js", "js/layouts.js", "js/app.js"].map(read).map(flatten);
 
-let html = read("index.html");
+let html = dropNoindex(read("index.html"));
 html = html.replace(
   /<script type="module" src="js\/app\.js"><\/script>/,
   `<script>\n"use strict";\n(function(){\n${parts.join("\n\n")}\n})();\n</script>`
