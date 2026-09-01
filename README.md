@@ -2,7 +2,7 @@
 
 **أدوات مفتوحة المصدر للفوترة الإلكترونية العربية** — من [OPUS Studio](https://github.com/opusstudiohq-max).
 
-[![tests](https://img.shields.io/badge/tests-160%20passing-brightgreen)](python-lib/tests/)
+[![tests](https://img.shields.io/badge/tests-176%20passing-brightgreen)](python-lib/tests/)
 [![license](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![privacy](https://img.shields.io/badge/privacy-runs%20in%20your%20browser-0A4D3C)](checker/)
 
@@ -14,6 +14,7 @@
 |---|---|
 | **[فاحص QR](https://opusstudiohq-max.github.io/arabic-invoice-mcp/checker/)** | الصق رمز QR لفاتورة → تقرير بالأخطاء البنيوية في ثوانٍ |
 | **[الفحص الجماعي](https://opusstudiohq-max.github.io/arabic-invoice-mcp/checker/batch.html)** | لمكاتب المحاسبة: افحص فواتير كل عملائك دفعة واحدة + تقرير جاهز بشعار مكتبك |
+| **[مقياس التفقيط العربي](https://opusstudiohq-max.github.io/arabic-invoice-mcp/tafgeet/)** | لوحة مفتوحة تختبر محرّكات التفقيط على قواعد العدد والمعدود — ونبدأ بفحص أنفسنا |
 
 > 🔒 **الخصوصية بالتصميم:** الأداتان تعملان **بالكامل داخل متصفحك**. افتح تبويب الشبكة في أدوات المطوّر وستجد **صفر طلبات** أثناء الفحص — بيانات فواتيرك لا تغادر جهازك.
 
@@ -39,8 +40,10 @@
 
 ```
 checker/          أدوات الويب (JS خالص، بلا تبعيات، تعمل محلياً)
-python-lib/       خادم MCP بايثون + المكتبة (160 اختباراً)
+python-lib/       خادم MCP بايثون + المكتبة (176 اختباراً)
 typescript-lib/   نسخة TypeScript من الأدوات الأساسية
+eta-lib/          مكتبة الفاتورة الإلكترونية المصرية (ETA) — بايثون + TypeScript
+tafgeet/          مقياس التفقيط العربي المفتوح
 ```
 
 ### `python-lib` — خادم MCP والمكتبة
@@ -52,8 +55,24 @@ typescript-lib/   نسخة TypeScript من الأدوات الأساسية
 - **`date_converter`** — تحويل هجري/ميلادي (أم القرى)، أيام العمل، المناسبات.
 
 ```bash
-cd python-lib && pip install -e ".[dev]" && pytest -q     # 160 passed
+cd python-lib && pip install -e ".[dev]" && pytest -q     # 176 passed
 ```
+
+### `eta-lib` — الفاتورة الإلكترونية المصرية (ETA)
+
+التسلسل الكنسي والتجزئة والتحقق وبناء المستندات — **مُتحقَّق بايتاً ببايت
+من العيّنة الرسمية** المنشورة على بوابة الهيئة.
+
+**لماذا:** صفر حزمة npm لمنظومة ETA، والمرجع الرسمي `EInvoicingSigner`
+مهجور منذ يناير 2024 بـ**63 نسخة مشتقة** — أي 63 فريقاً لم يجدوا بديلاً.
+
+```bash
+python -m pytest eta-lib/tests -q            # 50 passed
+cd eta-lib/ts && npm test                    # نسخة TypeScript + تكافؤ مع بايثون
+```
+
+**ولا يشمل التوقيع والإرسال** — الهيئة لا تمنح حساب بيئة تجريبية لمطوّر
+مستقل، ولن نشحن كوداً لم يُشغَّل على المنظومة الحقيقية.
 
 ### `typescript-lib`
 ```bash

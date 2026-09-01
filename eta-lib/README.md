@@ -1,0 +1,133 @@
+# مكتبة الفاتورة الإلكترونية المصرية (ETA)
+
+طبقة برمجية للتعامل مع منظومة الفاتورة الإلكترونية المصرية — **بمعايير
+مُتحقَّقة من عيّنة الهيئة الرسمية، لا من الاجتهاد.**
+
+---
+
+## لماذا
+
+| القياس | الرقم |
+|---|---|
+| حزم npm لمنظومة ETA | **صفر** |
+| مستودعات ETA على GitHub مقابل ZATCA | **5 مقابل 627** |
+| المرجع الرسمي `EInvoicingSigner` | **مهجور منذ 30 يناير 2024** — 26 مشكلة مفتوحة، **63 نسخة مشتقة** |
+
+63 نسخة مشتقة من مرجع متروك تعني 63 فريقاً لم يجدوا بديلاً.
+
+**والوضع النظامي مفتوح لهذا بالذات:** المصلحة تخاطب «**مطوري الممولين**»
+نصاً في أدلتها، وترخيص «مقدم الخدمة» يخصّ طبقة الوساطة لا مورّدي البرمجيات.
+التفصيل في [`research/ETA-LEGAL-CLEARANCE.md`](../research/ETA-LEGAL-CLEARANCE.md).
+
+---
+
+## ما هو مبنيّ
+
+### ① التسلسل الكنسي والتجزئة — `serialization.py`
+
+أصعب قطعة في التكامل. **مُتحقَّق منه بايتاً ببايت** مقابل الملف الرسمي
+`one-doc-serialized.json.txt` المنشور على بوابة الهيئة.
+
+```python
+from eta_invoice.serialization import load_document, canonical_hash
+
+doc = load_document(Path("invoice.json").read_text(encoding="utf-8"))
+print(canonical_hash(doc))   # D43FAE25B02B7E466FA5AA39E5FA45C7D92661E5B0A0E7964E04783BFF3C2651
+```
+
+**الفخّ الذي تقع فيه أغلب النسخ:** المواصفة تُلزم بأخذ القيمة «بلا أي
+معالجة» — فـ`0.0` تبقى `0.0` ولا تصير `0` ولا `0.00`. و`json.loads` العادي
+يحوّلها إلى `float` فيضيع شكلها اللفظي، فيختلف الهاش عن هاش الهيئة **ويُرفض
+المستند بلا تشخيص مفيد**. الحل هنا: `parse_float=str` و`parse_int=str`.
+
+### ② المُحقِّق المحلي — `validation.py`
+
+يمنع الرفض قبل الإرسال، **ويشرح السبب**.
+
+```python
+from eta_invoice.validation import validate_document, format_report
+print(format_report(validate_document(doc)))
+```
+
+```
+[خطأ] invoiceLines[0].salesTotal: إجمالي البيع لا يطابق المحسوب من مكوّناته
+    المتوقَّع: 947.0    الموجود: 950.0
+    الإصلاح: salesTotal = quantity × unitValue.amountEGP (الفارق 3.0)
+```
+
+**ثماني قواعد، كلها مشتقّة من العيّنة الرسمية ومُختبَرة عليها:**
+
+| # | القاعدة |
+|---|---|
+| 1 | `salesTotal = quantity × unitValue.amountEGP` |
+| 2 | `netTotal = salesTotal − discount.amount` |
+| 3 | `totalSalesAmount = Σ salesTotal` |
+| 4 | `totalDiscountAmount = Σ discount.amount` |
+| 5 | `netAmount = totalSalesAmount − totalDiscountAmount` |
+| 6 | `totalItemsDiscountAmount = Σ itemsDiscount` |
+| 7 | `taxTotals[type] = Σ taxableItems` لكل نوع |
+| 8 | `totalAmount = Σ line.total − extraDiscountAmount` |
+
+### ③ بنّاء المستند — `builder.py`
+
+المُحقِّق يمسك الخطأ بعد وقوعه؛ والبنّاء **يمنع وقوعه**: يحسب كل حقل مشتقّ
+بـ`Decimal`، ويجمّع كل إجماليات المستند، **ويفحص ناتجه بنفسه** قبل التسليم.
+
+```python
+b = InvoiceBuilder(issuer=..., receiver=..., internal_id="INV-1", activity_code="6201")
+b.add_line(InvoiceLine(description="خدمة", quantity=1,
+                       unit_price_egp="12000.00", total="13680.00",
+                       taxes=[Tax("T1", rate=14)]))
+doc = b.build()          # يرمي BuildError لو أخفق فحصه لنفسه
+```
+
+**ولا يخترع مالاً:** `total` للبند يأتي **من نظامك المحاسبي** لأن معادلته
+لم تُشتقّ من مواصفة الهيئة. والبنّاء يحسب ما يستطيع إثباته فقط.
+
+**ضمانة مُختبَرة:** 200 فاتورة عشوائية بمولّد حتمي — كلها تمرّ بالمُحقِّق.
+
+### ④ كتابة JSON متطابقة مع التجزئة — `dump_document`
+
+⚠️ الهاش مبنيّ على **الشكل النصّي** للقيمة. فكاتب JSON يكتب `114` حيث
+نجزّئ `114.0` — وكلاهما JSON صحيح — **يُغيّر الهاش فيُرفض المستند بلا
+تشخيص**. فاكتب مستندك بـ`dump_document`، أو اضمن أن كاتبك يطابق تمثيلنا.
+
+---
+
+## ما ليس مبنيّاً — وأقوله صراحةً
+
+### 🔴 قاعدة غير محسومة: `invoiceLines[].total`
+
+جُرّبت `netTotal + valueDifference + totalTaxableFees ± الضرائب − itemsDiscount`
+على العيّنة الرسمية فأعطت **فرقاً مقداره 912.00** في البند الأول، و**نصف قرش
+غير قابل للتمثيل** في البند الثاني — أي أن الخلل في **الصيغة** لا في قطبية
+أنواع الضرائب.
+
+**ولذلك لا تُفحص هذه القاعدة.** مُحقِّقٌ يرفض فاتورة صحيحة أسوأ من مُحقِّق
+يفحص أقل: الأول يُفقد الثقة فيُهمَل، فلا يمنع رفضاً أبداً.
+مسجَّلة في `validation.UNRESOLVED` وفي اختبار يفرض ألا تُطبَّق.
+
+### 🔴 التوقيع والإرسال — لا يمكن اختبارهما بلا حساب ممول
+
+المصلحة **لا تمنح حساب بيئة تجريبية للمطوّر المستقل**: الدخول «كمستخدم بصفة
+مدير مسئول لدى الممول». والختم الإلكتروني «لا يرتبط إلا بكيان قانوني».
+
+فالتوقيع `CAdES-BES` والإرسال يُبنيان **بعد** توفّر حساب — ولن نشحن كوداً
+لم يُشغَّل على المنظومة الحقيقية ونقول إنه يعمل.
+
+---
+
+## التشغيل
+
+```bash
+python -m pytest eta-lib/tests -q
+```
+
+**47 اختباراً**، منها المطابقة الحرفية للعيّنة الرسمية و200 فاتورة عشوائية.
+
+## المصادر
+
+- [مواصفة التسلسل](https://sdk.invoicing.eta.gov.eg/document-serialization-approach/)
+- [إنشاء التوقيع](https://sdk.invoicing.eta.gov.eg/signature-creation/)
+- [أنواع الضرائب](https://sdk.invoicing.eta.gov.eg/codes/tax-types/)
+- العيّنة الرسمية: `fixtures/one-doc.json` و`fixtures/one-doc-serialized.json.txt`
