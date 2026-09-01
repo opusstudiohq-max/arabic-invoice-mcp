@@ -1,0 +1,35 @@
+{
+  "_": "سجلّ ما نُشر فعلاً — لا ما نعتزم نشره. تحرَّر هذه القائمة يدوياً بعد النشر لا قبله، ومنها تتحقق بوابة claims_lint من كل ادعاء توزيع في أصولنا العامة.",
+  "_why": "في 1 سبتمبر 2026 كانت صفحة المقياس المنشورة تقول «حزمتنا على npm» ولا شيء لنا على npm. كان المعنى صحيحاً (البناء المشحون أخفق 38%) والصفة كاذبة. اكتُشف بمحاولة تثبيت الحزمة لا بمراجعة نصّ — فالقراءة لا تكشف غياب شيء.",
+  "_rule": "أي أصل عام يقول «npm i X» أو «pip install X» أو «X على npm» لاسمٍ من our_names يجب أن يجد X في القناة المقابلة أدناه. وأي ادعاء نشر مُرسَل بلا اسم يفشل ما دامت القناة فارغة.",
+
+  "our_names": [
+    "mutawafiq",
+    "arabic-invoice-mcp",
+    "arabic-invoice-mcp-ts",
+    "eta-einvoice",
+    "eta_invoice",
+    "arabic-tafgeet"
+  ],
+
+  "npm": [],
+  "pypi": [],
+
+  "github_pages": [
+    {
+      "name": "مقياس التفقيط العربي",
+      "url": "https://opusstudiohq-max.github.io/arabic-invoice-mcp/tafgeet-benchmark/",
+      "published_on": "2026-08-31",
+      "source": "tafgeet-benchmark/index.html"
+    }
+  ],
+
+  "github_repos": [
+    {
+      "name": "arabic-invoice-mcp",
+      "url": "https://github.com/opusstudiohq-max/arabic-invoice-mcp",
+      "published_on": "2026-08-31",
+      "visibility": "public"
+    }
+  ]
+}

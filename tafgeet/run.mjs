@@ -44,9 +44,9 @@ const ENGINES = [
     run: (amount, currency) => ourTafgeet(amount, currency),
   },
   {
-    id: "mutawafiq-npm",
-    name: "مُتوافِق — حزمة npm",
-    note: "الحزمة المشحونة فعلاً (arabic-invoice-mcp-ts). تُفحص هنا عمداً: من ينشر مقياساً للصحّة يبدأ بنفسه",
+    id: "mutawafiq-ts",
+    name: "مُتوافِق — بناء TypeScript المشحون",
+    note: "البناء المشحون فعلاً (arabic-invoice-mcp-ts/dist) — لا نسخة المصدر. تُفحص هنا عمداً: من ينشر مقياساً للصحّة يبدأ بنفسه",
     local: true,
     // يُحمَّل ديناميكياً حتى لا يُسقط غيابُ dist المقياسَ كله
     run: null,
@@ -145,7 +145,7 @@ async function loadOwnPackage() {
 
 const results = [];
 for (const engine of ENGINES) {
-  const loaded = engine.id === "mutawafiq-npm"
+  const loaded = engine.id === "mutawafiq-ts"
     ? await loadOwnPackage()
     : engine.local ? { run: engine.run } : await loadRemote(engine);
   if (loaded.skipped) {
@@ -171,16 +171,16 @@ for (const engine of ENGINES) {
 
 // ── الحارس: **كل** محرّك نملكه يجب أن يجتاز كل حالة ─────────────────────
 //
-// يشمل الحزمة المنشورة على npm عمداً. فحين قِستُها أول مرة كانت **19/50
-// (38%)** — أفضل من أضعف منافس بـ16 نقطة فقط، ونحن على وشك نشر مقياسٍ
-// للصحّة النحوية. نشرُ المقياس حينها كان كذباً بالإغفال.
+// يشمل **البناء المشحون** عمداً — لا نسخة المصدر. فحين قِستُه أول مرة كان
+// **19/50 (38%)** — أفضل من أضعف منافس بـ16 نقطة فقط، ونحن على وشك نشر
+// مقياسٍ للصحّة النحوية. نشرُ المقياس حينها كان كذباً بالإغفال.
 // وبوابة claims_lint لم تكن لتمسكه: ذاك انحراف **صحّة** لا انحراف **ادعاء**.
 //
 // **التخطّي ليس إخفاقاً هنا.** في المستودع العام لا يُحفظ مجلد dist (وهذا
-// صواب)، فيتخطّى المشغّل حزمةَ npm ويكمل — والمشغّل أداة عامة لا بوابة
+// صواب)، فيتخطّى المشغّل هذا المدخل ويكمل — والمشغّل أداة عامة لا بوابة
 // إصدار. أمّا الحارس الذي يمنع إصدارَنا نحن فمكانه الاختبار:
-// `tests/no-drift.test.mjs` يفرض أن تكون الحزمة قد فُحصت واجتازت.
-const OURS = ["mutawafiq", "mutawafiq-npm"];
+// `tests/no-drift.test.mjs` يفرض أن يكون البناء قد فُحص واجتاز.
+const OURS = ["mutawafiq", "mutawafiq-ts"];
 const failing = results.filter(r => OURS.includes(r.id) && !r.skipped && r.fail > 0);
 if (failing.length) {
   console.error("\n✖ محرّك من محرّكاتنا أخفق — لا يُنشر مقياس قبل حسمه:\n");
