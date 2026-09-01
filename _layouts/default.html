@@ -1,14 +1,8 @@
 <!DOCTYPE html>
 <!--
-  قالبُ الصفحة الأولى.
-
-  القالب الافتراضي لـGitHub Pages يُخرج `<html lang="en-US">` بلا `dir`،
-  وعنواناً أوّلَ هو **اسم المستودع** — على صفحةٍ محتواها عربي بالكامل.
-  فالنصّ يُحاذى يساراً، وعلاماتُ الترقيم تقع في غير موضعها، وأوّل ما يقرؤه
-  الزائر «arabic-invoice-mcp» لا ما تفعله الأدوات.
-
-  وهذا القالب يملك الثلاثة: اللغة، والاتجاه، والعنوان — ويضيف سبيلَ تواصل،
-  فقد كانت الصفحة الأولى وحدها بلا واحد بينما بقيةُ الأسطح السبعة فيها.
+  قالبُ الصفحة الأولى: لغةٌ عربية واتجاهٌ يميني وعنوانٌ يصف الأدوات — لا
+  اسمَ المستودع. والقالب الافتراضي كان يُخالف الثلاثة. المصدر في مستودع
+  العمل تحت `pages/`، ويُنسخ إلى الجذر هنا.
 -->
 <html lang="{{ site.lang | default: 'ar' }}" dir="rtl">
 <head>
@@ -60,6 +54,8 @@
   blockquote{margin:1rem 0;padding:.6rem 1rem;border-inline-start:3px solid var(--accent);
              background:var(--card);border-radius:0 8px 8px 0;color:var(--muted)}
   hr{border:none;border-top:1px solid var(--line);margin:2rem 0}
+  /* الملفّ يفصل بـ`---` ثم يأتي عنوانٌ له حدٌّ علوي، فيظهر خطّان. */
+  hr + h2{border-top:none;padding-top:0;margin-top:1rem}
   img{max-width:100%;height:auto}
   .contact{background:var(--ok-bg);border:1px solid var(--accent);border-radius:10px;
            padding:1rem 1.2rem;margin:2.5rem 0 0}

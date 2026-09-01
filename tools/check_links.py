@@ -43,13 +43,24 @@ def strip_code(text: str) -> str:
     return INLINE_CODE.sub(" ", FENCED.sub(" ", text))
 
 
+#: تعبيرُ قالبٍ لا مسارُ ملف: Liquid في قوالب Jekyll (`{{ … }}` و`{% … %}`)
+#: وقالبُ جافاسكربت النصّي (`${…}`). يُحلّ عند البناء، فلا وجود له على القرص.
+TEMPLATE = re.compile(r"\{\{|\{%|\$\{")
+
+
 def internal_links(text: str):
     text = strip_code(text)
     for pattern in (MD_LINK, HTML_HREF):
         for m in pattern.finditer(text):
             target = m.group(1).strip()
-            if target and not target.startswith(EXTERNAL):
-                yield target
+            if not target or target.startswith(EXTERNAL):
+                continue
+            # أُضيف بعد أن أفشل الحارسُ `href="{{ site.url }}{{ site.baseurl }}/"`
+            # في قالب Jekyll — وهو صحيح، ويصير عنواناً كاملاً بعد البناء.
+            # وحارسٌ يُفشل الصواب يُكسب الخطأ ثقته حين يمرّ.
+            if TEMPLATE.search(target):
+                continue
+            yield target
 
 
 def check() -> list[str]:
