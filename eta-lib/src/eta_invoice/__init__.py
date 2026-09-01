@@ -24,6 +24,12 @@ from .serialization import (
     load_document,
     serialize_document,
 )
+from .serialization_xml import (
+    canonical_hash_xml,
+    escape_quotes,
+    load_xml_document,
+    serialize_xml_document,
+)
 from .validation import (
     UNRESOLVED,
     Finding,
@@ -39,6 +45,11 @@ __all__ = [
     "dump_document",
     "serialize_document",
     "canonical_hash",
+    # التسلسل والتجزئة — XML (خوارزمية مختلفة عن JSON)
+    "load_xml_document",
+    "serialize_xml_document",
+    "canonical_hash_xml",
+    "escape_quotes",
     # التحقق
     "validate_document",
     "format_report",
