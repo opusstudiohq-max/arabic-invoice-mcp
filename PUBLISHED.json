@@ -11,7 +11,8 @@
     "arabic-tafgeet",
     "nasq",
     "fatura",
-    "invoice-tool"
+    "invoice-tool",
+    "pdf-benchmark"
   ],
   "npm": [],
   "pypi": [],
@@ -53,6 +54,12 @@
       "url": "https://opusstudiohq-max.github.io/arabic-invoice-mcp/robots.txt",
       "published_on": "2026-09-01",
       "source": "المستودع العام"
+    },
+    {
+      "name": "مقياس النصّ العربي في PDF",
+      "url": "https://opusstudiohq-max.github.io/arabic-invoice-mcp/pdf/",
+      "published_on": "2026-09-01",
+      "source": "pdf-benchmark/"
     }
   ],
   "github_repos": [
