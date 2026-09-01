@@ -676,3 +676,33 @@ a:hover { text-decoration: underline; }
 .phase2-notice strong { color: var(--clr-warning); display: block; margin-bottom: 0.5rem; font-size: 1.02rem; }
 .phase2-notice p { color: var(--clr-text-muted); font-size: 0.88rem; line-height: 1.8; margin-bottom: 0.5rem; }
 .phase2-notice p:last-child { margin-bottom: 0; }
+
+/* ---------- صفّ التواصل ---------- */
+/* العنوان **نصٌّ ظاهر** لا رابطٌ فقط: من يستعمل بريده عبر المتصفح لا يفتح
+   له `mailto:` شيئاً، فيبقى بلا سبيل. والصفّ يلتفّ على الشاشات الضيقة. */
+.contact-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.contact-mail {
+  direction: ltr;
+  unicode-bidi: isolate;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.7rem;
+  border: 1px dashed var(--clr-border, rgba(148, 163, 184, 0.4));
+  border-radius: 6px;
+  user-select: all;
+}
+
+.btn--ghost {
+  background: transparent;
+  border: 1px solid var(--clr-border, rgba(148, 163, 184, 0.4));
+  color: inherit;
+}
+
+.btn--ghost:hover { border-color: rgba(34, 197, 94, 0.6); }

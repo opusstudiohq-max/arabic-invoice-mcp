@@ -194,49 +194,90 @@
       html += '</tbody></table></details>';
     }
 
-    // Lead capture (show only if there are errors)
-    if (!result.valid) {
-      const failedList = result.checks
-        .filter((c) => !c.passed)
-        .map((c) => `- ${c.field}: ${c.risk || 'لم يجتز'}`)
-        .join('\n');
-      if (FORM_ENDPOINT) {
-        html += `
-          <div class="card lead-card" style="margin-top: 2rem;">
-            <div class="card__title"><span class="icon">📧</span> أرسل لي التقرير الكامل</div>
-            <p style="color: var(--clr-text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
-              احصل على تقرير مفصل بالحلول + دليل إصلاح خطوة بخطوة على إيميلك.
-            </p>
-            <form class="lead-form" action="${FORM_ENDPOINT}" method="POST" id="lead-form">
-              <input type="hidden" name="_subject" value="طلب تقرير ZATCA">
-              <input type="hidden" name="score" value="${result.score}/${result.total}">
-              <input type="email" name="email" placeholder="بريدك الإلكتروني" required>
-              <button type="submit" class="btn btn--primary">أرسل</button>
-            </form>
-            <p style="font-size: 0.75rem; color: var(--clr-text-dim); margin-top: 0.5rem;">لن نشارك بريدك مع أي طرف ثالث.</p>
-          </div>
-        `;
-      } else {
-        const subject = encodeURIComponent('طلب مراجعة فنية — نتيجة الفحص البنيوي');
-        const body = encodeURIComponent(
-          `نتيجة الفحص: ${result.score}/${result.total}\n\nالمشاكل:\n${failedList}\n\nأرغب في خطة إصلاح مجانية.`
-        );
-        html += `
-          <div class="card lead-card" style="margin-top: 2rem; text-align: center;">
-            <div class="card__title"><span class="icon">🛠️</span> ظهرت ملاحظات بنيوية — يمكننا مساعدتك في إصلاحها</div>
-            <p style="color: var(--clr-text-muted); font-size: 0.9rem; margin-bottom: 1rem;">
-              نبني تكاملات فوترة إلكترونية ونصلح التكاملات المكسورة — عمل هندسي بنطاق وسعر واضحين.
-            </p>
-            <a class="btn btn--primary" href="mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}">
-              📧 أرسل التقرير واطلب خطة الإصلاح المجانية
-            </a>
-          </div>
-        `;
-      }
-    }
+    html += contactCard(result);
 
     resultsContainer.innerHTML = html;
   }
+
+  /**
+   * بطاقة التواصل.
+   *
+   * ### عيبان كانا هنا، وكلاهما يُفقد اتصالاً
+   *
+   * ① **كانت تظهر عند الإخفاق وحده** (`if (!result.valid)`). فمن مرّ رمزُه
+   *    5/5 لم يجد سبيلاً للتواصل أصلاً — ونصفُ الزوّار كذلك، وفيهم من
+   *    فريقُه كفءٌ وهم أولى من يُحادَث.
+   *
+   * ② **`mailto:` وحده، والبريد داخل `href` لا نصّاً.** ومن يستعمل بريده
+   *    عبر المتصفح — وهم الأكثر — ينقر فلا يحدث شيء، ولا يجد عنواناً
+   *    ينسخه. أي أن القمع كلّه يعمل ثم يسقط في خطوته الأخيرة بصمت.
+   *
+   * فصار العنوان **ظاهراً نصّاً** ومعه زرّ نسخ، والبطاقة تُعرض في الحالين
+   * بنصّين مختلفين: لا تُخترع مشكلةٌ لمن رمزُه سليم.
+   */
+  function contactCard(result) {
+    const ok = result.valid;
+    const failedList = (result.checks || [])
+      .filter((c) => !c.passed)
+      .map((c) => `- ${c.field}: ${c.risk || 'لم يجتز'}`)
+      .join('\n');
+
+    const subject = encodeURIComponent(
+      ok ? 'سؤال عن الفوترة الإلكترونية' : 'طلب مراجعة فنية — نتيجة الفحص البنيوي');
+    const body = encodeURIComponent(
+      ok
+        ? `نتيجة الفحص: ${result.score}/${result.total} — سليم بنيوياً.\n\nسؤالي:\n`
+        : `نتيجة الفحص: ${result.score}/${result.total}\n\nالملاحظات:\n${failedList}\n\n`);
+
+    const title = ok
+      ? '<span class="icon">✅</span> بنيةُ رمزك سليمة — وإن كان لديك سؤال'
+      : '<span class="icon">🛠️</span> ظهرت ملاحظات بنيوية — يمكننا مساعدتك في إصلاحها';
+
+    const lede = ok
+      ? 'لا حاجة لك بنا الآن. وإن واجهتك مسألةٌ في التكامل مع منصة «فاتورة» — التوقيع، أو الإرسال، أو رفضٌ لا تفهم سببه — فاكتب لنا.'
+      : 'نبني تكاملات فوترة إلكترونية ونصلح التكاملات المكسورة — عمل هندسي بنطاق وسعر واضحين.';
+
+    return `
+      <div class="card lead-card" style="margin-top: 2rem;">
+        <div class="card__title">${title}</div>
+        <p style="color: var(--clr-text-muted); font-size: 0.9rem; margin-bottom: 1rem;">${lede}</p>
+        <div class="contact-row">
+          <a class="btn btn--primary" href="mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}">
+            📧 افتح بريدك برسالةٍ جاهزة
+          </a>
+          <span class="contact-mail" id="contact-mail">${CONTACT_EMAIL}</span>
+          <button type="button" class="btn btn--ghost" id="copy-mail"
+                  data-mail="${CONTACT_EMAIL}">نسخ العنوان</button>
+        </div>
+        <p style="font-size: 0.75rem; color: var(--clr-text-dim); margin-top: 0.75rem;">
+          العنوان مكتوبٌ أعلاه لمن يستعمل بريده عبر المتصفح، فلا يعتمد على زرٍّ قد لا يعمل عنده.
+        </p>
+      </div>
+    `;
+  }
+
+  /** نسخُ العنوان — مع بديلٍ لمن لا يمنح متصفحُه صلاحية الحافظة. */
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('#copy-mail');
+    if (!btn) return;
+    const mail = btn.dataset.mail;
+    try {
+      await navigator.clipboard.writeText(mail);
+      btn.textContent = 'نُسخ ✓';
+    } catch {
+      // الحافظة محجوبة (سياق غير آمن أو رفضٌ) — يُحدَّد النصّ ليَنسخه المستعمل
+      const el = document.getElementById('contact-mail');
+      if (el) {
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      }
+      btn.textContent = 'حُدِّد — انسخه';
+    }
+    setTimeout(() => { btn.textContent = 'نسخ العنوان'; }, 2500);
+  });
 
   function showFatalError(message, hint) {
     resultsSection.classList.add('visible');
