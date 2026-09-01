@@ -221,6 +221,13 @@ def scan() -> list[tuple[str, int, str, str]]:
 
 TEST_COUNT_RE = re.compile(r"(\d{2,4})\s*(?:اختبار|اختباراً|اختبارًا|automated tests|tests)")
 
+#: سطرٌ يُسمّي حزمةً بعينها — فعدده يخصّها لا يخصّ المشروع.
+NAMES_A_PACKAGE = re.compile(
+    r"`[\w./-]+/`"                        # مسار بين علامتَي كود: `fatura/`
+    r"|\b(?:nasq|fatura|eta-lib|python-lib|typescript-lib|arabic-text"
+    r"|invoice-pdf|arabic-invoice-mcp|tafgeet-benchmark|مُتوافِق)\b"
+)
+
 
 # حزمٌ لكلٍّ منها حزمة اختبارات مستقلة وعددٌ خاص. عدُّها لا يُقارن بعدّ
 # المشروع ولا بعدّ أختها — يحرسه اختبارٌ **داخلها** يقرأ رقم README ويقارنه
@@ -251,11 +258,17 @@ def check_test_counts(expected: int | None = None) -> list[str]:
             text = path.read_text(encoding="utf-8")
         except (UnicodeDecodeError, OSError):
             continue
-        for m in TEST_COUNT_RE.finditer(text):
-            n = int(m.group(1))
-            if n < 20:          # أرقام صغيرة غالباً ليست عدّ حزمة اختبارات
-                continue
-            found.setdefault(n, []).append(rel)
+        for line in text.splitlines():
+            for m in TEST_COUNT_RE.finditer(line):
+                n = int(m.group(1))
+                if n < 20:          # أرقام صغيرة غالباً ليست عدّ حزمة اختبارات
+                    continue
+                # عددٌ منسوبٌ إلى حزمة بعينها في السطر نفسه ليس ادعاءً عن
+                # المشروع. صفحةٌ تعدّد حزمها في جدول تقول «38» لهذه و«183»
+                # لتلك — وكلاهما صواب. وقاعدةٌ تُفشل الصواب تُكسب الخطأ ثقتها.
+                if NAMES_A_PACKAGE.search(line):
+                    continue
+                found.setdefault(n, []).append(rel)
 
     problems: list[str] = []
     if len(found) > 1:
@@ -392,6 +405,50 @@ def check_distribution_claims(registry_path: Path | None = None) -> list[str]:
     return problems
 
 
+def check_package_dependencies(registry_path: Path | None = None) -> list[str]:
+    """
+    تبعيةٌ باسمٍ من أسمائنا وبمدى نسخٍ تعني «هذه على npm» — وهي إن لم تكن
+    منشورة **تكسر `npm install` عند كل من ينسخ المستودع**.
+
+    وقد وقعت: `fatura` أعلنت `"nasq": "^0.1.0"` ولم يظهر شيء، لأن وصلةً
+    رمزية متبقّية من تثبيتٍ سابق كانت تحلّها عندنا وحدنا. والتصريح الصادق
+    `file:../…` — أو النشرُ الفعلي.
+
+    ولا تُفحص هنا إلا **أسماؤنا**: `"pdf-lib": "^1.17.1"` تبعيةٌ سليمة.
+    """
+    import json
+
+    registry_path = registry_path or ROOT / "PUBLISHED.json"
+    if not registry_path.exists():
+        return [f"سجل النشر {registry_path.name} غير موجود"]
+    reg = json.loads(registry_path.read_text(encoding="utf-8"))
+    ours = {n.lower() for n in reg.get("our_names", [])}
+    published = {e.get("name", "").lower() for e in reg.get("npm", [])}
+
+    problems: list[str] = []
+    for folder, subdirs, files in os.walk(ROOT):
+        here = Path(folder)
+        subdirs[:] = [d for d in subdirs if d not in PRUNED_DIRS]
+        if "package.json" not in files:
+            continue
+        path = here / "package.json"
+        try:
+            manifest = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        rel = path.relative_to(ROOT).as_posix()
+        for section in ("dependencies", "devDependencies", "peerDependencies"):
+            for name, spec in (manifest.get(section) or {}).items():
+                if name.lower() not in ours or name.lower() in published:
+                    continue
+                if not str(spec).startswith(("file:", "link:", "workspace:", "portal:")):
+                    problems.append(
+                        f"{rel} يعلن «{name}»: «{spec}» — والحزمة ليست على npm، "
+                        f"فـ`npm install` نظيف يفشل. استعمل `file:` أو انشرها"
+                    )
+    return problems
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description="فحص الادعاءات المحظورة في الأصول العامة")
     ap.add_argument("--quiet", action="store_true", help="مخرجات مختصرة")
@@ -404,7 +461,7 @@ def main() -> int:
     hits = scan()
     count_problems = check_test_counts(args.expect_tests)
     facts_problems = [] if args.skip_facts else check_facts_registry()
-    dist_problems = check_distribution_claims()
+    dist_problems = check_distribution_claims() + check_package_dependencies()
     if dist_problems:
         print("claims-lint: ادعاء توزيع بلا سجلّ نشر (PUBLISHED.json)\n")
         for pr in dist_problems:

@@ -6,7 +6,7 @@
 
 </div>
 
-**TypeScript port** of [arabic-invoice-mcp (Python)](../arabic-invoice-mcp/) — 6 core tools compatible with the Python version.
+**TypeScript port** of [arabic-invoice-mcp (Python)](../python-lib/) — 6 core tools compatible with the Python version.
 
 ## ✨ المميزات
 

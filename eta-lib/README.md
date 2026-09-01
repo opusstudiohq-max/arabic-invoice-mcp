@@ -17,7 +17,7 @@
 
 **والوضع النظامي مفتوح لهذا بالذات:** المصلحة تخاطب «**مطوري الممولين**»
 نصاً في أدلتها، وترخيص «مقدم الخدمة» يخصّ طبقة الوساطة لا مورّدي البرمجيات.
-التفصيل في [`research/ETA-LEGAL-CLEARANCE.md`](../research/ETA-LEGAL-CLEARANCE.md).
+التفصيل في [`research/ETA-LEGAL-CLEARANCE.md`](https://github.com/opusstudiohq-max/arabic-invoice-mcp).
 
 ---
 

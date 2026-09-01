@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>طباعة الشيكات بالتفقيط العربي الصحيح — مُتوافِق</title>
+<meta name="description" content="أداة تطبع الشيكات وتفقّط المبلغ بالعربية بنحو صحيح. تعمل داخل متصفحك بالكامل — بلا تثبيت، وبلا إنترنت، ولا تغادر بياناتك جهازك.">
+<style>
+  :root{
+    --bg:#f6f7f9; --panel:#fff; --ink:#16202b; --muted:#5d6b7a;
+    --line:#dde3ea; --accent:#0a7d5a; --accent-soft:#e6f4ef; --warn:#8a5a00;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font-family:"Segoe UI","Noto Naskh Arabic",Tahoma,sans-serif;line-height:1.6}
+  header{background:var(--panel);border-bottom:1px solid var(--line);padding:14px 20px}
+  header h1{margin:0;font-size:1.15rem}
+  header p{margin:4px 0 0;color:var(--muted);font-size:.85rem}
+  .badge{display:inline-block;background:var(--accent-soft);color:var(--accent);
+         border-radius:99px;padding:2px 10px;font-size:.75rem;font-weight:600;margin-inline-start:8px}
+  main{display:grid;grid-template-columns:minmax(300px,340px) 1fr;gap:18px;padding:18px;align-items:start}
+  @media(max-width:900px){main{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+  .panel h2{margin:0 0 10px;font-size:.95rem;color:var(--muted);font-weight:600}
+  label{display:block;font-size:.82rem;color:var(--muted);margin:10px 0 3px}
+  input,select,button{font:inherit;width:100%;padding:7px 9px;border:1px solid var(--line);
+        border-radius:7px;background:#fff;color:var(--ink)}
+  input[type=checkbox]{width:auto;margin-inline-end:6px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  button{cursor:pointer;background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+  button.ghost{background:#fff;color:var(--ink);border-color:var(--line);font-weight:500}
+  .words{background:var(--accent-soft);border:1px solid #cfe7dd;border-radius:8px;
+         padding:9px 11px;margin-top:10px;font-size:.95rem;min-height:2.6em}
+  .note{font-size:.76rem;color:var(--muted);margin-top:8px}
+  .warn{font-size:.78rem;color:var(--warn);background:#fff8e8;border:1px solid #f0e0b8;
+        border-radius:8px;padding:8px 10px;margin-top:10px}
+  .stage{background:#8d99a6;border-radius:10px;padding:22px;overflow:auto;display:flex;justify-content:center}
+  #sheet{position:relative;background:#fff no-repeat center/100% 100%;
+         box-shadow:0 4px 18px rgba(0,0,0,.25);flex:none}
+  .fld{position:absolute;white-space:nowrap;cursor:grab;
+       font-family:"Noto Naskh Arabic","Segoe UI",serif;transform:translateY(-50%);
+       padding:0 .5mm;border:.3mm dashed transparent;user-select:none;touch-action:none}
+  .fld:hover{border-color:#9bb}
+  .fld.sel{border-color:var(--accent);background:rgba(10,125,90,.07)}
+  .fld.empty{color:#b6c0ca;font-style:italic}
+  #hint{font-size:.8rem;color:var(--muted);margin-top:10px;text-align:center}
+  .ok{color:var(--accent);font-size:.8rem;min-height:1.2em}
+
+  @media print{
+    @page{margin:0}
+    body{background:#fff}
+    header,.panel,#hint,.stage{all:unset}
+    header,.panel,#hint{display:none!important}
+    main{display:block;padding:0}
+    .stage{display:block;padding:0;background:#fff}
+    #sheet{box-shadow:none;background-image:none!important;margin:0}
+    .fld{border-color:transparent!important;background:none!important}
+    .fld.empty{display:none}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🖋️ طباعة الشيكات بالتفقيط العربي الصحيح <span class="badge">مُتوافِق</span></h1>
+  <p>يعمل داخل متصفحك بالكامل — بلا تثبيت، وبلا إنترنت، <strong>ولا تغادر بياناتك جهازك</strong>. افتح تبويب الشبكة وتحقّق بنفسك.</p>
+</header>
+
+<main>
+  <div>
+    <div class="panel">
+      <h2>بيانات الشيك</h2>
+
+      <label for="amount">المبلغ</label>
+      <div class="row">
+        <input id="amount" type="text" inputmode="decimal" placeholder="مثال: 1250.75" autocomplete="off">
+        <select id="currency">
+          <option value="EGP" selected>جنيه مصري</option>
+          <option value="SAR">ريال سعودي</option>
+          <option value="AED">درهم إماراتي</option>
+          <option value="KWD">دينار كويتي</option>
+          <option value="BHD">دينار بحريني</option>
+          <option value="QAR">ريال قطري</option>
+          <option value="OMR">ريال عُماني</option>
+          <option value="USD">دولار أمريكي</option>
+        </select>
+      </div>
+
+      <div class="words" id="wordsPreview">—</div>
+
+      <label for="payee">المستفيد</label>
+      <input id="payee" type="text" placeholder="اسم المستفيد" autocomplete="off">
+      <label style="display:flex;align-items:center;margin-top:6px">
+        <input id="orOrder" type="checkbox"> إضافة «أو لأمره»
+      </label>
+
+      <label for="date">التاريخ</label>
+      <input id="date" type="date">
+    </div>
+
+    <div class="panel" style="margin-top:14px">
+      <h2>القالب والمعايرة</h2>
+
+      <label for="templateSelect">القالب</label>
+      <select id="templateSelect"></select>
+
+      <div class="warn">
+        القوالب المدمجة <strong>نقاط بداية لا مقاسات رسمية</strong> — مقاس الشيك
+        يختلف بين بنك وآخر. ارفع صورة شيكك، اسحب الحقول فوقها، ثم احفظ القالب باسمك.
+      </div>
+
+      <label for="bgFile">صورة الشيك للمعايرة (لا تُطبع ولا تُرفع)</label>
+      <input id="bgFile" type="file" accept="image/*">
+      <span id="bgImage" data-src=""></span>
+      <button class="ghost" id="clearBg" style="margin-top:6px">إزالة الصورة</button>
+
+      <div class="row" style="margin-top:10px">
+        <div><label for="offsetX">إزاحة أفقية (مم)</label><input id="offsetX" type="number" value="0" step="0.5"></div>
+        <div><label for="offsetY">إزاحة رأسية (مم)</label><input id="offsetY" type="number" value="0" step="0.5"></div>
+      </div>
+      <p class="note">لو خرجت الطباعة مزاحة عن مكانها، صحّحها بالإزاحة بدل تحريك كل حقل.</p>
+
+      <label for="wrapAt">أقصى طول لسطر التفقيط (حرفاً)</label>
+      <input id="wrapAt" type="number" value="60" min="20" max="120">
+
+      <label for="templateName">حفظ القالب باسم</label>
+      <div class="row">
+        <input id="templateName" type="text" placeholder="الأهلي — دفتر 2026">
+        <button id="saveTemplate">حفظ</button>
+      </div>
+      <div class="ok" id="saveMsg"></div>
+      <button class="ghost" id="deleteTemplate" style="margin-top:6px">حذف القالب المحدد</button>
+
+      <div class="row" style="margin-top:10px">
+        <button class="ghost" id="exportTemplates">تصدير القوالب</button>
+        <label class="ghost" style="margin:0;display:block">
+          <span style="display:block;text-align:center;border:1px solid var(--line);border-radius:7px;padding:7px;cursor:pointer">استيراد</span>
+          <input id="importTemplates" type="file" accept="application/json" style="display:none">
+        </label>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:14px">
+      <button id="printBtn">🖨️ طباعة الشيك</button>
+      <p class="note">اطبع أولاً على ورقة عادية وضعها فوق الشيك أمام الضوء للتأكد من المحاذاة.</p>
+    </div>
+  </div>
+
+  <div>
+    <div class="stage"><div id="sheet"></div></div>
+    <p id="hint"></p>
+  </div>
+</main>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
