@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>طباعة الشيكات بالتفقيط العربي الصحيح — مُتوافِق</title>
+<meta name="description" content="أداة تطبع الشيكات وتفقّط المبلغ بالعربية بنحو صحيح. تعمل داخل متصفحك بالكامل — بلا تثبيت، وبلا إنترنت، ولا تغادر بياناتك جهازك.">
+<style>
+  :root{
+    --bg:#f6f7f9; --panel:#fff; --ink:#16202b; --muted:#5d6b7a;
+    --line:#dde3ea; --accent:#0a7d5a; --accent-soft:#e6f4ef; --warn:#8a5a00;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font-family:"Segoe UI","Noto Naskh Arabic",Tahoma,sans-serif;line-height:1.6}
+  header{background:var(--panel);border-bottom:1px solid var(--line);padding:14px 20px}
+  header h1{margin:0;font-size:1.15rem}
+  header p{margin:4px 0 0;color:var(--muted);font-size:.85rem}
+  .badge{display:inline-block;background:var(--accent-soft);color:var(--accent);
+         border-radius:99px;padding:2px 10px;font-size:.75rem;font-weight:600;margin-inline-start:8px}
+  main{display:grid;grid-template-columns:minmax(300px,340px) 1fr;gap:18px;padding:18px;align-items:start}
+  @media(max-width:900px){main{grid-template-columns:1fr}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+  .panel h2{margin:0 0 10px;font-size:.95rem;color:var(--muted);font-weight:600}
+  label{display:block;font-size:.82rem;color:var(--muted);margin:10px 0 3px}
+  input,select,button{font:inherit;width:100%;padding:7px 9px;border:1px solid var(--line);
+        border-radius:7px;background:#fff;color:var(--ink)}
+  input[type=checkbox]{width:auto;margin-inline-end:6px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  button{cursor:pointer;background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+  button.ghost{background:#fff;color:var(--ink);border-color:var(--line);font-weight:500}
+  .words{background:var(--accent-soft);border:1px solid #cfe7dd;border-radius:8px;
+         padding:9px 11px;margin-top:10px;font-size:.95rem;min-height:2.6em}
+  .note{font-size:.76rem;color:var(--muted);margin-top:8px}
+  .warn{font-size:.78rem;color:var(--warn);background:#fff8e8;border:1px solid #f0e0b8;
+        border-radius:8px;padding:8px 10px;margin-top:10px}
+  .stage{background:#8d99a6;border-radius:10px;padding:22px;overflow:auto;display:flex;justify-content:center}
+  #sheet{position:relative;background:#fff no-repeat center/100% 100%;
+         box-shadow:0 4px 18px rgba(0,0,0,.25);flex:none}
+  .fld{position:absolute;white-space:nowrap;cursor:grab;
+       font-family:"Noto Naskh Arabic","Segoe UI",serif;transform:translateY(-50%);
+       padding:0 .5mm;border:.3mm dashed transparent;user-select:none;touch-action:none}
+  .fld:hover{border-color:#9bb}
+  .fld.sel{border-color:var(--accent);background:rgba(10,125,90,.07)}
+  .fld.empty{color:#b6c0ca;font-style:italic}
+  #hint{font-size:.8rem;color:var(--muted);margin-top:10px;text-align:center}
+  .ok{color:var(--accent);font-size:.8rem;min-height:1.2em}
+
+  @media print{
+    @page{margin:0}
+    body{background:#fff}
+    header,.panel,#hint,.stage{all:unset}
+    header,.panel,#hint{display:none!important}
+    main{display:block;padding:0}
+    .stage{display:block;padding:0;background:#fff}
+    #sheet{box-shadow:none;background-image:none!important;margin:0}
+    .fld{border-color:transparent!important;background:none!important}
+    .fld.empty{display:none}
+  }
+</style>
+<meta name="build" content="single-file">
+</head>
+<body>
+
+<header>
+  <h1>🖋️ طباعة الشيكات بالتفقيط العربي الصحيح <span class="badge">مُتوافِق</span></h1>
+  <p>يعمل داخل متصفحك بالكامل — بلا تثبيت، وبلا إنترنت، <strong>ولا تغادر بياناتك جهازك</strong>. افتح تبويب الشبكة وتحقّق بنفسك.</p>
+</header>
+
+<main>
+  <div>
+    <div class="panel">
+      <h2>بيانات الشيك</h2>
+
+      <label for="amount">المبلغ</label>
+      <div class="row">
+        <input id="amount" type="text" inputmode="decimal" placeholder="مثال: 1250.75" autocomplete="off">
+        <select id="currency">
+          <option value="EGP" selected>جنيه مصري</option>
+          <option value="SAR">ريال سعودي</option>
+          <option value="AED">درهم إماراتي</option>
+          <option value="KWD">دينار كويتي</option>
+          <option value="BHD">دينار بحريني</option>
+          <option value="QAR">ريال قطري</option>
+          <option value="OMR">ريال عُماني</option>
+          <option value="USD">دولار أمريكي</option>
+        </select>
+      </div>
+
+      <div class="words" id="wordsPreview">—</div>
+
+      <label for="payee">المستفيد</label>
+      <input id="payee" type="text" placeholder="اسم المستفيد" autocomplete="off">
+      <label style="display:flex;align-items:center;margin-top:6px">
+        <input id="orOrder" type="checkbox"> إضافة «أو لأمره»
+      </label>
+
+      <label for="date">التاريخ</label>
+      <input id="date" type="date">
+    </div>
+
+    <div class="panel" style="margin-top:14px">
+      <h2>القالب والمعايرة</h2>
+
+      <label for="templateSelect">القالب</label>
+      <select id="templateSelect"></select>
+
+      <div class="warn">
+        القوالب المدمجة <strong>نقاط بداية لا مقاسات رسمية</strong> — مقاس الشيك
+        يختلف بين بنك وآخر. ارفع صورة شيكك، اسحب الحقول فوقها، ثم احفظ القالب باسمك.
+      </div>
+
+      <label for="bgFile">صورة الشيك للمعايرة (لا تُطبع ولا تُرفع)</label>
+      <input id="bgFile" type="file" accept="image/*">
+      <span id="bgImage" data-src=""></span>
+      <button class="ghost" id="clearBg" style="margin-top:6px">إزالة الصورة</button>
+
+      <div class="row" style="margin-top:10px">
+        <div><label for="offsetX">إزاحة أفقية (مم)</label><input id="offsetX" type="number" value="0" step="0.5"></div>
+        <div><label for="offsetY">إزاحة رأسية (مم)</label><input id="offsetY" type="number" value="0" step="0.5"></div>
+      </div>
+      <p class="note">لو خرجت الطباعة مزاحة عن مكانها، صحّحها بالإزاحة بدل تحريك كل حقل.</p>
+
+      <label for="wrapAt">أقصى طول لسطر التفقيط (حرفاً)</label>
+      <input id="wrapAt" type="number" value="60" min="20" max="120">
+
+      <label for="templateName">حفظ القالب باسم</label>
+      <div class="row">
+        <input id="templateName" type="text" placeholder="الأهلي — دفتر 2026">
+        <button id="saveTemplate">حفظ</button>
+      </div>
+      <div class="ok" id="saveMsg"></div>
+      <button class="ghost" id="deleteTemplate" style="margin-top:6px">حذف القالب المحدد</button>
+
+      <div class="row" style="margin-top:10px">
+        <button class="ghost" id="exportTemplates">تصدير القوالب</button>
+        <label class="ghost" style="margin:0;display:block">
+          <span style="display:block;text-align:center;border:1px solid var(--line);border-radius:7px;padding:7px;cursor:pointer">استيراد</span>
+          <input id="importTemplates" type="file" accept="application/json" style="display:none">
+        </label>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:14px">
+      <button id="printBtn">🖨️ طباعة الشيك</button>
+      <p class="note">اطبع أولاً على ورقة عادية وضعها فوق الشيك أمام الضوء للتأكد من المحاذاة.</p>
+    </div>
+  </div>
+
+  <div>
+    <div class="stage"><div id="sheet"></div></div>
+    <p id="hint"></p>
+  </div>
+</main>
+
+<script>
+"use strict";
+(function(){
+/**
+ * التفقيط العربي — محرّك مستقل يعمل في المتصفح بلا اعتماديات.
+ *
+ * **منقول عن نسخة بايثون المرجعية** في
+ * `arabic-invoice-mcp/src/arabic_invoice_mcp/server.py` (183 اختباراً).
+ *
+ * ⚠️ ملاحظة مكلفة: النقل الأول جرى عن نسخة TypeScript، فأنتج **215 اختلافاً
+ * من 540 حالة** — تلك النسخة مبسّطة وتفتقد التذكير/التأنيث، وإسقاط النون عند
+ * الإضافة، وجموع التكسير الصحيحة (تقول «دينارات» والصواب «دنانير»).
+ * `tests/parity.test.mjs` هو ما كشفها، ويحرس ضد عودتها.
+ *
+ * ما يميّز هذا المحرّك:
+ *   2 ريال        ← «ريالان»              مثنى، لا «اثنان ريال»
+ *   3 ريال        ← «ثلاثة ريالات»         جمع القلة
+ *   11 ريال       ← «أحد عشر ريالاً»       تمييز مفرد منصوب
+ *   103 ريال      ← «مائة وثلاثة ريالات»   التمييز يتبع آخر عدد معطوف
+ *   2000 جنيه     ← «ألفا جنيه»            إسقاط النون عند الإضافة
+ *   0.750 دينار   ← «سبعمائة وخمسون فلساً» ثلاث منازل للدينار
+ *   0.02 ريال     ← «هللتان»               مثنى المؤنث
+ */
+
+const ONES_M = [
+  "", "واحد", "اثنان", "ثلاثة", "أربعة", "خمسة", "ستة", "سبعة",
+  "ثمانية", "تسعة", "عشرة", "أحد عشر", "اثنا عشر", "ثلاثة عشر",
+  "أربعة عشر", "خمسة عشر", "ستة عشر", "سبعة عشر", "ثمانية عشر",
+  "تسعة عشر"
+];
+
+const ONES_F = [
+  "", "واحدة", "اثنتان", "ثلاث", "أربع", "خمس", "ست", "سبع",
+  "ثماني", "تسع", "عشر", "إحدى عشرة", "اثنتا عشرة", "ثلاث عشرة",
+  "أربع عشرة", "خمس عشرة", "ست عشرة", "سبع عشرة", "ثماني عشرة",
+  "تسع عشرة"
+];
+
+const TENS = [
+  "", "", "عشرون", "ثلاثون", "أربعون", "خمسون", "ستون",
+  "سبعون", "ثمانون", "تسعون"
+];
+
+const HUNDREDS = [
+  "", "مائة", "مئتان", "ثلاثمائة", "أربعمائة", "خمسمائة",
+  "ستمائة", "سبعمائة", "ثمانمائة", "تسعمائة"
+];
+
+const SCALES = [[1, ""], [1000, "ألف"], [1000000, "مليون"],
+                [1000000000, "مليار"], [1000000000000, "تريليون"]];
+
+const SCALE_PLURALS = {
+  "ألف": "آلاف", "مليون": "ملايين", "مليار": "مليارات", "تريليون": "تريليونات"
+};
+
+const IDAFA_DUALS = [
+  ["مئتان", "مئتا"], ["ألفان", "ألفا"], ["مليونان", "مليونا"],
+  ["ملياران", "مليارا"], ["تريليونان", "تريليونا"]
+];
+
+const CURRENCY_UNITS = {
+  EGP: { singular: "جنيه", dual: "جنيهان", plural: "جنيهات", fraction_singular: "قرش", fraction_plural: "قروش", decimals: 2, name: "جنيه مصري" },
+  SAR: { singular: "ريال", dual: "ريالان", plural: "ريالات", fraction_singular: "هللة", fraction_plural: "هللات", decimals: 2, name: "ريال سعودي" },
+  AED: { singular: "درهم", dual: "درهمان", plural: "دراهم", fraction_singular: "فلس", fraction_plural: "فلوس", decimals: 2, name: "درهم إماراتي" },
+  QAR: { singular: "ريال", dual: "ريالان", plural: "ريالات", fraction_singular: "درهم", fraction_plural: "دراهم", decimals: 2, name: "ريال قطري" },
+  USD: { singular: "دولار", dual: "دولاران", plural: "دولارات", fraction_singular: "سنت", fraction_plural: "سنتات", decimals: 2, name: "دولار أمريكي" },
+  KWD: { singular: "دينار", dual: "ديناران", plural: "دنانير", fraction_singular: "فلس", fraction_plural: "فلوس", decimals: 3, name: "دينار كويتي" },
+  BHD: { singular: "دينار", dual: "ديناران", plural: "دنانير", fraction_singular: "فلس", fraction_plural: "فلوس", decimals: 3, name: "دينار بحريني" },
+  OMR: { singular: "ريال", dual: "ريالان", plural: "ريالات", fraction_singular: "بيسة", fraction_plural: "بيسات", decimals: 3, name: "ريال عُماني" },
+};
+
+const CURRENCY_DECIMALS = Object.fromEntries(
+  Object.entries(CURRENCY_UNITS).map(([k, v]) => [k, v.decimals])
+);
+
+// ── الحساب العشري الدقيق ────────────────────────────────────────────────
+/**
+ * تقسيم المبلغ إلى (صحيح، كسر) **بحساب عشري نصّي لا عائم**.
+ *
+ * في شيكٍ لا يجوز أن يضيع قرش. و`(1250.75 - 1250) * 100` تساوي
+ * 74.99999999999997 في JS، و`(1.005).toFixed(2)` تعطي "1.00" لا "1.01".
+ * لذلك نقرأ الرقم كنصّ ونقرّب يدوياً بنصف-لأعلى — مطابقاً لـ
+ * `Decimal(str(x))` مع `ROUND_HALF_UP` في بايثون.
+ */
+function splitDecimal(value, decimals) {
+  let s = typeof value === "string" ? value.trim() : String(value);
+  if (/e/i.test(s)) s = Number(s).toFixed(Math.max(decimals + 2, 20));
+
+  const negative = s.startsWith("-");
+  if (negative || s.startsWith("+")) s = s.slice(1);
+
+  let [intStr = "0", fracStr = ""] = s.split(".");
+  intStr = intStr.replace(/^0+(?=\d)/, "") || "0";
+
+  // تقريب نصف-لأعلى عند المنزلة المطلوبة
+  let keep = fracStr.slice(0, decimals).padEnd(decimals, "0");
+  const nextDigit = fracStr.charAt(decimals);
+  if (nextDigit && nextDigit >= "5") {
+    let carried = (BigInt(intStr + (keep || "0")) + 1n).toString();
+    const width = intStr.length + decimals;
+    carried = carried.padStart(width, "0");
+    intStr = carried.slice(0, carried.length - decimals) || "0";
+    keep = decimals ? carried.slice(carried.length - decimals) : "";
+  }
+
+  return {
+    integerPart: Number(intStr),
+    decimalPart: decimals ? Number(keep) : 0,
+    negative,
+  };
+}
+
+// ── تحويل الأعداد ───────────────────────────────────────────────────────
+function convertHundreds(n, gender = "M") {
+  if (n === 0) return "";
+  const parts = [];
+  const h = Math.trunc(n / 100);
+  const remainder = n % 100;
+  if (h > 0) parts.push(HUNDREDS[h]);
+  if (remainder > 0) {
+    if (remainder < 20) {
+      parts.push((gender === "M" ? ONES_M : ONES_F)[remainder]);
+    } else {
+      const t = Math.trunc(remainder / 10);
+      const o = remainder % 10;
+      if (o > 0) {
+        let onesWord;
+        if (o === 1) onesWord = gender === "M" ? "واحد" : "إحدى";
+        else if (o === 2) onesWord = gender === "M" ? "اثنان" : "اثنتان";
+        else onesWord = (gender === "M" ? ONES_M : ONES_F)[o];
+        parts.push(`${onesWord} و${TENS[t]}`);
+      } else {
+        parts.push(TENS[t]);
+      }
+    }
+  }
+  return parts.join(" و");
+}
+
+function convertLessThanThousand(n, scaleWord, scaleValue, gender = "M") {
+  if (n === 0) return "";
+  const grpGender = scaleValue === 1 ? gender : "M";
+  let base = convertHundreds(n, grpGender);
+  if (scaleValue === 1) return base;
+  if (base === "مئتان") base = "مئتا";           // مئتا ألف — إسقاط النون بالإضافة
+  if (n === 1) return scaleWord;
+  if (n === 2) return `${scaleWord}ان`;
+  if (n >= 3 && n <= 10) return `${base} ${SCALE_PLURALS[scaleWord] || scaleWord + "ات"}`;
+  return `${base} ${scaleWord}`;
+}
+
+/** تحويل عدد صحيح إلى كلمات عربية. */
+function numberToArabicWords(n, gender = "M") {
+  if (typeof n !== "number" || !isFinite(n)) {
+    throw new Error("الرقم يجب أن يكون قيمة عددية محددة");
+  }
+  if (n === 0) return "صفر";
+  const isNegative = n < 0;
+  let num = Math.trunc(Math.abs(n));
+  if (num === 0) return "صفر";
+
+  const groups = [];
+  let scaleIdx = 0;
+  while (num > 0 && scaleIdx < SCALES.length) {
+    const group = num % 1000;
+    if (group > 0) {
+      const [scaleValue, scaleWord] = SCALES[scaleIdx];
+      groups.push(convertLessThanThousand(group, scaleWord, scaleValue, gender));
+    }
+    num = Math.trunc(num / 1000);
+    scaleIdx += 1;
+  }
+  groups.reverse();
+  const words = groups.filter(Boolean).join(" و");
+  return isNegative ? `سالب ${words}` : words;
+}
+
+// ── قواعد العملة ────────────────────────────────────────────────────────
+/** التاء المربوطة تدل على النصب فلا تُنوَّن؛ وغيرها يُنوَّن بالفتح. */
+function accusativeForm(word) {
+  return word.endsWith("ة") ? word : word + "اً";
+}
+
+/** إسقاط النون من المثنى عند الإضافة: ألفان → ألفا، مئتان → مئتا. */
+function adjustDualsForIdafa(words) {
+  for (const [dual, idafa] of IDAFA_DUALS) {
+    if (words.endsWith(dual)) return words.slice(0, -dual.length) + idafa;
+  }
+  return words;
+}
+
+/** بناء المثنى من المفرد: هللة → هللتان، فلس → فلسان. */
+function buildDual(singular, gender) {
+  return gender === "F" ? singular.slice(0, -1) + "تان" : singular + "ان";
+}
+
+function currencyGrammar(count, words, singular, dual, plural, gender) {
+  if (count === 1) return `${singular} ${gender === "F" ? "واحدة" : "واحد"}`;
+  if (count === 2) return dual;
+  if (count >= 3 && count <= 10) return `${words} ${plural}`;
+
+  // مضاعفات المائة تُضاف: «ألفا جنيه» لا «ألفان جنيهاً»
+  if (count % 100 === 0) return `${adjustDualsForIdafa(words)} ${singular}`;
+
+  // في العدد المعطوف يتبع التمييزُ آخرَ عدد: 103 → «مائة وثلاثة ريالات»
+  const remainder = count % 100;
+  if (remainder >= 3 && remainder <= 10) return `${words} ${plural}`;
+
+  return `${words} ${accusativeForm(singular)}`;
+}
+
+function formatFraction(decimalPart, fracGender, fracSing, fracPlural) {
+  const decWords = numberToArabicWords(decimalPart, fracGender);
+  return currencyGrammar(decimalPart, decWords, fracSing,
+                         buildDual(fracSing, fracGender), fracPlural, fracGender);
+}
+
+/**
+ * تفقيط مبلغ مالي بالعربية.
+ * @param {number|string} amount المبلغ — يُقبل نصّاً للحفاظ على الدقة العشرية
+ * @param {string} currency رمز العملة (EGP افتراضياً)
+ * @returns {string} النص المفقّط، أو رسالة خطأ عربية
+ */
+function tafgeet(amount, currency = "EGP") {
+  if (typeof currency !== "string") return "خطأ: رمز العملة يجب أن يكون نصاً";
+  const numeric = typeof amount === "string" ? Number(amount) : amount;
+  if (typeof numeric !== "number" || !isFinite(numeric)) {
+    return "خطأ: المبلغ يجب أن يكون رقماً محدداً";
+  }
+  if (!(currency in CURRENCY_UNITS)) return `عملة غير مدعومة: ${currency}`;
+
+  const unit = CURRENCY_UNITS[currency];
+  const { integerPart, decimalPart, negative } = splitDecimal(amount, unit.decimals);
+
+  const fracSing = unit.fraction_singular;
+  const fracGender = fracSing.endsWith("ة") ? "F" : "M";
+
+  if (integerPart === 0) {
+    if (decimalPart === 0) {
+      const zero = `صفر ${unit.singular}`;
+      return negative ? `سالب ${zero}` : zero;
+    }
+    const decOnly = formatFraction(decimalPart, fracGender, fracSing, unit.fraction_plural);
+    return negative ? `سالب ${decOnly}` : decOnly;
+  }
+
+  // وحدات العملة الرئيسية كلها مذكرة
+  const intWords = numberToArabicWords(integerPart, "M");
+  const intStr = currencyGrammar(integerPart, intWords, unit.singular,
+                                 unit.dual, unit.plural, "M");
+
+  if (decimalPart === 0) return negative ? `سالب ${intStr}` : intStr;
+
+  const decStr = formatFraction(decimalPart, fracGender, fracSing, unit.fraction_plural);
+  const result = `${intStr} و${decStr}`;
+  return negative ? `سالب ${result}` : result;
+}
+
+/** الصيغة التي تُكتب على الشيك: «فقط … لا غير». */
+function chequeWords(amount, currency = "EGP") {
+  const words = tafgeet(amount, currency);
+  if (words.startsWith("خطأ") || words.startsWith("عملة")) return words;
+  return `فقط ${words} لا غير`;
+}
+
+
+/**
+ * قوالب الشيكات — مقاسات وأماكن الحقول بالمليمتر.
+ *
+ * ⚠️ **صدق واجب:** لا نملك قياسات رسمية لشيكات البنوك، ومقاسات الشيك تختلف
+ * بين بنك وآخر بل بين دفتر وآخر. لذلك ما هنا **نقاط بداية** لا قوالب نهائية،
+ * والأداة تعتمد على **المعايرة**: يرفع المستخدم صورة شيكه، ويسحب الحقول
+ * فوقها، ويحفظ القالب باسمه. هذا أصدق، وأدقّ فعلياً، من ادّعاء قوالب جاهزة.
+ *
+ * الإحداثيات: x من **يمين** الشيك، y من **أعلاه**، بالمليمتر.
+ */
+
+const LAYOUTS = {
+  "eg-standard": {
+    name: "شيك مصري — مقاس شائع (نقطة بداية)",
+    width: 175, height: 80,
+    fields: {
+      date:        { x: 30,  y: 16, size: 3.6, label: "التاريخ" },
+      payee:       { x: 32,  y: 30, size: 4.0, label: "المستفيد" },
+      amountWords: { x: 32,  y: 42, size: 3.8, label: "المبلغ كتابةً" },
+      amountWords2:{ x: 20,  y: 50, size: 3.8, label: "تكملة المبلغ" },
+      amountDigits:{ x: 140, y: 40, size: 4.4, label: "المبلغ رقماً" },
+    },
+  },
+  "gulf-standard": {
+    name: "شيك خليجي — مقاس شائع (نقطة بداية)",
+    width: 180, height: 85,
+    fields: {
+      date:        { x: 28,  y: 18, size: 3.6, label: "التاريخ" },
+      payee:       { x: 34,  y: 33, size: 4.0, label: "المستفيد" },
+      amountWords: { x: 34,  y: 46, size: 3.8, label: "المبلغ كتابةً" },
+      amountWords2:{ x: 22,  y: 54, size: 3.8, label: "تكملة المبلغ" },
+      amountDigits:{ x: 145, y: 44, size: 4.4, label: "المبلغ رقماً" },
+    },
+  },
+  "a4-blank": {
+    name: "ورقة اختبار A4 (لضبط الطابعة قبل الشيك)",
+    width: 210, height: 100,
+    fields: {
+      date:        { x: 40,  y: 20, size: 4.0, label: "التاريخ" },
+      payee:       { x: 40,  y: 35, size: 4.4, label: "المستفيد" },
+      amountWords: { x: 40,  y: 50, size: 4.0, label: "المبلغ كتابةً" },
+      amountWords2:{ x: 25,  y: 58, size: 4.0, label: "تكملة المبلغ" },
+      amountDigits:{ x: 165, y: 48, size: 4.8, label: "المبلغ رقماً" },
+    },
+  },
+};
+
+const FIELD_ORDER = ["date", "payee", "amountWords", "amountWords2", "amountDigits"];
+
+/** نسخة عميقة — حتى لا يعدّل المستخدم القالب الأصلي. */
+function cloneLayout(key) {
+  return JSON.parse(JSON.stringify(LAYOUTS[key] ?? LAYOUTS["eg-standard"]));
+}
+
+
+/**
+ * أداة طباعة الشيكات — منطق الواجهة.
+ *
+ * مبدأ حاكم: **لا تغادر بيانات المستخدم متصفحه.** لا شبكة، لا تحليلات،
+ * لا رفع. ما يُحفظ محلياً هو **القوالب فقط** (مواضع الحقول)، ولا يُحفظ
+ * مبلغ ولا اسم مستفيد إطلاقاً — يمكن للمستخدم التحقق بفتح تبويب الشبكة.
+ */
+const STORE_KEY = "mutawafiq.cheque.templates.v1";
+const $ = (id) => document.getElementById(id);
+
+let layout = cloneLayout("eg-standard");
+let selected = null;
+
+// ── الحفظ المحلي (القوالب فقط) ──────────────────────────────────────────
+const loadStore = () => {
+  try { return JSON.parse(localStorage.getItem(STORE_KEY) || "{}"); }
+  catch { return {}; }
+};
+const saveStore = (s) => localStorage.setItem(STORE_KEY, JSON.stringify(s));
+
+function refreshTemplateList() {
+  const sel = $("templateSelect");
+  const saved = loadStore();
+  sel.innerHTML = "";
+  for (const [k, v] of Object.entries(LAYOUTS)) {
+    sel.append(new Option(v.name, "builtin:" + k));
+  }
+  for (const k of Object.keys(saved)) {
+    sel.append(new Option("💾 " + k, "saved:" + k));
+  }
+}
+
+// ── تقسيم التفقيط على سطرين دون قطع كلمة ────────────────────────────────
+function splitWords(text, maxChars) {
+  if (text.length <= maxChars) return [text, ""];
+  const words = text.split(" ");
+  let first = "";
+  for (const w of words) {
+    if ((first + " " + w).trim().length > maxChars) break;
+    first = (first + " " + w).trim();
+  }
+  return [first, text.slice(first.length).trim()];
+}
+
+// ── القيم الحالية ───────────────────────────────────────────────────────
+const DEFAULT_CURRENCY = "EGP";
+
+function readInputs() {
+  // احتياط: لو لم تُهيّأ القائمة بعد أو حملت قيمة غير معروفة، لا ننهار.
+  const picked = ($("currency").value || "").trim();
+  const currency = picked in CURRENCY_UNITS ? picked : DEFAULT_CURRENCY;
+  const raw = ($("amount").value || "").trim();
+  const words = raw ? chequeWords(raw, currency) : "";
+  const decimals = CURRENCY_UNITS[currency].decimals;
+  const num = Number(raw);
+  const digits = raw && isFinite(num)
+    ? num.toLocaleString("en-US", { minimumFractionDigits: decimals, maximumFractionDigits: decimals })
+    : "";
+  const [w1, w2] = splitWords(words, Number($("wrapAt").value) || 60);
+  const payeeRaw = ($("payee").value || "").trim();
+  return {
+    date: $("date").value ? formatDate($("date").value) : "",
+    payee: payeeRaw + ($("orOrder").checked && payeeRaw ? " أو لأمره" : ""),
+    amountWords: w1,
+    amountWords2: w2,
+    amountDigits: digits ? `${digits} #` : "",
+    _wordsFull: words,
+  };
+}
+
+function formatDate(iso) {
+  const [y, m, d] = iso.split("-");
+  return `${d} / ${m} / ${y}`;
+}
+
+// ── الرسم ───────────────────────────────────────────────────────────────
+function render() {
+  const sheet = $("sheet");
+  const vals = readInputs();
+  const offX = Number($("offsetX").value) || 0;
+  const offY = Number($("offsetY").value) || 0;
+
+  sheet.style.width = layout.width + "mm";
+  sheet.style.height = layout.height + "mm";
+  sheet.innerHTML = "";
+
+  const bg = $("bgImage").dataset.src;
+  sheet.style.backgroundImage = bg ? `url(${bg})` : "none";
+
+  for (const key of FIELD_ORDER) {
+    const f = layout.fields[key];
+    if (!f) continue;
+    const el = document.createElement("div");
+    el.className = "fld" + (selected === key ? " sel" : "");
+    el.dataset.key = key;
+    el.style.right = (f.x + offX) + "mm";
+    el.style.top = (f.y + offY) + "mm";
+    el.style.fontSize = f.size + "mm";
+    el.textContent = vals[key] || "";
+    if (!vals[key]) { el.classList.add("empty"); el.textContent = f.label; }
+    sheet.append(el);
+  }
+
+  $("wordsPreview").textContent = vals._wordsFull || "—";
+  $("hint").textContent = selected
+    ? `المحدد: ${layout.fields[selected].label} — الأسهم تحرّكه، Shift+الأسهم تحريك دقيق`
+    : "اضغط على أي حقل لتحديده، ثم اسحبه أو حرّكه بالأسهم";
+}
+
+// ── السحب ───────────────────────────────────────────────────────────────
+let drag = null;
+function mmPerPx() {
+  const r = $("sheet").getBoundingClientRect();
+  return layout.width / r.width;
+}
+
+$("sheet").addEventListener("pointerdown", (e) => {
+  const el = e.target.closest(".fld");
+  if (!el) { selected = null; render(); return; }
+  selected = el.dataset.key;
+  drag = { x: e.clientX, y: e.clientY, f: { ...layout.fields[selected] } };
+  el.setPointerCapture(e.pointerId);
+  render();
+});
+
+$("sheet").addEventListener("pointermove", (e) => {
+  if (!drag || !selected) return;
+  const k = mmPerPx();
+  const f = layout.fields[selected];
+  f.x = Math.max(0, Math.round((drag.f.x - (e.clientX - drag.x) * k) * 10) / 10);
+  f.y = Math.max(0, Math.round((drag.f.y + (e.clientY - drag.y) * k) * 10) / 10);
+  render();
+});
+
+$("sheet").addEventListener("pointerup", () => { drag = null; });
+
+document.addEventListener("keydown", (e) => {
+  if (!selected || /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  const step = e.shiftKey ? 0.2 : 1;
+  const f = layout.fields[selected];
+  const moves = { ArrowRight: ["x", step], ArrowLeft: ["x", -step], ArrowDown: ["y", step], ArrowUp: ["y", -step] };
+  if (moves[e.key]) {
+    const [axis, d] = moves[e.key];
+    f[axis] = Math.max(0, Math.round((f[axis] + d) * 10) / 10);
+    e.preventDefault(); render();
+  }
+  if (e.key === "+" || e.key === "=") { f.size = Math.round((f.size + 0.2) * 10) / 10; render(); }
+  if (e.key === "-") { f.size = Math.max(1, Math.round((f.size - 0.2) * 10) / 10); render(); }
+});
+
+// ── الأحداث ─────────────────────────────────────────────────────────────
+["amount", "currency", "payee", "date", "wrapAt", "offsetX", "offsetY", "orOrder"]
+  .forEach((id) => $(id).addEventListener("input", render));
+
+$("templateSelect").addEventListener("change", (e) => {
+  const [kind, key] = e.target.value.split(":");
+  layout = kind === "saved" ? JSON.parse(JSON.stringify(loadStore()[key])) : cloneLayout(key);
+  selected = null; render();
+});
+
+$("saveTemplate").addEventListener("click", () => {
+  const name = ($("templateName").value || "").trim();
+  if (!name) { alert("اكتب اسماً للقالب أولاً (مثل: البنك الأهلي — دفتر 2026)"); return; }
+  const store = loadStore();
+  store[name] = JSON.parse(JSON.stringify(layout));
+  saveStore(store); refreshTemplateList();
+  $("templateSelect").value = "saved:" + name;
+  $("saveMsg").textContent = `حُفظ «${name}» في متصفحك.`;
+  setTimeout(() => ($("saveMsg").textContent = ""), 4000);
+});
+
+$("deleteTemplate").addEventListener("click", () => {
+  const v = $("templateSelect").value;
+  if (!v.startsWith("saved:")) { alert("القوالب المدمجة لا تُحذف."); return; }
+  const key = v.slice(6);
+  if (!confirm(`حذف القالب «${key}» نهائياً؟`)) return;
+  const store = loadStore(); delete store[key]; saveStore(store);
+  refreshTemplateList(); layout = cloneLayout("eg-standard"); render();
+});
+
+$("bgFile").addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const fr = new FileReader();
+  fr.onload = () => { $("bgImage").dataset.src = fr.result; render(); };
+  fr.readAsDataURL(file);   // محلي بالكامل — لا يُرفع لأي خادم
+});
+
+$("clearBg").addEventListener("click", () => {
+  $("bgImage").dataset.src = ""; $("bgFile").value = ""; render();
+});
+
+$("printBtn").addEventListener("click", () => {
+  document.body.classList.add("printing");
+  window.print();
+  setTimeout(() => document.body.classList.remove("printing"), 500);
+});
+
+$("exportTemplates").addEventListener("click", () => {
+  const data = JSON.stringify(loadStore(), null, 2);
+  const url = URL.createObjectURL(new Blob([data], { type: "application/json" }));
+  const a = document.createElement("a");
+  a.href = url; a.download = "cheque-templates.json"; a.click();
+  URL.revokeObjectURL(url);
+});
+
+$("importTemplates").addEventListener("change", (e) => {
+  const file = e.target.files[0]; if (!file) return;
+  const fr = new FileReader();
+  fr.onload = () => {
+    try {
+      const incoming = JSON.parse(fr.result);
+      saveStore({ ...loadStore(), ...incoming });
+      refreshTemplateList();
+      $("saveMsg").textContent = `استُوردت ${Object.keys(incoming).length} قوالب.`;
+    } catch { alert("الملف غير صالح."); }
+  };
+  fr.readAsText(file);
+});
+
+// ── الإقلاع ─────────────────────────────────────────────────────────────
+$("date").value = new Date().toISOString().slice(0, 10);
+refreshTemplateList();
+render();
+
+// نقطة وصول للاختبار الآلي وللمستخدم المتقدّم — لا ترسل شيئاً ولا تحفظ شيئاً.
+window.__cheque = { tafgeet, chequeWords, readInputs, splitWords,
+                    get layout() { return layout; } };
+
+})();
+</script>
+</body>
+</html>

@@ -2,5 +2,14 @@ node_modules/
 __pycache__/
 *.py[cod]
 .pytest_cache/
-dist/
 .coverage
+
+# ناتج ترجمة TypeScript — يُبنى من المصدر المرافق
+nasq/dist/
+fatura/dist/
+typescript-lib/dist/
+eta-lib/ts/dist/
+
+# ولا يُتجاهل `dist` عامةً: `cheque/dist/mutawafiq-cheque.html` هو **الأداة
+# المشحونة** نفسها، ملفٌ واحد يعمل بالنقر المزدوج. وقاعدةٌ عامة `dist/`
+# ابتلعته بصمت، فلم يُنشر قطّ — و`git add -A` لا يشتكي مما يتجاهله.
