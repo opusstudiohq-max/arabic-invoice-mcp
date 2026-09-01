@@ -60,7 +60,9 @@
         <td class="num">${i + 1}</td>
         <td>${esc(r.name)}</td>
         <td><span class="rep-pill rep-${r.cls}">${esc(r.status)}</span></td>
-        <td class="rep-note">${esc(r.detail)}</td>
+        <td class="rep-note">${esc(r.detail)}${
+          r.fix ? `<div class="rep-fix">الإصلاح: ${esc(r.fix)}</div>` : ''
+        }</td>
       </tr>`).join('');
 
     $('report-area').innerHTML = `

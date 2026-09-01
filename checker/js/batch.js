@@ -32,7 +32,7 @@
     const detailed = [];
     const trs = rows.map(({ name, qr }) => {
       const r = V.validateZatcaQR(qr);
-      let status, cls, detail;
+      let status, cls, detail, fix = '';
       if (r.fatalError) {
         unreadable++; status = 'غير مقروء'; cls = 'warn';
         detail = r.fatalError;
@@ -43,12 +43,17 @@
         atRisk++; status = `مخاطرة ${r.score}/${r.total}`; cls = 'fail';
         const firstFail = (r.checks || []).find(c => !c.passed);
         detail = firstFail ? `${firstFail.field}: ${firstFail.risk}` : 'حقول ناقصة';
+        // المحرّك يُنتج إرشاد إصلاحٍ لكل فحص، وكان يُسقط هنا: فيتسلّم
+        // المحاسبُ تشخيصاً بلا علاج، ويسلّمه لعميله كذلك.
+        fix = firstFail && firstFail.fix ? firstFail.fix : '';
       }
-      detailed.push({ name, status, cls, detail });
+      detailed.push({ name, status, cls, detail, fix });
       return `<tr class="row-${cls}">
         <td>${esc(name)}</td>
         <td><span class="pill pill-${cls}">${esc(status)}</span></td>
-        <td class="detail">${esc(detail)}</td></tr>`;
+        <td class="detail">${esc(detail)}${
+          fix ? `<div class="detail-fix">الإصلاح: ${esc(fix)}</div>` : ''
+        }</td></tr>`;
     }).join('');
 
     const total = rows.length;
