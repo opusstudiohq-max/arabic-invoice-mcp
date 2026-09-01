@@ -284,17 +284,27 @@ class TestGenerateImage:
 
 
 class TestZatcaQRWS1:
-    def test_tlv_field_length_exceeded(self):
-        # A field (like seller name) exceeding 255 bytes should raise ValueError
-        long_seller_name = "أ" * 200  # 200 Arabic letters in UTF-8 is 400 bytes
-        with pytest.raises(ValueError, match="too long|255"):
-            build_zatca_tlv(
-                seller_name=long_seller_name,
-                vat_number="300123456700003",
-                timestamp="2026-07-04T15:30:00Z",
-                total_with_vat="1150.00",
-                vat_amount="150.00",
-            )
+    def test_long_seller_name_uses_ber_length(self):
+        """
+        كان هنا: «القيمة فوق 255 بايتاً تُرفض». وهو مأخوذ من نصّ المواصفة
+        حرفياً («stored in one byte») — **وتبسيطٌ ينكسر عند 128**، فكان
+        يُنتج رمزاً يرفضه مُحقِّق الهيئة.
+
+        والحسم من منتدى الهيئة، بنصّ صاحب المشكلة بعد إصلاحها:
+        «our code assumed that the maximum length of the value is 1 byte …
+         we were not properly convert it to TLV value».
+        """
+        long_name = "أ" * 200                      # 400 بايتاً
+        tlv = build_zatca_tlv(
+            seller_name=long_name,
+            vat_number="300123456700003",
+            timestamp="2026-07-04T15:30:00Z",
+            total_with_vat="1150.00",
+            vat_amount="150.00",
+        )
+        assert tlv[0] == 1
+        assert tlv[1] == 0x82, "الطول ≥256 يُسبق بـ0x82"
+        assert (tlv[2] << 8) | tlv[3] == 400
 
     def test_strict_iso8601_timestamp_validation(self):
         # 1. Invalid date (Feb 30th)
@@ -406,20 +416,58 @@ class TestAgainstTheOfficialSpecification:
                                     "2022-04-25T15:30:00Z", "1000.00", "150.00")
         assert len(realistic) <= MAX_QR_BASE64_LENGTH
 
-    def test_a_value_over_255_bytes_is_rejected(self):
+    def test_ber_length_at_the_128_byte_boundary(self):
         """
-        الطول في بايتٍ واحد — فما جاوز 255 بايتاً لا يُمثَّل أصلاً.
-
-        والحرف العربي **بايتان** في UTF-8 لا ثلاثة (النطاق U+0600–U+06FF)،
-        فحدّ الاسم 127 حرفاً عربياً. قِيس، ولم يُفترض.
+        **الحدّ الذي يبلغه اسمُ منشأةٍ سعودية عادي.** الحرف العربي بايتان،
+        فـ64 حرفاً = 128 بايتاً — وعندها يتغيّر ترميز الطول.
         """
-        import pytest
         from arabic_invoice_mcp.zatca_qr import build_zatca_tlv
-        assert len("ش".encode("utf-8")) == 2
-        assert len(("ش" * 128).encode("utf-8")) == 256 > 255
-        with pytest.raises(ValueError):
-            build_zatca_tlv("ش" * 128, "310122393500003",
-                            "2022-04-25T15:30:00Z", "1000.00", "150.00")
+        fixed = ("310122393500003", "2022-04-25T15:30:00Z", "1000.00", "150.00")
+
+        short = build_zatca_tlv("ش" * 63, *fixed)          # 126 بايتاً
+        assert short[0] == 1 and short[1] == 126
+
+        boundary = build_zatca_tlv("ش" * 64, *fixed)       # 128 بايتاً
+        assert boundary[1] == 0x81, "عند 128 يجب أن يظهر 0x81 — وهنا كان الكسر"
+        assert boundary[2] == 128
+
+        huge = build_zatca_tlv("ش" * 128, *fixed)          # 256 بايتاً
+        assert huge[1] == 0x82
+        assert (huge[2] << 8) | huge[3] == 256
+
+    def test_ber_matches_a_published_saudi_package(self):
+        """
+        مطابقةٌ مع حزمة سعودية منشورة (`@talha7k/zatca-qr`) عبر الحدّ.
+
+        تُتخطّى إن لم تكن مثبَّتة — ولا تُعدّ نجاحاً حينها.
+        """
+        import json
+        import os
+        import subprocess
+
+        probe = os.environ.get("ZATCA_PROBE_DIR")
+        if not probe or not os.path.isdir(os.path.join(probe, "node_modules", "@talha7k")):
+            pytest.skip("حزمة المقارنة غير مثبَّتة — يُضبط ZATCA_PROBE_DIR")
+
+        from arabic_invoice_mcp.zatca_qr import encode_zatca_qr
+        script = (
+            'const t = await import("@talha7k/zatca-qr");'
+            'const out = {};'
+            'for (const n of [12, 63, 64, 127, 128, 200]) {'
+            '  out[n] = t.generatePhase1QRCodeData({ sellerName: "ش".repeat(n),'
+            '    vatNumber: "310122393500003", timestamp: "2022-04-25T15:30:00Z",'
+            '    totalWithVat: "1000.00", vatTotal: "150.00" }); }'
+            'console.log(JSON.stringify(out));'
+        )
+        out = subprocess.run(["node", "--input-type=module", "-e", script],
+                             cwd=probe, capture_output=True, text=True, encoding="utf-8")
+        if out.returncode != 0:
+            pytest.skip(f"تعذّر تشغيل حزمة المقارنة: {(out.stderr or '')[:80]}")
+        theirs = json.loads(out.stdout)
+        for count, expected in theirs.items():
+            ours = encode_zatca_qr("ش" * int(count), "310122393500003",
+                                   "2022-04-25T15:30:00Z", "1000.00", "150.00")
+            assert ours == expected, f"اختلاف عند {count} حرفاً"
 
     def test_the_spec_timestamp_example_is_accepted(self):
         """المثال المذكور في جدول المواصفة نفسه: 2022-02-21T12:13:57Z."""

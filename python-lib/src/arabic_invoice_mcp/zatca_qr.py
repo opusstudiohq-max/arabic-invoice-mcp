@@ -45,10 +45,44 @@ def _tlv(tag: int, value: str) -> bytes:
         bytes بالـ TLV format
     """
     encoded = value.encode("utf-8")
-    # ZATCA spec: length is single byte (max 255) for Phase 1
-    if len(encoded) > 255:
-        raise ValueError(f"TLV value too long ({len(encoded)} bytes). Max is 255 for Phase 1.")
-    return bytes([tag, len(encoded)]) + encoded
+    return bytes([tag]) + _ber_length(len(encoded)) + encoded
+
+
+def _ber_length(length: int) -> bytes:
+    """
+    ترميز الطول بقواعد BER — لا ببايتٍ واحد دائماً.
+
+    ### لماذا، وقد كان الكود يقول «بايت واحد»
+
+    نصّ مواصفة الهيئة يقول: «The length shall be stored in one byte». وهو
+    **تبسيطٌ ينكسر عند 128 بايتاً**، وقد كتبتُ الكود عليه فكان يُنتج رمزاً
+    **يرفضه مُحقِّق الهيئة**.
+
+    والحسم من منتدى الهيئة نفسه، في موضوع «QR Code Rejected When Tag 1
+    Exceeds 127 Characters» — وبنصّ صاحب المشكلة بعد إصلاحها:
+
+        «The problem was that our code assumed that the maximum length of
+         the value is 1 byte and therefore when the value was bigger than
+         127, we were not properly convert it to TLV value.»
+
+    https://zatca1.discourse.group/t/qr-code-rejected-when-tag-1-company-name-exceeds-127-characters/7202
+
+    ### القاعدة
+
+        الطول < 128        بايتٌ واحد يحمله
+        128 ≤ الطول ≤ 255  ‏`0x81` ثم بايت الطول
+        256 ≤ الطول        ‏`0x82` ثم بايتان بترتيب كبير-أولاً
+
+    **وحدُّ 128 يبلغه اسمٌ عربي من 64 حرفاً** — فالحرف العربي بايتان. وذاك
+    اسمُ منشأةٍ سعودية عادي الطول، لا حالةٌ حدّية مصطنعة.
+    """
+    if length < 0x80:
+        return bytes([length])
+    if length <= 0xFF:
+        return bytes([0x81, length])
+    if length <= 0xFFFF:
+        return bytes([0x82, length >> 8, length & 0xFF])
+    raise ValueError(f"طول القيمة {length} بايتاً يتجاوز ما يُمثَّل في رمز QR")
 
 
 def build_zatca_tlv(
