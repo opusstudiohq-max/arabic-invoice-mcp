@@ -202,6 +202,63 @@ describe("4. ZATCA QR Code (buildZatcaQr)", () => {
     expect(res.tlv_hex).toBeDefined();
   });
 
+  /**
+   * **الاختبار الذي كان غائباً فعاش العيب هنا وحده.**
+   *
+   * كانت الحالة أعلاه تكتفي بـ`toBeDefined()` — فحصٌ يمرّ على أي مخرَج مهما
+   * كان فاسداً. وبقي في هذا الملف `if (encoded.length > 255) throw` بينما
+   * أُصلحت النسختان الأخريان، لأن لا اختبار يسأل عن الطول أصلاً.
+   *
+   * الحدّ الحقيقي 128 بايتاً لا 255: البايت الواحد يحمل حتى 127، وما فوقه
+   * يلزمه `0x81`/`0x82` بقواعد BER. **واسمٌ عربي من 64 حرفاً يبلغه.**
+   * https://zatca1.discourse.group/t/qr-code-rejected-when-tag-1-company-name-exceeds-127-characters/7202
+   */
+  test("TLV length follows BER rules at the 128-byte boundary", () => {
+    const bytes = (name: string) =>
+      Buffer.from(
+        buildZatcaQr(name, "300123456700003", "2026-07-04T15:30:00Z", "1150.00", "150.00")
+          .base64_data,
+        "base64"
+      );
+
+    expect(Buffer.from("ش", "utf-8").length).toBe(2);
+
+    const short = bytes("ش".repeat(63));   // 126 بايتاً
+    expect(short[0]).toBe(1);
+    expect(short[1]).toBe(126);
+
+    const long = bytes("ش".repeat(64));    // 128 بايتاً — هنا كان الكسر
+    expect(long[1]).toBe(0x81);
+    expect(long[2]).toBe(128);
+
+    const huge = bytes("ش".repeat(128));   // 256 بايتاً
+    expect(huge[1]).toBe(0x82);
+    expect((huge[2] << 8) | huge[3]).toBe(256);
+  });
+
+  /** التكافؤ مع نسخة فاتورة — نسختان تُنتجان رمزين مختلفين عيبٌ صامت. */
+  test("Matches the fatura encoder byte for byte", async () => {
+    const { buildZatcaTlv } = await import("../../invoice-pdf/dist/zatca-qr.js");
+    for (const count of [10, 63, 64, 127, 128, 200]) {
+      const name = "ش".repeat(count);
+      const mine = Buffer.from(
+        buildZatcaQr(name, "300123456700003", "2026-07-04T15:30:00Z", "1150.00", "150.00")
+          .base64_data,
+        "base64"
+      );
+      const theirs = Buffer.from(
+        buildZatcaTlv({
+          sellerName: name,
+          vatNumber: "300123456700003",
+          timestamp: "2026-07-04T15:30:00Z",
+          totalWithVat: "1150.00",
+          vatAmount: "150.00",
+        })
+      );
+      expect(mine.equals(theirs)).toBe(true);
+    }
+  });
+
   test("Missing seller name throws error", () => {
     expect(() => buildZatcaQr("", "300123456700003", "2026-07-04T15:30:00Z", "1150.00", "150.00"))
       .toThrow("اسم البائع مطلوب");

@@ -3,186 +3,353 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>مقياس التفقيط العربي — اختبار محرّكات تحويل المبالغ إلى حروف</title>
-<meta name="description" content="مقياس مفتوح يختبر محرّكات التفقيط العربي على قواعد العدد والمعدود. النتائج والحالات وطريقة إعادة التشغيل منشورة بالكامل.">
-<link rel="canonical" href="https://opusstudiohq-max.github.io/arabic-invoice-mcp/tafgeet/">
-<!-- وسوم المعاينة: هذه أكثر صفحاتنا قابليةً للمشاركة، وكانت الوحيدة بلا بطاقة -->
-<meta property="og:type" content="website">
-<meta property="og:locale" content="ar_AR">
-<meta property="og:site_name" content="أدوات الفوترة العربية">
-<meta property="og:url" content="https://opusstudiohq-max.github.io/arabic-invoice-mcp/tafgeet/">
-<meta property="og:title" content="مقياس التفقيط العربي — كل حالة تحمل قاعدةً نحوية مسمّاة">
-<meta property="og:description" content="52 حالة تختبر محرّكات تحويل المبالغ إلى حروف. وأول محرّك فُحص به كان محرّكنا نحن — فرسب بـ19 من 50.">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="مقياس التفقيط العربي — كل حالة تحمل قاعدةً نحوية مسمّاة">
-<meta name="twitter:description" content="52 حالة بقواعد نحوية مسمّاة. وأول محرّك فُحص به كان محرّكنا — فرسب بـ19 من 50.">
+<title>مقياس التفقيط العربي — اختبار مفتوح لمحرّكات تحويل المبالغ إلى حروف</title>
+<meta name="description" content="اختبار مفتوح يقيس محرّكات التفقيط العربي على 52 حالة، كل حالة بقاعدة نحوية مسمّاة. النتائج والمنهجية والكود متاحة للمراجعة والنقض.">
 <style>
-  :root{
-    --bg:#f7f8fa; --card:#fff; --ink:#16202b; --muted:#5d6b7a; --line:#e0e6ec;
-    --ok:#0a7d5a; --ok-bg:#e8f5f0; --bad:#b4232a; --bad-bg:#fdeeee;
-    --warn:#8a5a00; --warn-bg:#fff8e8;
-  }
-  @media(prefers-color-scheme:dark){
-    :root{ --bg:#0f1419; --card:#161d25; --ink:#e6edf3; --muted:#9aa8b6; --line:#2a343f;
-           --ok:#3fbf95; --ok-bg:#10281f; --bad:#f2777f; --bad-bg:#2a1416;
-           --warn:#e0b060; --warn-bg:#2a2010; }
-  }
+  :root{--bg:#f6f7f9;--panel:#fff;--ink:#16202b;--muted:#5d6b7a;--line:#dde3ea;
+        --ok:#0a7d5a;--ok-soft:#e6f4ef;--bad:#b3261e;--bad-soft:#fdecea;--warn:#8a5a00}
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);line-height:1.75;
+  body{margin:0;background:var(--bg);color:var(--ink);line-height:1.7;
        font-family:"Segoe UI","Noto Naskh Arabic",Tahoma,sans-serif}
-  .wrap{max-width:960px;margin:0 auto;padding:28px 18px 70px}
-  h1{font-size:1.6rem;margin:0 0 6px;line-height:1.4}
-  .sub{color:var(--muted);margin:0 0 26px}
-  h2{font-size:1.15rem;margin:34px 0 12px;padding-top:14px;border-top:1px solid var(--line)}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin:14px 0}
-  table{width:100%;border-collapse:collapse;font-size:.94rem}
-  th,td{text-align:right;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
-  th{color:var(--muted);font-weight:600;font-size:.85rem}
-  .num{font-variant-numeric:tabular-nums;white-space:nowrap}
-  .score{font-size:1.5rem;font-weight:700;font-variant-numeric:tabular-nums}
-  .ok{color:var(--ok)} .bad{color:var(--bad)}
-  .pill{display:inline-block;border-radius:99px;padding:1px 9px;font-size:.76rem;font-weight:600}
-  .pill.ok{background:var(--ok-bg)} .pill.bad{background:var(--bad-bg)}
-  .pill.brk{background:var(--bad-bg);color:var(--bad)}
-  code{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:1px 6px;
-       font-family:ui-monospace,Consolas,monospace;font-size:.88em;direction:ltr;display:inline-block}
-  pre{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:13px;
-      overflow-x:auto;direction:ltr;text-align:left;font-size:.86rem}
-  .note{background:var(--warn-bg);border:1px solid var(--line);border-right:3px solid var(--warn);
-        border-radius:8px;padding:12px 14px;margin:14px 0;font-size:.92rem}
-  .scroll{overflow-x:auto}
-  .rule{font-size:.82rem;color:var(--muted)}
-  footer{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);
-         color:var(--muted);font-size:.86rem}
+  .wrap{max-width:900px;margin:0 auto;padding:22px 16px 60px}
+  h1{font-size:1.5rem;margin:0 0 6px} h2{font-size:1.1rem;margin:32px 0 10px}
+  h3{font-size:1rem;margin:0 0 8px;display:flex;justify-content:space-between;align-items:baseline}
+  .lede{color:var(--muted);margin:0 0 4px}
+  .stamp{color:var(--muted);font-size:.8rem}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin:14px 0}
+  /* الجداول تُمرَّر داخل حاويتها — لا يُمرَّر جسم الصفحة أفقياً أبداً */
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{width:100%;border-collapse:collapse;font-size:.9rem;min-width:min(100%,520px)}
+  body{overflow-x:hidden}
+  td{overflow-wrap:anywhere;word-break:break-word}
+  th,td{text-align:right;padding:8px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:.8rem}
+  td.n,th.n{text-align:left;direction:ltr;font-variant-numeric:tabular-nums}
+  .rank{color:var(--muted);width:2rem}
+  .rid{color:var(--muted);font-family:ui-monospace,monospace;font-size:.78rem;width:3rem}
+  .note{display:block;color:var(--muted);font-size:.78rem;font-weight:400;margin-top:2px}
+  tr.ours{background:var(--ok-soft)}
+  .bar{display:inline-block;width:80px;height:7px;border-radius:99px;background:var(--line);
+       margin-inline-end:8px;vertical-align:middle;position:relative;overflow:hidden}
+  .bar::after{content:"";position:absolute;inset:0 auto 0 0;width:var(--w);background:var(--ok)}
+  .good{color:var(--ok)} .bad{color:var(--bad)}
+  .broken{color:#fff;background:var(--bad);border-radius:4px;padding:1px 6px;display:inline-block}
+  .perfect{background:var(--ok-soft);color:var(--ok);border-radius:8px;padding:10px 12px;font-size:.9rem}
+  .eng{margin:18px 0}
+  .score{color:var(--muted);font-weight:600;font-size:.85rem}
+  .warnbox{background:#fff8e8;border:1px solid #f0e0b8;border-radius:8px;padding:10px 12px;
+           font-size:.85rem;color:var(--warn)}
+  code{background:#eef2f6;border-radius:4px;padding:1px 5px;font-size:.85em}
+  pre{background:#16202b;color:#dbe6f0;border-radius:8px;padding:12px;overflow-x:auto;font-size:.8rem}
+  footer{color:var(--muted);font-size:.8rem;margin-top:30px;border-top:1px solid var(--line);padding-top:14px}
   a{color:var(--ok)}
+  @media(prefers-color-scheme:dark){
+    :root{--bg:#11161c;--panel:#171e26;--ink:#e6edf3;--muted:#94a3b1;--line:#26313c;
+          --ok:#3fbf94;--ok-soft:#12312a;--bad:#ff8a80;--bad-soft:#3a1c19}
+    code{background:#222d38} .broken{color:#1a0f0e}
+  }
 </style>
 </head>
-<body>
-<div class="wrap">
+<body><div class="wrap">
 
 <h1>مقياس التفقيط العربي</h1>
-<p class="sub">اختبار مفتوح لمحرّكات تحويل المبالغ إلى حروف، على قواعد العدد والمعدود.
-<span id="meta"></span></p>
+<p class="lede">اختبار مفتوح يقيس محرّكات تحويل المبالغ إلى حروف عربية على <strong>52 حالة</strong>،
+<strong>كل حالة بقاعدة نحوية مسمّاة</strong>.</p>
+<p class="stamp">آخر تشغيل: <bdi dir="ltr">2026-09-01</bdi> • النتائج مولَّدة آلياً من كود مفتوح</p>
 
-<div class="note">
-  <strong>لماذا هذا المقياس؟</strong> التفقيط ليس تجميلاً. في مصر تنصّ
-  <strong>المادة 476 من قانون التجارة 17 لسنة 1999</strong> على أن العبرة عند
-  الاختلاف تكون <strong>بالمبلغ المكتوب بالحروف</strong>. فخطأ التفقيط خطأ في
-  المستند المُعتَدّ به قانوناً.
-</div>
+<div class="panel"><div class="scroll">
+<table>
+<thead><tr><th class="rank">#</th><th>المحرّك</th><th class="n">اجتاز</th><th class="n">النسبة</th><th class="n">مخرَج مكسور</th></tr></thead>
+<tbody>
+  <tr class="ours">
+    <td class="rank">1</td>
+    <td><strong>مُتوافِق</strong><span class="note">محرّكنا — منقول عن نسخة بايثون بـ184 اختباراً، ومُثبت التكافؤ على 540 حالة</span></td>
+    <td class="n"><strong>52</strong> / 52</td>
+    <td class="n"><span class="bar" style="--w:100%"></span><b>100%</b></td>
+    <td class="n">—</td>
+  </tr>
+  <tr class="">
+    <td class="rank">2</td>
+    <td><strong>مُتوافِق — بناء TypeScript المشحون</strong><span class="note">البناء المشحون فعلاً (arabic-invoice-mcp-ts/dist) — لا نسخة المصدر. تُفحص هنا عمداً: من ينشر مقياساً للصحّة يبدأ بنفسه</span></td>
+    <td class="n"><strong>52</strong> / 52</td>
+    <td class="n"><span class="bar" style="--w:100%"></span><b>100%</b></td>
+    <td class="n">—</td>
+  </tr>
+  <tr class="">
+    <td class="rank">3</td>
+    <td><strong>sheekprint.com</strong><span class="note">محرّك أداة طباعة شيكات مجانية مصرية</span></td>
+    <td class="n"><strong>11</strong> / 52</td>
+    <td class="n"><span class="bar" style="--w:21.2%"></span><b>21.2%</b></td>
+    <td class="n"><span class="bad">10</span></td>
+  </tr></tbody>
+</table>
+</div></div>
 
-<h2>النتائج</h2>
-<div id="board"></div>
-
-<div class="note">
-  <strong>الحَكَم قاعدة نحوية، لا رأينا.</strong> كل حالة أدناه مرتبطة برقم
-  القاعدة التي تختبرها. ومن يخالف حالةً فليخالف <em>القاعدة</em> — ونحن نرحّب
-  بذلك علناً ونصحّح المقياس إن ثبت الخطأ.
-  <br><br>
-  <strong>وحالات الخلاف النحوي مستبعَدة عمداً.</strong> صيغ مثل «مائة وواحد
-  جنيهاً» موضع اختلاف حقيقي بين النحويين، فلا نُسقط بها محرّكاً.
-</div>
-
-<h2>المقياس عضّ صاحبه أولاً</h2>
-<div class="card">
-  <p>قبل نشر هذه الصفحة سألنا سؤالاً بديهياً: <strong>هل يجتاز البناء الذي
-  نشحنه مقياسَنا نحن؟</strong> فشغّلنا <code>arabic-invoice-mcp-ts/dist</code> —
-  الملف المبنيّ الذي يصل المستعمل، لا نسخة المصدر — على الحالات نفسها.</p>
-
-  <div class="scroll"><table>
-    <tr><th>المحرّك</th><th class="num">31 أغسطس 2026 — قبل الإصلاح<div class="rule">(المقياس 50 حالة يومها)</div></th><th class="num">بعد الإصلاح</th></tr>
-    <tr><td>محرّك بايثون / أداة الشيكات</td><td class="num ok">50/50</td><td class="num ok">مطابق</td></tr>
-    <tr><td><strong>بناؤنا المشحون (TypeScript)</strong></td><td class="num bad"><strong>19/50 — 38%</strong></td><td class="num ok">مطابق</td></tr>
-  </table></div>
-
-  <p>أي أننا كنّا أفضل من أضعف محرّك في الجدول بـ<strong>ست عشرة نقطة فقط</strong>،
-  ونحن على وشك نشر مقياسٍ للصحّة النحوية. والنتيجة الحالية لكليهما في اللوحة أعلاه. نشرُه حينها كان <strong>كذباً
-  بالإغفال</strong>.</p>
-
-  <p class="rule">ما كان ناقصاً في نسختنا: جداول التذكير والتأنيث، وإسقاط النون
-  عند الإضافة (<code>ألفا جنيه</code> لا <code>ألفان جنيهاً</code>)، وقاعدة
-  «التمييز يتبع آخر عدد معطوف»، وجمع التكسير الصحيح (<code>دنانير</code> لا
-  <code>دينارات</code>). وكان في حزمتنا <strong>اختباران يُشفّران الخطأ نفسه</strong> —
-  يتوقعان «ألف ريالاً»، والصواب «ألف ريال».</p>
-
-  <p>ولذلك <strong>يرفض المشغّل العمل إن أخفق أي محرّك نملكه</strong>. مقياسٌ لا
-  يعضّ صاحبه دعاية لا مقياس.</p>
+<h2>لماذا هذا المقياس موجود</h2>
+<div class="panel">
+<p>التفقيط ليس تجميلاً. في <strong>المادة 476 من قانون التجارة المصري رقم 17 لسنة 1999</strong>،
+العبرة عند اختلاف المبلغ المكتوب بالأرقام عن المكتوب بالحروف تكون <strong>بالحروف</strong>.
+ومصر وحدها تسوّي نحو <strong>10.6 مليون شيك سنوياً</strong>.</p>
+<p>ومع ذلك، أغلب محرّكات التفقيط المتاحة تخطئ في قواعد العدد والمعدود — وبعضها
+يُخرج <code>undefined</code> على مبالغ أقل من جنيه.</p>
+<div class="warnbox"><strong>الحَكَم قاعدة، لا رأي.</strong> كل حالة أدناه تحمل رقم القاعدة
+النحوية التي تختبرها. من يخالف حالةً فليخالف قاعدتها — والقواعد معروضة كاملة، والنقاش فيها مفتوح.</div>
 </div>
 
 <h2>القواعد المُختبَرة</h2>
-<div id="rules"></div>
+<div class="panel"><div class="scroll"><table><tbody><tr><td class="rid">R1</td><td><strong>المفرد</strong><span class="note">العدد واحد يُذكر بعد المعدود مطابقاً له: «جنيه واحد» لا «واحد جنيه».</span></td></tr><tr><td class="rid">R2</td><td><strong>المثنى</strong><span class="note">العدد اثنان يُؤدَّى بصيغة المثنى وحدها: «جنيهان» — ولا يُقال «اثنان جنيه»، فالتثنية تُغني عن العدد.</span></td></tr><tr><td class="rid">R3</td><td><strong>جمع القلة (⁦3-10⁩)</strong><span class="note">من ثلاثة إلى عشرة: المعدود جمعٌ مجرور، والعدد يخالفه في التذكير والتأنيث. «ثلاثة جنيهات» لا «ثلاثة جنيه».</span></td></tr><tr><td class="rid">R4</td><td><strong>التمييز المفرد المنصوب (⁦11-99⁩)</strong><span class="note">من أحد عشر إلى تسعة وتسعين: التمييز مفردٌ منصوب. «أحد عشر جنيهاً» لا «أحد عشر جنيه».</span></td></tr><tr><td class="rid">R5</td><td><strong>التمييز يتبع آخر عدد معطوف</strong><span class="note">في العدد المعطوف يتبع التمييزُ آخرَ جزء مذكور. فـ103 = «مائة وثلاثة جنيهات» بالجمع، لأن آخر عدد فيها ثلاثة.</span></td></tr><tr><td class="rid">R6</td><td><strong>المائة والألف وما بعدهما — تمييز مفرد مجرور</strong><span class="note">المائة والألف والمليون تُضاف إلى مفرد مجرور: «مائة جنيه» و«ألف جنيه» — لا «مائة جنيهاً».</span></td></tr><tr><td class="rid">R7</td><td><strong>إسقاط النون من المثنى عند الإضافة</strong><span class="note">مثنى المائة والألف يُضاف فتسقط نونه: «مئتا جنيه» و«ألفا جنيه» — لا «مائتان جنيه» ولا «ألفان جنيه».</span></td></tr><tr><td class="rid">R8</td><td><strong>الكسور — مذكر ومؤنث</strong><span class="note">الوحدة الفرعية تُعرب بقواعدها هي. والقرش مذكر، والهللة مؤنثة: «قرشان» و«هللتان».</span></td></tr><tr><td class="rid">R9</td><td><strong>المنازل العشرية بحسب العملة</strong><span class="note">الدينار الكويتي والبحريني والريال العُماني ثلاث منازل (1000 وحدة فرعية). فـ0.750 ديناراً = «سبعمائة وخمسون فلساً» لا «خمسة وسبعون».</span></td></tr><tr><td class="rid">R10</td><td><strong>سلامة المخرَج</strong><span class="note">لا يجوز أن يُخرج المحرّك قيمة غير معرّفة أو نصاً مكسوراً على مبلغ صحيح — فالشيك مستند مالي.</span></td></tr></tbody></table></div></div>
 
-<h2>تفصيل الاختلافات</h2>
-<div id="details"></div>
+<h2>تفصيل الإخفاقات</h2>
 
-<h2>أعِد التشغيل بنفسك</h2>
-<div class="card">
-<p>المقياس كلّه مفتوح: الحالات، والمشغّل، والنتائج.</p>
-<pre>git clone https://github.com/opusstudiohq-max/arabic-invoice-mcp
-cd arabic-invoice-mcp/tafgeet
-node run.mjs --fetch</pre>
-<p class="rule">المحرّكات العامة تُجلب <strong>مرة واحدة وتُخزَّن</strong> ولا يُكرَّر
-الطلب، وتُشغَّل محلياً في نطاق معزول. والمقارنة تتجاهل التشكيل وصيغ الألف
-والمسافات و«فقط… لا غير»، <strong>ولا تتجاهل التنوين</strong> لأنه موضع الخلاف نفسه.</p>
+  <section class="eng">
+    <h3>مُتوافِق <span class="score">52/52</span></h3>
+    <div class="perfect">✅ اجتاز الحالات الخمسين كلها.</div>
+  </section>
+  <section class="eng">
+    <h3>مُتوافِق — بناء TypeScript المشحون <span class="score">52/52</span></h3>
+    <div class="perfect">✅ اجتاز الحالات الخمسين كلها.</div>
+  </section>
+  <section class="eng">
+    <h3>sheekprint.com <span class="score">11/52</span></h3>
+    <div class="scroll"><table class="detail"><thead><tr>
+      <th>المبلغ</th><th>القاعدة</th><th>الصواب</th><th>الناتج</th></tr></thead><tbody><tr>
+      <td class="n">1 <small>EGP</small></td>
+      <td class="rid">R1</td>
+      <td class="good">جنيه واحد</td>
+      <td class="bad">فقط واحد جنيهاً لا غير</td>
+    </tr><tr>
+      <td class="n">2 <small>EGP</small></td>
+      <td class="rid">R2</td>
+      <td class="good">جنيهان</td>
+      <td class="bad">فقط اثنان جنيهاً لا غير</td>
+    </tr><tr>
+      <td class="n">12 <small>EGP</small></td>
+      <td class="rid">R4</td>
+      <td class="good">اثنا عشر جنيهاً</td>
+      <td class="bad">فقط أثني عشر جنيهاً لا غير</td>
+    </tr><tr>
+      <td class="n">100 <small>EGP</small></td>
+      <td class="rid">R6</td>
+      <td class="good">مائة جنيه</td>
+      <td class="bad">فقط مائة جنيهاً لا غير</td>
+    </tr><tr>
+      <td class="n">103 <small>EGP</small></td>
+      <td class="rid">R5</td>
+      <td class="good">مائة وثلاثة جنيهات</td>
+      <td class="bad">فقط مائة وثلاثة جنيهاً لا غير</td>
+    </tr><tr>
+      <td class="n">105 <small>EGP</small></td>
+      <td class="rid">R5</td>
+      <td class="good">مائة وخمسة جنيهات</td>
+      <td class="bad">فقط مائة وخمسة جنيهاً لا غير</td>
+    </tr><tr>
+      <td class="n">200 <small>EGP</small></td>
+      <td class="rid">R7</td>
+      <td class="good">مئتا جنيه</td>
+      <td class="bad">فقط مائتان جنيهاً لا غير</td>
+    </tr><tr>
+      <td class="n">300 <small>EGP</small></td>
+      <td class="rid">R6</td>
+      <td class="good">ثلاثمائة جنيه</td>
+      <td class="bad">فقط ثلاثمائة جنيهاً لا غير</td>
+    </tr><tr>
+      <td class="n">1,000 <small>EGP</small></td>
+      <td class="rid">R6</td>
+      <td class="good">ألف جنيه</td>
+      <td class="bad">فقط ألف جنيهاً لا غير</td>
+    </tr><tr>
+      <td class="n">2,000 <small>EGP</small></td>
+      <td class="rid">R7</td>
+      <td class="good">ألفا جنيه</td>
+      <td class="bad">فقط ألفان جنيهاً لا غير</td>
+    </tr><tr>
+      <td class="n">3,000 <small>EGP</small></td>
+      <td class="rid">R3</td>
+      <td class="good">ثلاثة آلاف جنيه</td>
+      <td class="bad">فقط ثلاثة ألآف جنيهاً لا غير</td>
+    </tr><tr>
+      <td class="n">10,000 <small>EGP</small></td>
+      <td class="rid">R3</td>
+      <td class="good">عشرة آلاف جنيه</td>
+      <td class="bad">فقط عشرة ألآف جنيهاً لا غير</td>
+    </tr><tr>
+      <td class="n">11,000 <small>EGP</small></td>
+      <td class="rid">R6</td>
+      <td class="good">أحد عشر ألف جنيه</td>
+      <td class="bad">فقط أحد عشر ألف جنيهاً لا غير</td>
+    </tr><tr>
+      <td class="n">200,000 <small>EGP</small></td>
+      <td class="rid">R7</td>
+      <td class="good">مئتا ألف جنيه</td>
+      <td class="bad">فقط مائتان ألف جنيهاً لا غير</td>
+    </tr><tr>
+      <td class="n">1,000,000 <small>EGP</small></td>
+      <td class="rid">R6</td>
+      <td class="good">مليون جنيه</td>
+      <td class="bad">فقط مليون جنيهاً لا غير</td>
+    </tr><tr>
+      <td class="n">2,000,000 <small>EGP</small></td>
+      <td class="rid">R7</td>
+      <td class="good">مليونا جنيه</td>
+      <td class="bad">فقط مليونان جنيهاً لا غير</td>
+    </tr><tr>
+      <td class="n">3,000,000 <small>EGP</small></td>
+      <td class="rid">R3</td>
+      <td class="good">ثلاثة ملايين جنيه</td>
+      <td class="bad">فقط ثلاثة ملايين جنيهاً لا غير</td>
+    </tr><tr>
+      <td class="n">0.01 <small>EGP</small></td>
+      <td class="rid">R8</td>
+      <td class="good">قرش واحد</td>
+      <td class="broken">فقط undefined جنيهاً وواحد قرش لا غير</td>
+    </tr><tr>
+      <td class="n">0.02 <small>EGP</small></td>
+      <td class="rid">R8</td>
+      <td class="good">قرشان</td>
+      <td class="broken">فقط undefined جنيهاً واثنان قرش لا غير</td>
+    </tr><tr>
+      <td class="n">0.03 <small>EGP</small></td>
+      <td class="rid">R8</td>
+      <td class="good">ثلاثة قروش</td>
+      <td class="broken">فقط undefined جنيهاً وثلاثة قرش لا غير</td>
+    </tr><tr>
+      <td class="n">0.05 <small>EGP</small></td>
+      <td class="rid">R8</td>
+      <td class="good">خمسة قروش</td>
+      <td class="broken">فقط undefined جنيهاً وخمسة قرش لا غير</td>
+    </tr><tr>
+      <td class="n">1.05 <small>EGP</small></td>
+      <td class="rid">R8</td>
+      <td class="good">جنيه واحد وخمسة قروش</td>
+      <td class="bad">فقط واحد جنيهاً وخمسة قرش لا غير</td>
+    </tr><tr>
+      <td class="n">0.25 <small>EGP</small></td>
+      <td class="rid">R8</td>
+      <td class="good">خمسة وعشرون قرشاً</td>
+      <td class="broken">فقط undefined جنيهاً وخمسة وعشرون قرش لا غير</td>
+    </tr><tr>
+      <td class="n">0.5 <small>EGP</small></td>
+      <td class="rid">R10</td>
+      <td class="good">خمسون قرشاً</td>
+      <td class="broken">فقط undefined جنيهاً وخمسون قرش لا غير</td>
+    </tr><tr>
+      <td class="n">0.75 <small>EGP</small></td>
+      <td class="rid">R8</td>
+      <td class="good">خمسة وسبعون قرشاً</td>
+      <td class="broken">فقط undefined جنيهاً وخمسة وسبعون قرش لا غير</td>
+    </tr><tr>
+      <td class="n">0.99 <small>EGP</small></td>
+      <td class="rid">R8</td>
+      <td class="good">تسعة وتسعون قرشاً</td>
+      <td class="broken">فقط undefined جنيهاً وتسعة وتسعون قرش لا غير</td>
+    </tr><tr>
+      <td class="n">1.5 <small>EGP</small></td>
+      <td class="rid">R1</td>
+      <td class="good">جنيه واحد وخمسون قرشاً</td>
+      <td class="bad">فقط واحد جنيهاً وخمسون قرش لا غير</td>
+    </tr><tr>
+      <td class="n">2.02 <small>EGP</small></td>
+      <td class="rid">R2</td>
+      <td class="good">جنيهان وقرشان</td>
+      <td class="bad">فقط اثنان جنيهاً واثنان قرش لا غير</td>
+    </tr><tr>
+      <td class="n">11.11 <small>EGP</small></td>
+      <td class="rid">R4</td>
+      <td class="good">أحد عشر جنيهاً وأحد عشر قرشاً</td>
+      <td class="bad">فقط أحد عشر جنيهاً وأحد عشر قرش لا غير</td>
+    </tr><tr>
+      <td class="n">100.5 <small>EGP</small></td>
+      <td class="rid">R6</td>
+      <td class="good">مائة جنيه وخمسون قرشاً</td>
+      <td class="bad">فقط مائة جنيهاً وخمسون قرش لا غير</td>
+    </tr><tr>
+      <td class="n">103.25 <small>EGP</small></td>
+      <td class="rid">R5</td>
+      <td class="good">مائة وثلاثة جنيهات وخمسة وعشرون قرشاً</td>
+      <td class="bad">فقط مائة وثلاثة جنيهاً وخمسة وعشرون قرش لا غير</td>
+    </tr><tr>
+      <td class="n">200.75 <small>EGP</small></td>
+      <td class="rid">R7</td>
+      <td class="good">مئتا جنيه وخمسة وسبعون قرشاً</td>
+      <td class="bad">فقط مائتان جنيهاً وخمسة وسبعون قرش لا غير</td>
+    </tr><tr>
+      <td class="n">1,250.75 <small>EGP</small></td>
+      <td class="rid">R4</td>
+      <td class="good">ألف ومئتان وخمسون جنيهاً وخمسة وسبعون قرشاً</td>
+      <td class="bad">فقط ألف ومائتان وخمسون جنيهاً وخمسة وسبعون قرش لا غير</td>
+    </tr><tr>
+      <td class="n">2,000.5 <small>EGP</small></td>
+      <td class="rid">R7</td>
+      <td class="good">ألفا جنيه وخمسون قرشاً</td>
+      <td class="bad">فقط ألفان جنيهاً وخمسون قرش لا غير</td>
+    </tr><tr>
+      <td class="n">9,876,543.21 <small>EGP</small></td>
+      <td class="rid">R4</td>
+      <td class="good">تسعة ملايين وثمانمائة وستة وسبعون ألف وخمسمائة وثلاثة وأربعون جنيهاً وواحد وعشرون قرشاً</td>
+      <td class="bad">فقط تسعة ملايين وثمانمائة وستة وسبعون ألف وخمسمائة وثلاثة وأربعون جنيهاً وواحد وعشرون قرش لا غير</td>
+    </tr><tr>
+      <td class="n">2 <small>SAR</small></td>
+      <td class="rid">R2</td>
+      <td class="good">ريالان</td>
+      <td class="bad">فقط اثنان ريال سعودي لا غير</td>
+    </tr><tr>
+      <td class="n">0.02 <small>SAR</small></td>
+      <td class="rid">R8</td>
+      <td class="good">هللتان</td>
+      <td class="broken">فقط undefined ريال سعودي واثنان هللة لا غير</td>
+    </tr><tr>
+      <td class="n">103 <small>SAR</small></td>
+      <td class="rid">R5</td>
+      <td class="good">مائة وثلاثة ريالات</td>
+      <td class="bad">فقط مائة وثلاثة ريال سعودي لا غير</td>
+    </tr><tr>
+      <td class="n">150.75 <small>KWD</small></td>
+      <td class="rid">R9</td>
+      <td class="good">مائة وخمسون ديناراً وسبعمائة وخمسون فلساً</td>
+      <td class="bad">فقط مائة وخمسون دينار كويتي وخمسة وسبعون فلس لا غير</td>
+    </tr><tr>
+      <td class="n">3 <small>KWD</small></td>
+      <td class="rid">R3</td>
+      <td class="good">ثلاثة دنانير</td>
+      <td class="bad">فقط ثلاثة دنانير كويتية لا غير</td>
+    </tr><tr>
+      <td class="n">0.75 <small>OMR</small></td>
+      <td class="rid">R9</td>
+      <td class="good">سبعمائة وخمسون بيسة</td>
+      <td class="broken">undefined</td>
+    </tr></tbody></table></div>
+  </section>
+
+<h2>حالات موضع خلاف — خارج التقييم عمداً</h2>
+<div class="panel">
+<p class="note" style="margin-bottom:10px">لا نُسقط محرّكاً على صيغة لا نملك لها حكماً قاطعاً.
+هذه الحالات <strong>لا تدخل في النسب أعلاه</strong>، ونعرضها للشفافية.</p>
+<div class="scroll"><table><tbody>
+  <tr><td class="n">101</td>
+      <td><code>مائة وواحد جنيهاً</code> أم <code>مائة جنيه وجنيه واحد</code>
+          <span class="note">حين يكون آخر جزء في العدد المعطوف «واحداً»، اختلف النحويون: أيتبع التمييزُ المائةَ فيُجرّ مفرداً، أم العددَ الأخيرَ فيُنصب؟</span></td></tr>
+  <tr><td class="n">1,001</td>
+      <td><code>ألف وواحد جنيهاً</code> أم <code>ألف جنيه وجنيه واحد</code>
+          <span class="note">نفس الخلاف مع الألف: أتُعامل «ألف وواحد» عدداً واحداً مركّباً له تمييز منصوب، أم يُفصل فيُضاف الألف إلى مفرد مجرور ثم يُعطف عليه المعدود الواحد؟</span></td></tr>
+  <tr><td class="n">102</td>
+      <td><code>مائة واثنان جنيهاً</code> أم <code>مائة جنيه وجنيهان</code>
+          <span class="note">نفس الخلاف مع المثنى، ويزيده تعقيداً أن التثنية تُغني عن ذكر العدد.</span></td></tr></tbody></table></div>
+</div>
+
+<h2>أعد التشغيل بنفسك</h2>
+<div class="panel">
+<p class="note">المقياس كله كود مفتوح. لا تصدّق الجدول — شغّله.</p>
+<pre>node tafgeet-benchmark/run.mjs --fetch
+node tafgeet-benchmark/build.mjs</pre>
+<p class="note">المحرّكات العامة تُجلب مرة واحدة وتُخزَّن محلياً، ولا يُكرَّر الطلب.
+وكل محرّك يُشغَّل في نطاق معزول، ويُقارَن مخرَجه بعد تطبيع التشكيل والمسافات —
+<strong>دون تطبيع التنوين</strong>، فهو موضع الخلاف نفسه.</p>
 </div>
 
 <footer>
-  <p><strong>مُتوافِق</strong> — أدوات عربية دقيقة، مبنيّة على اختبارات لا على وعود.
-  محرّكنا يخضع لـ<strong>184 اختباراً</strong> في نسخة بايثون، و<strong>540 حالة
-  تكافؤ</strong> بين نسختَي بايثون والمتصفح.</p>
-  <p>وجدت خطأً في المقياس نفسه؟ <strong>افتح مشكلة على المستودع</strong> — تصحيحه
-  يخدمنا قبل غيرنا.</p>
+<p>مقياس مفتوح من <strong>مُتوافِق</strong> — أدوات عربية دقيقة.
+وجدتَ خطأً في حالة أو قاعدة؟ <strong>ننشر التصحيح ونذكر صاحبه.</strong></p>
+<p>المقارنة تخصّ <strong>التفقيط وحده</strong>، ولا تحكم على المنتجات المقارَنة في شيء آخر.</p>
 </footer>
 
-</div>
-
-<script>
-const $ = (id) => document.getElementById(id);
-
-fetch("results.json").then(r => r.json()).then(d => {
-  $("meta").textContent = `آخر تشغيل: ${d.generated_utc} • ${d.cases_total} حالة.`;
-
-  // ── اللوحة ──
-  const rows = d.engines.map(e => {
-    if (e.skipped) return `<tr><td>${e.name}</td><td colspan="4" class="rule">تخطّي: ${e.skipped}</td></tr>`;
-    const cls = e.rate >= 95 ? "ok" : "bad";
-    const brk = e.broken
-      ? `<span class="pill brk">${e.broken} مخرَج مكسور</span>` : "";
-    return `<tr>
-      <td><strong>${e.name}</strong><div class="rule">${e.note}</div></td>
-      <td class="num score ${cls}">${e.rate}%</td>
-      <td class="num">${e.pass} / ${e.total}</td>
-      <td class="num ${e.fail ? "bad" : "ok"}">${e.fail}</td>
-      <td>${brk}</td></tr>`;
-  }).join("");
-  $("board").innerHTML = `<div class="card scroll"><table>
-    <tr><th>المحرّك</th><th>النسبة</th><th>اجتاز</th><th>أخفق</th><th></th></tr>
-    ${rows}</table></div>`;
-
-  // ── القواعد ──
-  $("rules").innerHTML = `<div class="card scroll"><table>
-    <tr><th style="width:70px">الرمز</th><th>القاعدة</th></tr>
-    ${Object.entries(d.rules).map(([k, r]) =>
-      `<tr><td><code>${k}</code></td><td><strong>${r.name}</strong><div class="rule">${r.text}</div></td></tr>`
-    ).join("")}</table></div>`;
-
-  // ── التفصيل ──
-  $("details").innerHTML = d.engines.filter(e => !e.skipped && e.fail > 0).map(e => {
-    const bad = e.rows.filter(r => !r.ok);
-    return `<div class="card">
-      <h3 style="margin:0 0 10px;font-size:1rem">${e.name} — ${bad.length} اختلاف</h3>
-      <div class="scroll"><table>
-        <tr><th class="num">المبلغ</th><th>الصواب بالقاعدة</th><th>ناتج المحرّك</th><th>القاعدة</th></tr>
-        ${bad.map(r => `<tr>
-          <td class="num">${r.amount} ${r.currency}</td>
-          <td class="ok">${r.expected}</td>
-          <td class="bad">${r.got}${r.kind === "مخرَج مكسور" ? ' <span class="pill brk">مكسور</span>' : ""}</td>
-          <td><code>${r.rule}</code></td></tr>`).join("")}
-      </table></div></div>`;
-  }).join("") || `<div class="card">لا اختلافات.</div>`;
-}).catch(e => {
-  $("board").innerHTML = `<div class="card">تعذّر تحميل النتائج. شغّل <code>node tafgeet-benchmark/run.mjs</code> أولاً.</div>`;
-});
-</script>
-</body>
-</html>
+</div></body></html>

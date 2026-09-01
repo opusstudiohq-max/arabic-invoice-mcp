@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مقياس رمز QR السعودي — هل يقبله مُحقِّق الهيئة؟</title>
+<meta name="description" content="مقياس مفتوح يبني رموز QR فعلية بـ13 مكتبة npm ويفكّها بايتاً بايت. 91.7% من التنزيلات الشهرية المقيسة تذهب إلى حزمٍ تُخفق في قاعدةٍ أو أكثر. الحالات والقواعد ومصادرها منشورة.">
+<link rel="canonical" href="https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ar_AR">
+<meta property="og:site_name" content="أدوات الفوترة العربية">
+<meta property="og:url" content="https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/">
+<meta property="og:title" content="اسمُ منشأتك بأربعة وستين حرفاً؟ رمزُك مرفوض">
+<meta property="og:description" content="91.7% من تنزيلات مكتبات ZATCA الشهرية المقيسة تذهب إلى حزمٍ تكسر ترميز الطول عند 128 بايتاً — أي عند اسمٍ عربي من 64 حرفاً. مقياس مفتوح يُعاد تشغيله بأمرٍ واحد.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="اسمُ منشأتك بأربعة وستين حرفاً؟ رمزُك مرفوض">
+<meta name="twitter:description" content="13 مكتبة قِيست على 10 حالة، كلٌّ بقاعدةٍ من المواصفة أو من حسم منتدى الهيئة.">
+<style>
+  :root{
+    --bg:#f7f8fa; --card:#fff; --ink:#16202b; --muted:#5d6b7a; --line:#e0e6ec;
+    --ok:#0a7d5a; --ok-bg:#e8f5f0; --bad:#b4232a; --bad-bg:#fdeeee;
+    --warn:#8a5a00; --warn-bg:#fff8e8; --accent:#0d5c47;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{--bg:#12161b; --card:#1a1f26; --ink:#e6eaef; --muted:#9aa6b4; --line:#2a323c;
+          --ok:#3fae8f; --ok-bg:#14261f; --bad:#ef7c84; --bad-bg:#2a1618;
+          --warn:#d6a054; --warn-bg:#2a2113; --accent:#3fae8f;}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:0 1rem 4rem;background:var(--bg);color:var(--ink);
+       font:16px/1.75 "Segoe UI","Noto Sans Arabic",system-ui,sans-serif}
+  main{max-width:1040px;margin:0 auto}
+  header{padding:3rem 0 1.5rem;border-bottom:1px solid var(--line)}
+  h1{font-size:clamp(1.6rem,4.5vw,2.3rem);margin:0 0 .6rem;letter-spacing:-.01em}
+  h2{font-size:1.25rem;margin:2.5rem 0 1rem}
+  h3{font-size:1rem;margin:0 0 .5rem}
+  .lede{color:var(--muted);max-width:64ch;margin:0}
+  .hero{background:var(--bad-bg);border:1px solid var(--bad);border-radius:12px;
+        padding:1.3rem 1.5rem;margin:1.6rem 0}
+  .figure{font-size:clamp(2rem,7vw,3.2rem);font-weight:700;line-height:1.1;
+          color:var(--bad);font-variant-numeric:tabular-nums}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;
+        padding:1rem 1.2rem;margin-bottom:1rem}
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{width:100%;border-collapse:collapse;background:var(--card);
+        border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  th,td{padding:.65rem .8rem;text-align:right;border-bottom:1px solid var(--line);
+        vertical-align:top}
+  th{background:var(--bg);font-size:.82rem;color:var(--muted);font-weight:600}
+  tr:last-child td{border-bottom:none}
+  tr.ours{background:var(--ok-bg)}
+  .num{text-align:center;font-variant-numeric:tabular-nums}
+  .vert{writing-mode:vertical-rl;transform:rotate(180deg);white-space:nowrap;
+        font-size:.72rem;padding:.5rem .3rem;max-height:9rem}
+  .ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--warn)}
+  .rule{font-size:.8rem;color:var(--muted);margin-top:.25rem;font-weight:400}
+  .rule.src{margin-top:.4rem;font-style:italic}
+  .tag{display:inline-block;padding:.05rem .45rem;border:1px solid var(--line);
+       border-radius:5px;font-size:.78rem;color:var(--muted)}
+  .ours-tag{border-color:var(--ok);color:var(--ok)}
+  /* **الرموز التقنية تُعزل اتجاهياً.**
+     بلا هذا يُعرض «@talha7k/zatca-qr» في فقرةٍ يمينية «talha7k/zatca-qr@» —
+     لأن «@» محايدٌ على حدّ المقطع فيلتحق بالجوار (X6a من UAX #9). وهو
+     العيب نفسه الذي تُصلحه مكتبتنا في PDF، فظهر على صفحتنا نحن. */
+  code{font-family:ui-monospace,Consolas,monospace;font-size:.88em;
+       background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:.1em .35em;
+       unicode-bidi:isolate;direction:ltr}
+  pre{background:var(--card);border:1px solid var(--line);border-radius:10px;
+      padding:1rem;overflow-x:auto;direction:ltr;text-align:left}
+  pre code{background:none;border:none;padding:0}
+  ul.findings{margin:.4rem 0 0;padding-inline-start:1.2rem}
+  ul.findings li{margin-bottom:.3rem;font-size:.9rem}
+  a{color:var(--accent)}
+  footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--line);
+         color:var(--muted);font-size:.88rem}
+  .own{background:var(--warn-bg);border:1px solid var(--warn);border-radius:10px;
+       padding:1rem 1.3rem;margin:1.5rem 0}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1>هل يقبل مُحقِّق الهيئة رمزَ فاتورتك؟</h1>
+  <p class="lede">
+    مقياسٌ مفتوح يبني رموز QR <strong>فعلية</strong> بـ13 مكتبة،
+    ثم يفكّها <strong>بايتاً بايت</strong> بفاكٍّ مستقلٍّ لا يستدعي كود أحد.
+    10 حالة، كلٌّ تحمل قاعدتها ومصدرَها: نصّ المواصفة، أو حسمٌ
+    منشور في منتدى الهيئة نفسها.
+  </p>
+</header>
+
+<div class="hero">
+  <div class="figure" dir="ltr">91.7%</div>
+  <p style="margin:.4rem 0 0">
+    من <strong dir="ltr">44,915</strong> تنزيلٍ شهري قِيست
+    لمكتبات ZATCA على npm تذهب إلى حزمٍ <strong>تُخفق في قاعدةٍ أو أكثر</strong>.
+    ومن 11 مكتبةً قِيست، <strong>2</strong> فقط اجتازت الحالات كلّها.
+  </p>
+  <p style="margin:.8rem 0 0;font-size:.92rem">
+    وأشدُّ ما وُجد أثراً: <strong dir="ltr">41,195</strong> تنزيلٍ شهري
+    في حزمٍ تكسر ترميز الطول عند <strong>128 بايتاً</strong> —
+    أي عند <strong>اسمٍ عربي من 64 حرفاً</strong>، وهو طولُ اسم منشأةٍ سعودية عادي.
+  </p>
+</div>
+
+<div class="own">
+  <h3>وكودُنا نحن كان أحدها</h3>
+  <p style="margin:0">
+    ذهبنا نفحص حزمة غيرنا فوجدنا أن <strong>الخطأ عندنا</strong>: كنّا نكتب الطول
+    في بايتٍ واحد، منقولاً حرفياً عن جملة المواصفة
+    <code dir="ltr">The length shall be stored in one byte</code>. وهي تبسيطٌ ينكسر
+    عند 128. أصلحناه في <strong>ثلاث</strong> نسخٍ عندنا — مكتبة PDF، وخادم MCP،
+    وأداةُ الفحص المنشورة — <em>قبل</em> أن نقيس أحداً. والمقياس يرفض أن يُنتج
+    صفحته أصلاً إن أخفق محرّكٌ من محرّكاتنا.
+  </p>
+</div>
+
+<h2>النتيجة</h2>
+<div class="scroll">
+<table>
+  <thead><tr>
+    <th>المكتبة</th>
+    <th class="num">تنزيلات شهرية<div class="rule">قِيست <bdi dir="ltr">2026-09-01</bdi></div></th>
+    <th class="num">النتيجة</th>
+  </tr></thead>
+  <tbody>
+  <tr class="">
+    <td>
+      <strong><code>@talha7k/zatca-qr</code></strong>
+      
+      
+      
+    </td>
+    <td class="num"><span dir="ltr">1,991</span></td>
+    <td class="num ok">
+      <strong>10/10</strong><div class="rule">100%</div>
+    </td>
+  </tr>
+  <tr class="">
+    <td>
+      <strong><code>@talha7k/zatca</code></strong>
+      
+      
+      
+    </td>
+    <td class="num"><span dir="ltr">1,729</span></td>
+    <td class="num ok">
+      <strong>10/10</strong><div class="rule">100%</div>
+    </td>
+  </tr>
+  <tr class="ours">
+    <td>
+      <strong>فاتورة</strong>
+      <span class="tag ours-tag">نحن</span>
+      <div class="rule">نسختنا — أُصلحت بعد أن كشفها هذا المقياس نفسه</div>
+      
+    </td>
+    <td class="num">—</td>
+    <td class="num ok">
+      <strong>10/10</strong><div class="rule">100%</div>
+    </td>
+  </tr>
+  <tr class="ours">
+    <td>
+      <strong>خادم MCP — البناء المشحون</strong>
+      <span class="tag ours-tag">نحن</span>
+      <div class="rule">البناء المشحون فعلاً لا نسخة المصدر. يُفحص هنا عمداً: من ينشر مقياساً يبدأ بنفسه</div>
+      
+    </td>
+    <td class="num">—</td>
+    <td class="num ok">
+      <strong>10/10</strong><div class="rule">100%</div>
+    </td>
+  </tr>
+  <tr class="">
+    <td>
+      <strong><code>zatca-xml-js</code></strong>
+      
+      
+      
+    </td>
+    <td class="num"><span dir="ltr">21,943</span></td>
+    <td class="num warn">
+      <strong>7/10</strong><div class="rule">70%</div>
+    </td>
+  </tr>
+  <tr class="">
+    <td>
+      <strong><code>zatca-sdk</code></strong>
+      
+      <div class="rule">يبني المرحلة الثانية فقط — تُمرَّر حقول التوقيع صورياً وتُفحص الوسوم <bdi dir="ltr">1-5</bdi></div>
+      
+    </td>
+    <td class="num"><span dir="ltr">300</span></td>
+    <td class="num warn">
+      <strong>7/10</strong><div class="rule">70%</div>
+    </td>
+  </tr>
+  <tr class="">
+    <td>
+      <strong><code>zatca-qr-tlv</code></strong>
+      
+      
+      
+    </td>
+    <td class="num"><span dir="ltr">123</span></td>
+    <td class="num warn">
+      <strong>7/10</strong><div class="rule">70%</div>
+    </td>
+  </tr>
+  <tr class="">
+    <td>
+      <strong><code>zatca-qr-generator</code></strong>
+      
+      
+      
+    </td>
+    <td class="num"><span dir="ltr">104</span></td>
+    <td class="num warn">
+      <strong>7/10</strong><div class="rule">70%</div>
+    </td>
+  </tr>
+  <tr class="">
+    <td>
+      <strong><code>zatca-simplified-invoice-sdk</code></strong>
+      
+      
+      
+    </td>
+    <td class="num"><span dir="ltr">10</span></td>
+    <td class="num warn">
+      <strong>7/10</strong><div class="rule">70%</div>
+    </td>
+  </tr>
+  <tr class="">
+    <td>
+      <strong><code>@axenda/zatca</code></strong>
+      
+      
+      
+    </td>
+    <td class="num"><span dir="ltr">17,376</span></td>
+    <td class="num warn">
+      <strong>6/10</strong><div class="rule">60%</div>
+    </td>
+  </tr>
+  <tr class="">
+    <td>
+      <strong><code>@pioneersoft/zatca-einvoice</code></strong>
+      
+      
+      
+    </td>
+    <td class="num"><span dir="ltr">646</span></td>
+    <td class="num warn">
+      <strong>6/10</strong><div class="rule">60%</div>
+    </td>
+  </tr>
+  <tr class="">
+    <td>
+      <strong><code>@zatca/qr</code></strong>
+      
+      
+      
+    </td>
+    <td class="num"><span dir="ltr">503</span></td>
+    <td class="num warn">
+      <strong>6/10</strong><div class="rule">60%</div>
+    </td>
+  </tr>
+  <tr class="">
+    <td>
+      <strong><code>zatca</code></strong>
+      
+      <div class="rule">منشورة أيضاً باسم ‎<bdi dir="ltr">@tatwerat/zatca</bdi></div>
+      <div class="rule warn">⚑ ترفض «<bdi dir="ltr">2022-04-25T15:30:00Z</bdi>» وتشترط كسور الثواني ‎.000Z‎ — تُقاد بها ليُقاس الترميز</div>
+    </td>
+    <td class="num"><span dir="ltr">190</span></td>
+    <td class="num bad">
+      <strong>2/10</strong><div class="rule">20%</div>
+    </td>
+  </tr></tbody>
+</table>
+</div>
+
+<h2>ما وُجد بالضبط</h2>
+
+    <div class="card">
+      <h3><code>zatca-xml-js</code>
+        <span class="rule"><span dir="ltr">21,943</span> تنزيلاً شهرياً</span></h3>
+      <ul class="findings"><li><span class="tag">Q2</span> <code>arabic-64-chars</code> — <bdi>شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80</bdi></li><li><span class="tag">Q2</span> <code>arabic-100-chars</code> — <bdi>شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0xc8</bdi></li><li><span class="tag">Q3</span> <code>arabic-128-chars</code> — <bdi>لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات</bdi></li></ul>
+    </div>
+    <div class="card">
+      <h3><code>@axenda/zatca</code>
+        <span class="rule"><span dir="ltr">17,376</span> تنزيلاً شهرياً</span></h3>
+      <ul class="findings"><li><span class="tag">Q2</span> <code>arabic-64-chars</code> — <bdi>لا يُفكّ: الوسم 1 يُعلن 239 بايتاً ويتجاوز نهاية البيانات</bdi></li><li><span class="tag">Q2</span> <code>arabic-100-chars</code> — <bdi>لا يُفكّ: الوسم 48 يُعلن 90 بايتاً ويتجاوز نهاية البيانات</bdi></li><li><span class="tag">Q3</span> <code>arabic-128-chars</code> — <bdi>لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات</bdi></li></ul>
+    </div>
+    <div class="card">
+      <h3><code>zatca-qr-tlv</code>
+        <span class="rule"><span dir="ltr">123</span> تنزيلاً شهرياً</span></h3>
+      <ul class="findings"><li><span class="tag">Q2</span> <code>arabic-64-chars</code> — <bdi>شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80</bdi></li><li><span class="tag">Q2</span> <code>arabic-100-chars</code> — <bdi>شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0xc8</bdi></li><li><span class="tag">Q3</span> <code>arabic-128-chars</code> — <bdi>استثناء: ZATCA QR field 1 is 256 bytes; the format allows at most 255</bdi></li></ul>
+    </div>
+    <div class="card">
+      <h3><code>zatca-sdk</code>
+        <span class="rule"><span dir="ltr">300</span> تنزيلاً شهرياً</span></h3>
+      <ul class="findings"><li><span class="tag">Q2</span> <code>arabic-64-chars</code> — <bdi>شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80</bdi></li><li><span class="tag">Q2</span> <code>arabic-100-chars</code> — <bdi>شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0xc8</bdi></li><li><span class="tag">Q3</span> <code>arabic-128-chars</code> — <bdi>استثناء: TLV tag 1 value is 256 bytes; ZATCA TLV supports at most 255</bdi></li></ul>
+    </div>
+    <div class="card">
+      <h3><code>zatca-qr-generator</code>
+        <span class="rule"><span dir="ltr">104</span> تنزيلاً شهرياً</span></h3>
+      <ul class="findings"><li><span class="tag">Q2</span> <code>arabic-64-chars</code> — <bdi>شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80</bdi></li><li><span class="tag">Q2</span> <code>arabic-100-chars</code> — <bdi>شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0xc8</bdi></li><li><span class="tag">Q3</span> <code>arabic-128-chars</code> — <bdi>لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات</bdi></li></ul>
+    </div>
+    <div class="card">
+      <h3><code>zatca-simplified-invoice-sdk</code>
+        <span class="rule"><span dir="ltr">10</span> تنزيلاً شهرياً</span></h3>
+      <ul class="findings"><li><span class="tag">Q2</span> <code>arabic-64-chars</code> — <bdi>شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80</bdi></li><li><span class="tag">Q2</span> <code>arabic-100-chars</code> — <bdi>شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0xc8</bdi></li><li><span class="tag">Q3</span> <code>arabic-128-chars</code> — <bdi>استثناء: tag 1 value exceeds 255 UTF-8 bytes</bdi></li></ul>
+    </div>
+    <div class="card">
+      <h3><code>@pioneersoft/zatca-einvoice</code>
+        <span class="rule"><span dir="ltr">646</span> تنزيلاً شهرياً</span></h3>
+      <ul class="findings"><li><span class="tag">Q2</span> <code>arabic-64-chars</code> — <bdi>شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80</bdi></li><li><span class="tag">Q2</span> <code>arabic-100-chars</code> — <bdi>شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0xc8</bdi></li><li><span class="tag">Q3</span> <code>arabic-128-chars</code> — <bdi>لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات</bdi></li></ul>
+    </div>
+    <div class="card">
+      <h3><code>@zatca/qr</code>
+        <span class="rule"><span dir="ltr">503</span> تنزيلاً شهرياً</span></h3>
+      <ul class="findings"><li><span class="tag">Q2</span> <code>arabic-64-chars</code> — <bdi>لا يُفكّ: الوسم 1 يُعلن 239 بايتاً ويتجاوز نهاية البيانات</bdi></li><li><span class="tag">Q2</span> <code>arabic-100-chars</code> — <bdi>لا يُفكّ: الوسم 48 يُعلن 90 بايتاً ويتجاوز نهاية البيانات</bdi></li><li><span class="tag">Q3</span> <code>arabic-128-chars</code> — <bdi>لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات</bdi></li></ul>
+    </div>
+    <div class="card">
+      <h3><code>zatca</code>
+        <span class="rule"><span dir="ltr">190</span> تنزيلاً شهرياً</span></h3>
+      <ul class="findings"><li><span class="tag">Q1</span> <code>arabic-byte-length</code> — <bdi>لا يُفكّ: الوسم 217 يُعلن 131 بايتاً ويتجاوز نهاية البيانات</bdi></li><li><span class="tag">Q1</span> <code>arabic-63-chars</code> — <bdi>لا يُفكّ: الوسم 180 يُعلن 216 بايتاً ويتجاوز نهاية البيانات</bdi></li><li><span class="tag">Q2</span> <code>arabic-64-chars</code> — <bdi>لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات</bdi></li></ul>
+    </div>
+
+<h2>الحالة × المكتبة</h2>
+<div class="scroll">
+<table>
+  <thead><tr><th>الحالة</th><th>القاعدة</th><th class="num vert"><span>@talha7k/zatca-qr</span></th><th class="num vert"><span>@talha7k/zatca</span></th><th class="num vert"><span>فاتورة</span></th><th class="num vert"><span>خادم MCP — البناء المشحون</span></th><th class="num vert"><span>zatca-xml-js</span></th><th class="num vert"><span>zatca-sdk</span></th><th class="num vert"><span>zatca-qr-tlv</span></th><th class="num vert"><span>zatca-qr-generator</span></th><th class="num vert"><span>zatca-simplified-invoice-sdk</span></th><th class="num vert"><span>@axenda/zatca</span></th><th class="num vert"><span>@pioneersoft/zatca-einvoice</span></th><th class="num vert"><span>@zatca/qr</span></th><th class="num vert"><span>zatca</span></th></tr></thead>
+  <tbody>
+    <tr>
+      <td><strong>ascii-baseline</strong><div class="rule">الحدّ الأدنى: حقول لاتينية قصيرة. من أخفق هنا لا يبني TLV أصلاً.</div></td>
+      <td><span class="tag">Q4</span></td>
+      <td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td>
+    </tr>
+    <tr>
+      <td><strong>arabic-byte-length</strong><div class="rule">«شركة» أربعة أحرف وثمانِ بايتات — أشهر فخّ يُسقط التطبيقات الساذجة.</div></td>
+      <td><span class="tag">Q1</span></td>
+      <td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num bad" title="لا يُفكّ: الوسم 217 يُعلن 131 بايتاً ويتجاوز نهاية البيانات">✗</td>
+    </tr>
+    <tr>
+      <td><strong>arabic-63-chars</strong><div class="rule">126 بايتاً — تحت الحدّ مباشرة، فبايتٌ واحد يحمله.</div></td>
+      <td><span class="tag">Q1</span></td>
+      <td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num bad" title="لا يُفكّ: الوسم 180 يُعلن 216 بايتاً ويتجاوز نهاية البيانات">✗</td>
+    </tr>
+    <tr>
+      <td><strong>arabic-64-chars</strong><div class="rule">128 بايتاً بالضبط — **هنا ينكسر كل من قرأ نصّ المواصفة حرفياً**. واسمُ منشأةٍ سعودية من 64 حرفاً عاديّ تماماً.</div></td>
+      <td><span class="tag">Q2</span></td>
+      <td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num bad" title="شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80">✗</td><td class="num bad" title="شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80">✗</td><td class="num bad" title="شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80">✗</td><td class="num bad" title="شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80">✗</td><td class="num bad" title="شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80">✗</td><td class="num bad" title="لا يُفكّ: الوسم 1 يُعلن 239 بايتاً ويتجاوز نهاية البيانات">✗</td><td class="num bad" title="شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80">✗</td><td class="num bad" title="لا يُفكّ: الوسم 1 يُعلن 239 بايتاً ويتجاوز نهاية البيانات">✗</td><td class="num bad" title="لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات">✗</td>
+    </tr>
+    <tr>
+      <td><strong>arabic-100-chars</strong><div class="rule">200 بايتاً — داخل مدى 0x81 وبعيداً عن الحدّ، فلا يُنجي من الخطأ حظُّ الحدود.</div></td>
+      <td><span class="tag">Q2</span></td>
+      <td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num bad" title="شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0xc8">✗</td><td class="num bad" title="شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0xc8">✗</td><td class="num bad" title="شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0xc8">✗</td><td class="num bad" title="شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0xc8">✗</td><td class="num bad" title="شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0xc8">✗</td><td class="num bad" title="لا يُفكّ: الوسم 48 يُعلن 90 بايتاً ويتجاوز نهاية البيانات">✗</td><td class="num bad" title="شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0xc8">✗</td><td class="num bad" title="لا يُفكّ: الوسم 48 يُعلن 90 بايتاً ويتجاوز نهاية البيانات">✗</td><td class="num bad" title="لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات">✗</td>
+    </tr>
+    <tr>
+      <td><strong>arabic-128-chars</strong><div class="rule">256 بايتاً — يعبر مدى البايت الواحد كلّه إلى 0x82.</div></td>
+      <td><span class="tag">Q3</span></td>
+      <td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num bad" title="لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات">✗</td><td class="num bad" title="استثناء: TLV tag 1 value is 256 bytes; ZATCA TLV supports at most 255">✗</td><td class="num bad" title="استثناء: ZATCA QR field 1 is 256 bytes; the format allows at most 255">✗</td><td class="num bad" title="لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات">✗</td><td class="num bad" title="استثناء: tag 1 value exceeds 255 UTF-8 bytes">✗</td><td class="num bad" title="لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات">✗</td><td class="num bad" title="لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات">✗</td><td class="num bad" title="لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات">✗</td><td class="num bad" title="لا يُفكّ: الوسم 49 يُعلن 53 بايتاً ويتجاوز نهاية البيانات">✗</td>
+    </tr>
+    <tr>
+      <td><strong>roundtrip-long-arabic</strong><div class="rule">اسمٌ من 64 حرفاً يخرج كما دخل. القاعدة نفسها من جهة القيمة لا من جهة الطول.</div></td>
+      <td><span class="tag">Q5</span></td>
+      <td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num bad" title="لا يُفكّ: الوسم 1 يُعلن 239 بايتاً ويتجاوز نهاية البيانات">✗</td><td class="num ok" title="">✓</td><td class="num bad" title="لا يُفكّ: الوسم 1 يُعلن 239 بايتاً ويتجاوز نهاية البيانات">✗</td><td class="num bad" title="لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات">✗</td>
+    </tr>
+    <tr>
+      <td><strong>realistic-saudi-name</strong><div class="rule">اسمٌ سعودي واقعي بطوله الطبيعي — لا سلسلةَ حرفٍ مكرّر.</div></td>
+      <td><span class="tag">Q5</span></td>
+      <td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num bad" title="لا يُفكّ: الوسم 167 يُعلن 216 بايتاً ويتجاوز نهاية البيانات">✗</td>
+    </tr>
+    <tr>
+      <td><strong>amount-as-printed</strong><div class="rule">«<bdi dir="ltr">1000.00</bdi>» على وجه الفاتورة يجب أن يكون «<bdi dir="ltr">1000.00</bdi>» في الرمز — لا «1000».</div></td>
+      <td><span class="tag">Q6</span></td>
+      <td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td>
+    </tr>
+    <tr>
+      <td><strong>timestamp-verbatim</strong><div class="rule">الطابع الزمني يدخل في المطابقة — وإعادةُ صياغته صامتاً تغيير قيمة.</div></td>
+      <td><span class="tag">Q7</span></td>
+      <td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num bad" title="الطابع الزمني «2022-04-25T15:30:00» والمتوقَّع «2022-04-25T15:30:00Z»">✗</td><td class="num ok" title="">✓</td><td class="num bad" title="الطابع الزمني «2022-04-25T15:30:00.000Z» والمتوقَّع «2022-04-25T15:30:00Z»">✗</td>
+    </tr></tbody>
+</table>
+</div>
+
+<h2>القواعد ومصادرها</h2>
+<p class="lede" style="margin-bottom:1rem">
+  الحَكَم مصدرٌ مسمّى لا رأيُنا. فمن يخالف حالةً يخالف مصدرها، ويستطيع أن
+  ينازع في المصدر نفسه علناً.
+</p>
+<div class="scroll">
+<table>
+  <thead><tr><th style="width:5rem">الرمز</th><th>القاعدة</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><span class="tag">Q1</span></td>
+    <td><strong>الطول بعدد البايتات لا بعدد الأحرف</strong><div class="rule">طول القيمة يُكتب بعدد بايتات ترميز <bdi dir="ltr">UTF-8</bdi> لا بعدد الأحرف (§<bdi dir="ltr">4.1</bdi>). و«شركة» أربعة أحرف وثمانِ بايتات — فمن عدّ الأحرف أنتج رمزاً يفشل قارئه بلا رسالة تشخيص.</div>
+      <div class="rule src">المصدر: ZATCA — Electronic Invoice Security Features Implementation Standards, §4.1 والجدول 3</div></td>
+  </tr>
+  <tr>
+    <td><span class="tag">Q2</span></td>
+    <td><strong>الطول بقواعد BER عند 128 بايتاً</strong><div class="rule">نصّ المواصفة «The length shall be stored in one byte» تبسيطٌ ينكسر عند 128: البايت الواحد يحمل حتى 127، وما فوقه يلزمه 0x81 ثم بايت الطول. والحسم من منتدى الهيئة نفسه بنصّ صاحب المشكلة بعد إصلاحها: «our code assumed that the maximum length of the value is 1 byte … we were not properly convert it to TLV value». وحدُّ 128 يبلغه اسمٌ عربي من 64 حرفاً — فالحرف بايتان.</div>
+      <div class="rule src">المصدر: <a href="https://zatca1.discourse.group/t/qr-code-rejected-when-tag-1-company-name-exceeds-127-characters/7202">منتدى الهيئة</a></div></td>
+  </tr>
+  <tr>
+    <td><span class="tag">Q3</span></td>
+    <td><strong>الطول بقواعد BER فوق 255 بايتاً</strong><div class="rule">ما جاوز 255 بايتاً يلزمه 0x82 ثم بايتان بترتيب كبير-أولاً. واسمٌ عربي من 128 حرفاً يبلغ 256 بايتاً.</div>
+      <div class="rule src">المصدر: <a href="https://zatca1.discourse.group/t/qr-code-rejected-when-tag-1-company-name-exceeds-127-characters/7202">منتدى الهيئة</a></div></td>
+  </tr>
+  <tr>
+    <td><span class="tag">Q4</span></td>
+    <td><strong>ترتيب الوسوم 1 ثم 2 ثم 3 ثم 4 ثم 5</strong><div class="rule">الجدول 3 يُرتّب الوسوم: اسم البائع، ثم الرقم الضريبي، ثم الطابع الزمني، ثم الإجمالي شامل الضريبة، ثم مبلغ الضريبة. والترتيب جزءٌ من البنية لا تفصيلٌ تجميلي.</div>
+      <div class="rule src">المصدر: ZATCA — Electronic Invoice Security Features Implementation Standards, §4.1 والجدول 3</div></td>
+  </tr>
+  <tr>
+    <td><span class="tag">Q5</span></td>
+    <td><strong>القيمة تصل كما كُتبت</strong><div class="rule">الاسم المُدخَل يجب أن يخرج من الفكّ كما دخل — لا بتراً ولا تحريفاً في الترميز. وهذه القاعدة تكشف عيب الطول من الجهة الأخرى: طولٌ خاطئ يُنتج قيمةً مبتورة.</div>
+      <div class="rule src">المصدر: ZATCA — Electronic Invoice Security Features Implementation Standards, §4.1 والجدول 3</div></td>
+  </tr>
+  <tr>
+    <td><span class="tag">Q6</span></td>
+    <td><strong>المبلغ كما يُطبع على الفاتورة</strong><div class="rule">الوسمان 4 و5 يحملان المبلغ **نصّاً كما يُطبع** على الفاتورة. فمن أعاد تنسيقه («<bdi dir="ltr">1000.00</bdi>» ⇐ «1000») خالف المطبوع، ورمزُه لا يطابق وجه الفاتورة.</div>
+      <div class="rule src">المصدر: ZATCA — Electronic Invoice Security Features Implementation Standards, §4.1 والجدول 3</div></td>
+  </tr>
+  <tr>
+    <td><span class="tag">Q7</span></td>
+    <td><strong>الطابع الزمني كما أُعطي</strong><div class="rule">الوسم 3 طابعٌ زمني بصيغة ISO 8601 مع منطقة زمنية. ومن أعاد صياغته صامتاً غيّر قيمةً تدخل في المطابقة.</div>
+      <div class="rule src">المصدر: ZATCA — Electronic Invoice Security Features Implementation Standards, §4.1 والجدول 3</div></td>
+  </tr></tbody>
+</table>
+</div>
+
+
+
+<h2>أعِد تشغيله بنفسك</h2>
+<pre><code>git clone https://github.com/opusstudiohq-max/arabic-invoice-mcp
+cd arabic-invoice-mcp/zatca-qr-benchmark
+npm install
+node run.mjs --fetch &amp;&amp; node build.mjs</code></pre>
+<p class="lede">
+  الحالات في <code>cases.json</code>، والمحوّلات في <code>run.mjs</code>.
+  ومن رأى محوّلاً يظلم مكتبته فليفتح مسألةً — <strong>أخطأنا في تسعةٍ من
+  محوّلاتنا في التشغيل الأول</strong>، فأصلحناها قبل النشر، ولا نستبعد بقيّة.
+</p>
+
+<footer>
+  <p>
+    شُغّل في <bdi dir="ltr">2026-09-01</bdi> · 10 حالة ·
+    13 محرّكاً · <a href="../">أدوات الفوترة العربية</a>
+  </p>
+  <p>
+    المصدر النصّي: ZATCA — Electronic Invoice Security Features Implementation Standards, §4.1 والجدول 3 —
+    والحسم في طول BER: <a href="https://zatca1.discourse.group/t/qr-code-rejected-when-tag-1-company-name-exceeds-127-characters/7202">موضوع منتدى الهيئة</a>.
+  </p>
+</footer>
+
+</main>
+</body>
+</html>

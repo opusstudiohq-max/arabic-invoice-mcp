@@ -283,6 +283,40 @@ def check_test_counts(expected: int | None = None) -> list[str]:
     return problems
 
 
+#: شارة shields.io تحمل عدداً: `badge/tests-184%20passing`.
+BADGE_COUNT_RE = re.compile(r"badge/tests-(\d{2,4})(?:%20|-|_)")
+
+
+def check_badge_counts(expected: int | None = None) -> list[str]:
+    """
+    **الشارة ادعاءٌ كأي ادعاء — وقد أفلتت من البوابة لأنها ليست نصّاً عربياً.**
+
+    كان في الصفحة الأولى `badge/tests-160%20passing` بينما النصّ تحتها يقول
+    «184 اختباراً» والواقع 184. فحصُ الأعداد كان يقرأ «N اختباراً» ولا يرى
+    الشارة، فمرّ الرقمان المتناقضان على الصفحة نفسها.
+
+    وهي أوّل ما يراه الزائر.
+    """
+    if expected is None:
+        return []
+    problems: list[str] = []
+    for path in iter_public_files():
+        if path.suffix.lower() not in (".md", ".html"):
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (UnicodeDecodeError, OSError):
+            continue
+        for m in BADGE_COUNT_RE.finditer(text):
+            n = int(m.group(1))
+            if n != expected:
+                problems.append(
+                    f"شارة تعلن {n} اختباراً والواقع {expected} — "
+                    f"{path.relative_to(ROOT).as_posix()}"
+                )
+    return problems
+
+
 def check_facts_registry(facts_path: Path | None = None, today=None) -> list[str]:
     """
     الحقيقة التنظيمية المتقادمة تصبح مستحيلة بنيوياً لا مجرد مستبعدة:
@@ -459,7 +493,8 @@ def main() -> int:
     args = ap.parse_args()
 
     hits = scan()
-    count_problems = check_test_counts(args.expect_tests)
+    count_problems = (check_test_counts(args.expect_tests)
+                      + check_badge_counts(args.expect_tests))
     facts_problems = [] if args.skip_facts else check_facts_registry()
     dist_problems = check_distribution_claims() + check_package_dependencies()
     if dist_problems:

@@ -112,13 +112,55 @@ test("الرقم الضريبي: 15 رقماً يبدأ بـ3 يمر؛ قصير/
   }
 });
 
-test("اسم البائع: فارغ/مسافات/أطول من 255 بايت يفشل؛ اسم عربي يمر", () => {
+test("اسم البائع: فارغ ومسافات يفشلان؛ واسمٌ عربي طويل يمرّ", () => {
   assert.equal(V.validateSellerName(td("مؤسسة أوبس")).passed, true);
   for (const bad of ["", "   "]) {
     assert.equal(V.validateSellerName(td(bad)).passed, false, `قُبل خطأً: "${bad}"`);
   }
-  // 200 حرف عربي = 400 بايت UTF-8 > 255 (مطابق zatca_qr.py:_tlv)
-  assert.equal(V.validateSellerName(td("ش".repeat(200))).passed, false);
+  // كان هنا: «200 حرف = 400 بايت ⇒ يُرفض، الحدّ 255». وذلك خطأ مضاعف —
+  // الحدّ الحاكم سقفُ الرمز كلّه (700 حرف Base64) لا حدٌّ للحقل، وترميز BER
+  // يحمل حتى 65,535 بايتاً. فاسمُ منشأةٍ من 200 حرف **صحيحٌ بنيوياً**.
+  assert.equal(V.validateSellerName(td("ش".repeat(200))).passed, true);
+});
+
+/**
+ * **الاختبار الذي كشف أن الأداة تكذب على مستعملها.**
+ *
+ * قارئ الطول ببايتٍ واحد يقرأ `0x81` طولاً قدره 129 فيبتلع الوسم التالي،
+ * ثم يُعلن «بيانات مقطوعة» — أي يُخبر تاجراً سعودياً اسمُه من 64 حرفاً
+ * عربياً أن رمزه **الصحيح** مكسور. والحدّ ليس مصطنعاً: الحرف العربي بايتان.
+ *
+ * https://zatca1.discourse.group/t/qr-code-rejected-when-tag-1-company-name-exceeds-127-characters/7202
+ */
+test("الطول بقواعد BER — الأداة تقرأ ما يقبله مُحقِّق الهيئة", () => {
+  const enc = new TextEncoder();
+  /** مشفّر BER مستقل، مكتوب هنا ولا يستدعي كود الأداة. */
+  const berTlv = (tag, value) => {
+    const v = enc.encode(value);
+    const len = v.length < 0x80 ? [v.length]
+      : v.length <= 0xFF ? [0x81, v.length]
+      : [0x82, v.length >> 8, v.length & 0xFF];
+    return [tag, ...len, ...v];
+  };
+  const qr = (name) => {
+    const bytes = [
+      ...berTlv(1, name),
+      ...berTlv(2, "310122393500003"),
+      ...berTlv(3, "2026-07-06T14:30:00Z"),
+      ...berTlv(4, "1150.00"),
+      ...berTlv(5, "150.00"),
+    ];
+    return Buffer.from(bytes).toString("base64");
+  };
+
+  for (const count of [63, 64, 127, 128, 200]) {
+    const name = "ش".repeat(count);
+    const r = V.validateZatcaQR(qr(name));
+    assert.equal(r.fatalError, null, `${count} حرفاً: خطأ قاتل`);
+    assert.ok(Object.values(r.decoded || {}).includes(name),
+      `اسمٌ من ${count} حرفاً (${count * 2} بايتاً) لم يُقرأ كما كُتب`);
+    assert.equal(r.valid, true, `${count} حرفاً: حُكم عليه بالمخالفة وهو صحيح`);
+  }
 });
 
 test("التاريخ: صيغة صحيحة تمر؛ بلا timezone يفشل (مطابق _ISO8601_STRICT)", () => {

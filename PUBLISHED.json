@@ -12,7 +12,9 @@
     "nasq",
     "fatura",
     "invoice-tool",
-    "pdf-benchmark"
+    "pdf-benchmark",
+    "zatca-qr-benchmark",
+    "zatca-qr"
   ],
   "npm": [],
   "pypi": [],

@@ -9,6 +9,9 @@
  * المرجع: ZATCA E-Invoicing Technical Specification (Phase 1 — B2C)
  */
 
+/** أقصى طولٍ يُمثَّل بترميز BER بوسم 0x82 — لا 255 كما كان. */
+const MAX_TLV_VALUE_BYTES = 0xFFFF;
+
 // Strict ISO-8601 regex — identical to _ISO8601_STRICT in zatca_qr.py
 const ISO8601_STRICT = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
 
@@ -48,8 +51,21 @@ function decodeBase64(b64) {
 }
 
 /**
- * فك TLV buffer إلى حقول
- * يطابق منطق test_tlv_5_fields_concatenated في test_zatca_qr.py
+ * فك TLV buffer إلى حقول — **بقواعد BER**.
+ *
+ * ### لماذا BER، وكانت هنا قراءةٌ ببايتٍ واحد
+ *
+ * نصّ المواصفة يقول «The length shall be stored in one byte»، وهو تبسيطٌ
+ * ينكسر عند 128 بايتاً. والحسم من منتدى الهيئة نفسه، بنصّ صاحب المشكلة بعد
+ * إصلاحها: «our code assumed that the maximum length of the value is 1 byte
+ * … we were not properly convert it to TLV value».
+ * https://zatca1.discourse.group/t/qr-code-rejected-when-tag-1-company-name-exceeds-127-characters/7202
+ *
+ * والقارئ ببايتٍ واحد **يعكس ضرر المشفّر**: يقرأ `0x81` طولاً قدره 129،
+ * فيبتلع الوسمَ التالي ثم يُعلن «بيانات مقطوعة». أي أن هذه الأداة كانت
+ * **تُخبر تاجراً سعودياً اسمه من 64 حرفاً عربياً أن رمزه الصحيح مكسور**.
+ * وهي أداةٌ منشورة، والخطأ فيها يصل من يثق بها.
+ *
  * @param {Uint8Array} buffer
  * @returns {{ ok: boolean, tags?: Object, errors?: string[] }}
  */
@@ -65,19 +81,29 @@ function parseTLV(buffer) {
     }
 
     const tag = buffer[i];
-    const length = buffer[i + 1];
 
-    // ZATCA Phase 1: max 255 bytes per field — mirrors _tlv() line 43
-    if (length > 255) {
-      errors.push(`الحقل ${tag} (${TAG_NAMES[tag] || 'غير معروف'}) يتجاوز 255 بايت — مخالف لقاعدة TLV في المرحلة الأولى`);
+    // الطول بقواعد BER: بايتٌ واحد دون 128، وإلا 0x81 ثم بايت، أو 0x82 ثم بايتان.
+    let length = buffer[i + 1];
+    let header = 2;
+    if (length === 0x81) {
+      length = buffer[i + 2];
+      header = 3;
+    } else if (length === 0x82) {
+      length = (buffer[i + 2] << 8) | buffer[i + 3];
+      header = 4;
     }
 
-    if (i + 2 + length > buffer.length) {
+    if (i + header > buffer.length) {
+      errors.push(`الحقل ${tag} يُعلن طولاً ممتداً ثم تنتهي البيانات قبل قراءته`);
+      break;
+    }
+
+    if (i + header + length > buffer.length) {
       errors.push(`الحقل ${tag} يحدد طول ${length} بايت لكن البيانات المتاحة أقل`);
       break;
     }
 
-    const valueBytes = buffer.slice(i + 2, i + 2 + length);
+    const valueBytes = buffer.slice(i + header, i + header + length);
 
     // Decode UTF-8
     try {
@@ -97,7 +123,7 @@ function parseTLV(buffer) {
       errors.push(`الحقل ${tag} يحتوي على بيانات UTF-8 غير صالحة`);
     }
 
-    i += 2 + length;
+    i += header + length;
   }
 
   return { ok: errors.length === 0, tags, errors };
@@ -128,14 +154,16 @@ function validateSellerName(tagData) {
       severity: 'error',
     };
   }
-  // Check byte length ≤ 255 — mirrors _tlv() line 43
-  if (tagData.byteLength > 255) {
+  // الحدّ الحاكم ليس 255 بايتاً للحقل، بل **سقف الـ700 حرفاً للرمز كله**
+  // (§4.1). وترميز BER يحمل حتى 65,535 بايتاً، فلا معنى لحدٍّ عند 255 —
+  // وكان الفحص هنا ميّتاً أصلاً: `buffer[i+1]` لا يتجاوز 255 بحكم النوع.
+  if (tagData.byteLength > MAX_TLV_VALUE_BYTES) {
     return {
       passed: false,
       tag: 1,
       field: TAG_NAMES[1],
-      risk: `اسم البائع طويل جداً (${tagData.byteLength} بايت) — الحد الأقصى 255 بايت في Phase 1.`,
-      fix: 'اختصر اسم البائع ليكون أقل من 255 بايت في UTF-8.',
+      risk: `اسم البائع ${tagData.byteLength} بايتاً — ولا يُمثَّل طولٌ فوق ${MAX_TLV_VALUE_BYTES} في ترميز الطول.`,
+      fix: 'اختصر اسم البائع.',
       severity: 'error',
     };
   }

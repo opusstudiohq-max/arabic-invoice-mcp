@@ -1,0 +1,16 @@
+{
+  "measured_utc": "2026-09-01",
+  "counts": {
+    "zatca-xml-js": 21943,
+    "@axenda/zatca": 17376,
+    "@talha7k/zatca-qr": 1991,
+    "@talha7k/zatca": 1729,
+    "zatca-qr-tlv": 123,
+    "zatca-sdk": 300,
+    "zatca-qr-generator": 104,
+    "zatca-simplified-invoice-sdk": 10,
+    "@pioneersoft/zatca-einvoice": 646,
+    "@zatca/qr": 503,
+    "zatca": 190
+  }
+}

@@ -65,6 +65,7 @@ function buildCases() {
 
 test("تكافؤ التفقيط: JS مطابق لبايثون على كل حالة", () => {
   const cases = buildCases();
+  if (process.env.PARITY_COUNT) console.log("PARITY_CASES=" + cases.length);
   const expected = pythonTafgeet(cases);
   assert.equal(expected.length, cases.length, "عدد النتائج لا يطابق عدد الحالات");
 

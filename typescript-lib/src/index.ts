@@ -64,12 +64,30 @@ export function calculateVat(
 // ZATCA QR Code (TLV + Base64)
 // =============================================================================
 
+/**
+ * ترميز الطول بقواعد BER.
+ *
+ * كان هنا `if (encoded.length > 255) throw` — منقولاً عن نصّ المواصفة
+ * «The length shall be stored in one byte». وهو **تبسيطٌ ينكسر عند 128
+ * بايتاً**: البايت الواحد يحمل حتى 127 فقط، وما فوقه يلزمه `0x81`/`0x82`.
+ *
+ * والحسم من منتدى الهيئة نفسه، بنصّ صاحب المشكلة بعد إصلاحها: «our code
+ * assumed that the maximum length of the value is 1 byte … we were not
+ * properly convert it to TLV value».
+ * https://zatca1.discourse.group/t/qr-code-rejected-when-tag-1-company-name-exceeds-127-characters/7202
+ *
+ * **واسمٌ عربي من 64 حرفاً يبلغ 128 بايتاً** — فالحرف بايتان.
+ */
+function berLength(length: number): number[] {
+  if (length < 0x80) return [length];
+  if (length <= 0xFF) return [0x81, length];
+  if (length <= 0xFFFF) return [0x82, length >> 8, length & 0xFF];
+  throw new Error(`طول القيمة ${length} بايتاً يتجاوز ما يُمثَّل في رمز QR`);
+}
+
 function tlv(tag: number, value: string): Uint8Array {
   const encoded = new TextEncoder().encode(value);
-  if (encoded.length > 255) {
-    throw new Error(`TLV value too long (${encoded.length} bytes)`);
-  }
-  return new Uint8Array([tag, encoded.length, ...encoded]);
+  return new Uint8Array([tag, ...berLength(encoded.length), ...encoded]);
 }
 
 export interface ZatcaQRResult {

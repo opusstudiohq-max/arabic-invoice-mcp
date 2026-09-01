@@ -1,0 +1,1066 @@
+{
+  "generated_utc": "2026-09-01",
+  "downloads_measured_utc": "2026-09-01",
+  "cases_total": 10,
+  "sources": {
+    "spec": "ZATCA — Electronic Invoice Security Features Implementation Standards, §4.1 والجدول 3",
+    "forum": "https://zatca1.discourse.group/t/qr-code-rejected-when-tag-1-company-name-exceeds-127-characters/7202"
+  },
+  "rules": {
+    "Q1": {
+      "name": "الطول بعدد البايتات لا بعدد الأحرف",
+      "text": "طول القيمة يُكتب بعدد بايتات ترميز UTF-8 لا بعدد الأحرف (§4.1). و«شركة» أربعة أحرف وثمانِ بايتات — فمن عدّ الأحرف أنتج رمزاً يفشل قارئه بلا رسالة تشخيص.",
+      "source": "spec"
+    },
+    "Q2": {
+      "name": "الطول بقواعد BER عند 128 بايتاً",
+      "text": "نصّ المواصفة «The length shall be stored in one byte» تبسيطٌ ينكسر عند 128: البايت الواحد يحمل حتى 127، وما فوقه يلزمه 0x81 ثم بايت الطول. والحسم من منتدى الهيئة نفسه بنصّ صاحب المشكلة بعد إصلاحها: «our code assumed that the maximum length of the value is 1 byte … we were not properly convert it to TLV value». وحدُّ 128 يبلغه اسمٌ عربي من 64 حرفاً — فالحرف بايتان.",
+      "source": "forum"
+    },
+    "Q3": {
+      "name": "الطول بقواعد BER فوق 255 بايتاً",
+      "text": "ما جاوز 255 بايتاً يلزمه 0x82 ثم بايتان بترتيب كبير-أولاً. واسمٌ عربي من 128 حرفاً يبلغ 256 بايتاً.",
+      "source": "forum"
+    },
+    "Q4": {
+      "name": "ترتيب الوسوم 1 ثم 2 ثم 3 ثم 4 ثم 5",
+      "text": "الجدول 3 يُرتّب الوسوم: اسم البائع، ثم الرقم الضريبي، ثم الطابع الزمني، ثم الإجمالي شامل الضريبة، ثم مبلغ الضريبة. والترتيب جزءٌ من البنية لا تفصيلٌ تجميلي.",
+      "source": "spec"
+    },
+    "Q5": {
+      "name": "القيمة تصل كما كُتبت",
+      "text": "الاسم المُدخَل يجب أن يخرج من الفكّ كما دخل — لا بتراً ولا تحريفاً في الترميز. وهذه القاعدة تكشف عيب الطول من الجهة الأخرى: طولٌ خاطئ يُنتج قيمةً مبتورة.",
+      "source": "spec"
+    },
+    "Q6": {
+      "name": "المبلغ كما يُطبع على الفاتورة",
+      "text": "الوسمان 4 و5 يحملان المبلغ **نصّاً كما يُطبع** على الفاتورة. فمن أعاد تنسيقه («1000.00» ⇐ «1000») خالف المطبوع، ورمزُه لا يطابق وجه الفاتورة.",
+      "source": "spec"
+    },
+    "Q7": {
+      "name": "الطابع الزمني كما أُعطي",
+      "text": "الوسم 3 طابعٌ زمني بصيغة ISO 8601 مع منطقة زمنية. ومن أعاد صياغته صامتاً غيّر قيمةً تدخل في المطابقة.",
+      "source": "spec"
+    }
+  },
+  "cases": [
+    {
+      "id": "ascii-baseline",
+      "rule": "Q4",
+      "why": "الحدّ الأدنى: حقول لاتينية قصيرة. من أخفق هنا لا يبني TLV أصلاً.",
+      "fields": {
+        "sellerName": "Bobs Records",
+        "vatNumber": "310122393500003",
+        "timestamp": "2022-04-25T15:30:00Z",
+        "totalWithVat": "1000.00",
+        "vatAmount": "150.00"
+      },
+      "expect": {
+        "tags": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      }
+    },
+    {
+      "id": "arabic-byte-length",
+      "rule": "Q1",
+      "why": "«شركة» أربعة أحرف وثمانِ بايتات — أشهر فخّ يُسقط التطبيقات الساذجة.",
+      "fields": {
+        "sellerName": "شركة",
+        "vatNumber": "310122393500003",
+        "timestamp": "2022-04-25T15:30:00Z",
+        "totalWithVat": "1000.00",
+        "vatAmount": "150.00"
+      },
+      "expect": {
+        "tag1_declared_length": 8
+      }
+    },
+    {
+      "id": "arabic-63-chars",
+      "rule": "Q1",
+      "why": "126 بايتاً — تحت الحدّ مباشرة، فبايتٌ واحد يحمله.",
+      "fields": {
+        "sellerName": "ش×63",
+        "vatNumber": "310122393500003",
+        "timestamp": "2022-04-25T15:30:00Z",
+        "totalWithVat": "1000.00",
+        "vatAmount": "150.00"
+      },
+      "expect": {
+        "tag1_declared_length": 126,
+        "tag1_length_form": "short"
+      }
+    },
+    {
+      "id": "arabic-64-chars",
+      "rule": "Q2",
+      "why": "128 بايتاً بالضبط — **هنا ينكسر كل من قرأ نصّ المواصفة حرفياً**. واسمُ منشأةٍ سعودية من 64 حرفاً عاديّ تماماً.",
+      "fields": {
+        "sellerName": "ش×64",
+        "vatNumber": "310122393500003",
+        "timestamp": "2022-04-25T15:30:00Z",
+        "totalWithVat": "1000.00",
+        "vatAmount": "150.00"
+      },
+      "expect": {
+        "tag1_declared_length": 128,
+        "tag1_length_form": "0x81"
+      }
+    },
+    {
+      "id": "arabic-100-chars",
+      "rule": "Q2",
+      "why": "200 بايتاً — داخل مدى 0x81 وبعيداً عن الحدّ، فلا يُنجي من الخطأ حظُّ الحدود.",
+      "fields": {
+        "sellerName": "ش×100",
+        "vatNumber": "310122393500003",
+        "timestamp": "2022-04-25T15:30:00Z",
+        "totalWithVat": "1000.00",
+        "vatAmount": "150.00"
+      },
+      "expect": {
+        "tag1_declared_length": 200,
+        "tag1_length_form": "0x81"
+      }
+    },
+    {
+      "id": "arabic-128-chars",
+      "rule": "Q3",
+      "why": "256 بايتاً — يعبر مدى البايت الواحد كلّه إلى 0x82.",
+      "fields": {
+        "sellerName": "ش×128",
+        "vatNumber": "310122393500003",
+        "timestamp": "2022-04-25T15:30:00Z",
+        "totalWithVat": "1000.00",
+        "vatAmount": "150.00"
+      },
+      "expect": {
+        "tag1_declared_length": 256,
+        "tag1_length_form": "0x82"
+      }
+    },
+    {
+      "id": "roundtrip-long-arabic",
+      "rule": "Q5",
+      "why": "اسمٌ من 64 حرفاً يخرج كما دخل. القاعدة نفسها من جهة القيمة لا من جهة الطول.",
+      "fields": {
+        "sellerName": "ش×64",
+        "vatNumber": "310122393500003",
+        "timestamp": "2022-04-25T15:30:00Z",
+        "totalWithVat": "1000.00",
+        "vatAmount": "150.00"
+      },
+      "expect": {
+        "tag1_value_intact": true
+      }
+    },
+    {
+      "id": "realistic-saudi-name",
+      "rule": "Q5",
+      "why": "اسمٌ سعودي واقعي بطوله الطبيعي — لا سلسلةَ حرفٍ مكرّر.",
+      "fields": {
+        "sellerName": "مؤسسة عبد الرحمن بن محمد العتيبي للتجارة والمقاولات العامة",
+        "vatNumber": "310122393500003",
+        "timestamp": "2022-04-25T15:30:00Z",
+        "totalWithVat": "1150.00",
+        "vatAmount": "150.00"
+      },
+      "expect": {
+        "tag1_value_intact": true
+      }
+    },
+    {
+      "id": "amount-as-printed",
+      "rule": "Q6",
+      "why": "«1000.00» على وجه الفاتورة يجب أن يكون «1000.00» في الرمز — لا «1000».",
+      "fields": {
+        "sellerName": "Bobs Records",
+        "vatNumber": "310122393500003",
+        "timestamp": "2022-04-25T15:30:00Z",
+        "totalWithVat": "1000.00",
+        "vatAmount": "150.00"
+      },
+      "expect": {
+        "tag4_value": "1000.00",
+        "tag5_value": "150.00"
+      }
+    },
+    {
+      "id": "timestamp-verbatim",
+      "rule": "Q7",
+      "why": "الطابع الزمني يدخل في المطابقة — وإعادةُ صياغته صامتاً تغيير قيمة.",
+      "fields": {
+        "sellerName": "Bobs Records",
+        "vatNumber": "310122393500003",
+        "timestamp": "2022-04-25T15:30:00Z",
+        "totalWithVat": "1000.00",
+        "vatAmount": "150.00"
+      },
+      "expect": {
+        "tag3_value": "2022-04-25T15:30:00Z"
+      }
+    }
+  ],
+  "engines": [
+    {
+      "id": "fatura",
+      "name": "فاتورة",
+      "ours": true,
+      "note": "نسختنا — أُصلحت بعد أن كشفها هذا المقياس نفسه",
+      "total": 10,
+      "pass": 10,
+      "fail": 0,
+      "rate": 100,
+      "rows": [
+        {
+          "id": "ascii-baseline",
+          "rule": "Q4",
+          "ok": true
+        },
+        {
+          "id": "arabic-byte-length",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-63-chars",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-64-chars",
+          "rule": "Q2",
+          "ok": true
+        },
+        {
+          "id": "arabic-100-chars",
+          "rule": "Q2",
+          "ok": true
+        },
+        {
+          "id": "arabic-128-chars",
+          "rule": "Q3",
+          "ok": true
+        },
+        {
+          "id": "roundtrip-long-arabic",
+          "rule": "Q5",
+          "ok": true
+        },
+        {
+          "id": "realistic-saudi-name",
+          "rule": "Q5",
+          "ok": true
+        },
+        {
+          "id": "amount-as-printed",
+          "rule": "Q6",
+          "ok": true
+        },
+        {
+          "id": "timestamp-verbatim",
+          "rule": "Q7",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "mcp-ts",
+      "name": "خادم MCP — البناء المشحون",
+      "ours": true,
+      "note": "البناء المشحون فعلاً لا نسخة المصدر. يُفحص هنا عمداً: من ينشر مقياساً يبدأ بنفسه",
+      "total": 10,
+      "pass": 10,
+      "fail": 0,
+      "rate": 100,
+      "rows": [
+        {
+          "id": "ascii-baseline",
+          "rule": "Q4",
+          "ok": true
+        },
+        {
+          "id": "arabic-byte-length",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-63-chars",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-64-chars",
+          "rule": "Q2",
+          "ok": true
+        },
+        {
+          "id": "arabic-100-chars",
+          "rule": "Q2",
+          "ok": true
+        },
+        {
+          "id": "arabic-128-chars",
+          "rule": "Q3",
+          "ok": true
+        },
+        {
+          "id": "roundtrip-long-arabic",
+          "rule": "Q5",
+          "ok": true
+        },
+        {
+          "id": "realistic-saudi-name",
+          "rule": "Q5",
+          "ok": true
+        },
+        {
+          "id": "amount-as-printed",
+          "rule": "Q6",
+          "ok": true
+        },
+        {
+          "id": "timestamp-verbatim",
+          "rule": "Q7",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "zatca-xml-js",
+      "name": "zatca-xml-js",
+      "npm": "zatca-xml-js",
+      "ours": false,
+      "monthly_downloads": 21943,
+      "total": 10,
+      "pass": 7,
+      "fail": 3,
+      "rate": 70,
+      "rows": [
+        {
+          "id": "ascii-baseline",
+          "rule": "Q4",
+          "ok": true
+        },
+        {
+          "id": "arabic-byte-length",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-63-chars",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-64-chars",
+          "rule": "Q2",
+          "ok": false,
+          "why": "شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80"
+        },
+        {
+          "id": "arabic-100-chars",
+          "rule": "Q2",
+          "ok": false,
+          "why": "شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0xc8"
+        },
+        {
+          "id": "arabic-128-chars",
+          "rule": "Q3",
+          "ok": false,
+          "why": "لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات"
+        },
+        {
+          "id": "roundtrip-long-arabic",
+          "rule": "Q5",
+          "ok": true
+        },
+        {
+          "id": "realistic-saudi-name",
+          "rule": "Q5",
+          "ok": true
+        },
+        {
+          "id": "amount-as-printed",
+          "rule": "Q6",
+          "ok": true
+        },
+        {
+          "id": "timestamp-verbatim",
+          "rule": "Q7",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "axenda",
+      "name": "@axenda/zatca",
+      "npm": "@axenda/zatca",
+      "ours": false,
+      "monthly_downloads": 17376,
+      "total": 10,
+      "pass": 6,
+      "fail": 4,
+      "rate": 60,
+      "rows": [
+        {
+          "id": "ascii-baseline",
+          "rule": "Q4",
+          "ok": true
+        },
+        {
+          "id": "arabic-byte-length",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-63-chars",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-64-chars",
+          "rule": "Q2",
+          "ok": false,
+          "why": "لا يُفكّ: الوسم 1 يُعلن 239 بايتاً ويتجاوز نهاية البيانات"
+        },
+        {
+          "id": "arabic-100-chars",
+          "rule": "Q2",
+          "ok": false,
+          "why": "لا يُفكّ: الوسم 48 يُعلن 90 بايتاً ويتجاوز نهاية البيانات"
+        },
+        {
+          "id": "arabic-128-chars",
+          "rule": "Q3",
+          "ok": false,
+          "why": "لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات"
+        },
+        {
+          "id": "roundtrip-long-arabic",
+          "rule": "Q5",
+          "ok": false,
+          "why": "لا يُفكّ: الوسم 1 يُعلن 239 بايتاً ويتجاوز نهاية البيانات"
+        },
+        {
+          "id": "realistic-saudi-name",
+          "rule": "Q5",
+          "ok": true
+        },
+        {
+          "id": "amount-as-printed",
+          "rule": "Q6",
+          "ok": true
+        },
+        {
+          "id": "timestamp-verbatim",
+          "rule": "Q7",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "talha7k-qr",
+      "name": "@talha7k/zatca-qr",
+      "npm": "@talha7k/zatca-qr",
+      "ours": false,
+      "monthly_downloads": 1991,
+      "total": 10,
+      "pass": 10,
+      "fail": 0,
+      "rate": 100,
+      "rows": [
+        {
+          "id": "ascii-baseline",
+          "rule": "Q4",
+          "ok": true
+        },
+        {
+          "id": "arabic-byte-length",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-63-chars",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-64-chars",
+          "rule": "Q2",
+          "ok": true
+        },
+        {
+          "id": "arabic-100-chars",
+          "rule": "Q2",
+          "ok": true
+        },
+        {
+          "id": "arabic-128-chars",
+          "rule": "Q3",
+          "ok": true
+        },
+        {
+          "id": "roundtrip-long-arabic",
+          "rule": "Q5",
+          "ok": true
+        },
+        {
+          "id": "realistic-saudi-name",
+          "rule": "Q5",
+          "ok": true
+        },
+        {
+          "id": "amount-as-printed",
+          "rule": "Q6",
+          "ok": true
+        },
+        {
+          "id": "timestamp-verbatim",
+          "rule": "Q7",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "talha7k",
+      "name": "@talha7k/zatca",
+      "npm": "@talha7k/zatca",
+      "ours": false,
+      "monthly_downloads": 1729,
+      "total": 10,
+      "pass": 10,
+      "fail": 0,
+      "rate": 100,
+      "rows": [
+        {
+          "id": "ascii-baseline",
+          "rule": "Q4",
+          "ok": true
+        },
+        {
+          "id": "arabic-byte-length",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-63-chars",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-64-chars",
+          "rule": "Q2",
+          "ok": true
+        },
+        {
+          "id": "arabic-100-chars",
+          "rule": "Q2",
+          "ok": true
+        },
+        {
+          "id": "arabic-128-chars",
+          "rule": "Q3",
+          "ok": true
+        },
+        {
+          "id": "roundtrip-long-arabic",
+          "rule": "Q5",
+          "ok": true
+        },
+        {
+          "id": "realistic-saudi-name",
+          "rule": "Q5",
+          "ok": true
+        },
+        {
+          "id": "amount-as-printed",
+          "rule": "Q6",
+          "ok": true
+        },
+        {
+          "id": "timestamp-verbatim",
+          "rule": "Q7",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "zatca-qr-tlv",
+      "name": "zatca-qr-tlv",
+      "npm": "zatca-qr-tlv",
+      "ours": false,
+      "monthly_downloads": 123,
+      "total": 10,
+      "pass": 7,
+      "fail": 3,
+      "rate": 70,
+      "rows": [
+        {
+          "id": "ascii-baseline",
+          "rule": "Q4",
+          "ok": true
+        },
+        {
+          "id": "arabic-byte-length",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-63-chars",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-64-chars",
+          "rule": "Q2",
+          "ok": false,
+          "why": "شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80"
+        },
+        {
+          "id": "arabic-100-chars",
+          "rule": "Q2",
+          "ok": false,
+          "why": "شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0xc8"
+        },
+        {
+          "id": "arabic-128-chars",
+          "rule": "Q3",
+          "ok": false,
+          "why": "استثناء: ZATCA QR field 1 is 256 bytes; the format allows at most 255"
+        },
+        {
+          "id": "roundtrip-long-arabic",
+          "rule": "Q5",
+          "ok": true
+        },
+        {
+          "id": "realistic-saudi-name",
+          "rule": "Q5",
+          "ok": true
+        },
+        {
+          "id": "amount-as-printed",
+          "rule": "Q6",
+          "ok": true
+        },
+        {
+          "id": "timestamp-verbatim",
+          "rule": "Q7",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "zatca-sdk",
+      "name": "zatca-sdk",
+      "npm": "zatca-sdk",
+      "ours": false,
+      "note": "يبني المرحلة الثانية فقط — تُمرَّر حقول التوقيع صورياً وتُفحص الوسوم 1-5",
+      "monthly_downloads": 300,
+      "total": 10,
+      "pass": 7,
+      "fail": 3,
+      "rate": 70,
+      "rows": [
+        {
+          "id": "ascii-baseline",
+          "rule": "Q4",
+          "ok": true
+        },
+        {
+          "id": "arabic-byte-length",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-63-chars",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-64-chars",
+          "rule": "Q2",
+          "ok": false,
+          "why": "شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80"
+        },
+        {
+          "id": "arabic-100-chars",
+          "rule": "Q2",
+          "ok": false,
+          "why": "شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0xc8"
+        },
+        {
+          "id": "arabic-128-chars",
+          "rule": "Q3",
+          "ok": false,
+          "why": "استثناء: TLV tag 1 value is 256 bytes; ZATCA TLV supports at most 255"
+        },
+        {
+          "id": "roundtrip-long-arabic",
+          "rule": "Q5",
+          "ok": true
+        },
+        {
+          "id": "realistic-saudi-name",
+          "rule": "Q5",
+          "ok": true
+        },
+        {
+          "id": "amount-as-printed",
+          "rule": "Q6",
+          "ok": true
+        },
+        {
+          "id": "timestamp-verbatim",
+          "rule": "Q7",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "zatca-qr-generator",
+      "name": "zatca-qr-generator",
+      "npm": "zatca-qr-generator",
+      "ours": false,
+      "monthly_downloads": 104,
+      "total": 10,
+      "pass": 7,
+      "fail": 3,
+      "rate": 70,
+      "rows": [
+        {
+          "id": "ascii-baseline",
+          "rule": "Q4",
+          "ok": true
+        },
+        {
+          "id": "arabic-byte-length",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-63-chars",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-64-chars",
+          "rule": "Q2",
+          "ok": false,
+          "why": "شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80"
+        },
+        {
+          "id": "arabic-100-chars",
+          "rule": "Q2",
+          "ok": false,
+          "why": "شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0xc8"
+        },
+        {
+          "id": "arabic-128-chars",
+          "rule": "Q3",
+          "ok": false,
+          "why": "لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات"
+        },
+        {
+          "id": "roundtrip-long-arabic",
+          "rule": "Q5",
+          "ok": true
+        },
+        {
+          "id": "realistic-saudi-name",
+          "rule": "Q5",
+          "ok": true
+        },
+        {
+          "id": "amount-as-printed",
+          "rule": "Q6",
+          "ok": true
+        },
+        {
+          "id": "timestamp-verbatim",
+          "rule": "Q7",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "zatca-simplified",
+      "name": "zatca-simplified-invoice-sdk",
+      "npm": "zatca-simplified-invoice-sdk",
+      "ours": false,
+      "monthly_downloads": 10,
+      "total": 10,
+      "pass": 7,
+      "fail": 3,
+      "rate": 70,
+      "rows": [
+        {
+          "id": "ascii-baseline",
+          "rule": "Q4",
+          "ok": true
+        },
+        {
+          "id": "arabic-byte-length",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-63-chars",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-64-chars",
+          "rule": "Q2",
+          "ok": false,
+          "why": "شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80"
+        },
+        {
+          "id": "arabic-100-chars",
+          "rule": "Q2",
+          "ok": false,
+          "why": "شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0xc8"
+        },
+        {
+          "id": "arabic-128-chars",
+          "rule": "Q3",
+          "ok": false,
+          "why": "استثناء: tag 1 value exceeds 255 UTF-8 bytes"
+        },
+        {
+          "id": "roundtrip-long-arabic",
+          "rule": "Q5",
+          "ok": true
+        },
+        {
+          "id": "realistic-saudi-name",
+          "rule": "Q5",
+          "ok": true
+        },
+        {
+          "id": "amount-as-printed",
+          "rule": "Q6",
+          "ok": true
+        },
+        {
+          "id": "timestamp-verbatim",
+          "rule": "Q7",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "pioneersoft",
+      "name": "@pioneersoft/zatca-einvoice",
+      "npm": "@pioneersoft/zatca-einvoice",
+      "ours": false,
+      "monthly_downloads": 646,
+      "total": 10,
+      "pass": 6,
+      "fail": 4,
+      "rate": 60,
+      "rows": [
+        {
+          "id": "ascii-baseline",
+          "rule": "Q4",
+          "ok": true
+        },
+        {
+          "id": "arabic-byte-length",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-63-chars",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-64-chars",
+          "rule": "Q2",
+          "ok": false,
+          "why": "شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80"
+        },
+        {
+          "id": "arabic-100-chars",
+          "rule": "Q2",
+          "ok": false,
+          "why": "شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0xc8"
+        },
+        {
+          "id": "arabic-128-chars",
+          "rule": "Q3",
+          "ok": false,
+          "why": "لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات"
+        },
+        {
+          "id": "roundtrip-long-arabic",
+          "rule": "Q5",
+          "ok": true
+        },
+        {
+          "id": "realistic-saudi-name",
+          "rule": "Q5",
+          "ok": true
+        },
+        {
+          "id": "amount-as-printed",
+          "rule": "Q6",
+          "ok": true
+        },
+        {
+          "id": "timestamp-verbatim",
+          "rule": "Q7",
+          "ok": false,
+          "why": "الطابع الزمني «2022-04-25T15:30:00» والمتوقَّع «2022-04-25T15:30:00Z»"
+        }
+      ]
+    },
+    {
+      "id": "zatca-qr-scoped",
+      "name": "@zatca/qr",
+      "npm": "@zatca/qr",
+      "ours": false,
+      "monthly_downloads": 503,
+      "total": 10,
+      "pass": 6,
+      "fail": 4,
+      "rate": 60,
+      "rows": [
+        {
+          "id": "ascii-baseline",
+          "rule": "Q4",
+          "ok": true
+        },
+        {
+          "id": "arabic-byte-length",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-63-chars",
+          "rule": "Q1",
+          "ok": true
+        },
+        {
+          "id": "arabic-64-chars",
+          "rule": "Q2",
+          "ok": false,
+          "why": "لا يُفكّ: الوسم 1 يُعلن 239 بايتاً ويتجاوز نهاية البيانات"
+        },
+        {
+          "id": "arabic-100-chars",
+          "rule": "Q2",
+          "ok": false,
+          "why": "لا يُفكّ: الوسم 48 يُعلن 90 بايتاً ويتجاوز نهاية البيانات"
+        },
+        {
+          "id": "arabic-128-chars",
+          "rule": "Q3",
+          "ok": false,
+          "why": "لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات"
+        },
+        {
+          "id": "roundtrip-long-arabic",
+          "rule": "Q5",
+          "ok": false,
+          "why": "لا يُفكّ: الوسم 1 يُعلن 239 بايتاً ويتجاوز نهاية البيانات"
+        },
+        {
+          "id": "realistic-saudi-name",
+          "rule": "Q5",
+          "ok": true
+        },
+        {
+          "id": "amount-as-printed",
+          "rule": "Q6",
+          "ok": true
+        },
+        {
+          "id": "timestamp-verbatim",
+          "rule": "Q7",
+          "ok": true
+        }
+      ]
+    },
+    {
+      "id": "zatca",
+      "name": "zatca",
+      "npm": "zatca",
+      "ours": false,
+      "note": "منشورة أيضاً باسم ‎@tatwerat/zatca",
+      "adapter_note": "ترفض «2022-04-25T15:30:00Z» وتشترط كسور الثواني ‎.000Z‎ — تُقاد بها ليُقاس الترميز",
+      "monthly_downloads": 190,
+      "total": 10,
+      "pass": 2,
+      "fail": 8,
+      "rate": 20,
+      "rows": [
+        {
+          "id": "ascii-baseline",
+          "rule": "Q4",
+          "ok": true
+        },
+        {
+          "id": "arabic-byte-length",
+          "rule": "Q1",
+          "ok": false,
+          "why": "لا يُفكّ: الوسم 217 يُعلن 131 بايتاً ويتجاوز نهاية البيانات"
+        },
+        {
+          "id": "arabic-63-chars",
+          "rule": "Q1",
+          "ok": false,
+          "why": "لا يُفكّ: الوسم 180 يُعلن 216 بايتاً ويتجاوز نهاية البيانات"
+        },
+        {
+          "id": "arabic-64-chars",
+          "rule": "Q2",
+          "ok": false,
+          "why": "لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات"
+        },
+        {
+          "id": "arabic-100-chars",
+          "rule": "Q2",
+          "ok": false,
+          "why": "لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات"
+        },
+        {
+          "id": "arabic-128-chars",
+          "rule": "Q3",
+          "ok": false,
+          "why": "لا يُفكّ: الوسم 49 يُعلن 53 بايتاً ويتجاوز نهاية البيانات"
+        },
+        {
+          "id": "roundtrip-long-arabic",
+          "rule": "Q5",
+          "ok": false,
+          "why": "لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات"
+        },
+        {
+          "id": "realistic-saudi-name",
+          "rule": "Q5",
+          "ok": false,
+          "why": "لا يُفكّ: الوسم 167 يُعلن 216 بايتاً ويتجاوز نهاية البيانات"
+        },
+        {
+          "id": "amount-as-printed",
+          "rule": "Q6",
+          "ok": true
+        },
+        {
+          "id": "timestamp-verbatim",
+          "rule": "Q7",
+          "ok": false,
+          "why": "الطابع الزمني «2022-04-25T15:30:00.000Z» والمتوقَّع «2022-04-25T15:30:00Z»"
+        }
+      ]
+    }
+  ]
+}

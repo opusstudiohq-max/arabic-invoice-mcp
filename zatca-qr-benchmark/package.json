@@ -1,0 +1,24 @@
+{
+  "name": "zatca-qr-benchmark",
+  "private": true,
+  "type": "module",
+  "description": "مقياس مفتوح لرمز QR السعودي — يقيس حزم npm المنشورة مقابل نصّ المواصفة وحسم منتدى الهيئة",
+  "scripts": {
+    "bench": "node run.mjs && node build.mjs",
+    "test": "node --test tests/"
+  },
+  "devDependencies": {
+    "@axenda/zatca": "^1.0.4",
+    "@khaledhajsalem/zatca-node": "^1.0.4",
+    "@pioneersoft/zatca-einvoice": "^0.1.9",
+    "@talha7k/zatca": "^0.11.1",
+    "@talha7k/zatca-qr": "^1.2.2",
+    "@zatca/qr": "^1.4.0",
+    "zatca": "^1.0.2",
+    "zatca-qr-generator": "^1.1.1",
+    "zatca-qr-tlv": "^1.0.0",
+    "zatca-sdk": "^0.1.1",
+    "zatca-simplified-invoice-sdk": "^0.1.0",
+    "zatca-xml-js": "^0.1.9"
+  }
+}

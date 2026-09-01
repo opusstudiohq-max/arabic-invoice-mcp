@@ -18,6 +18,21 @@ const cases = JSON.parse(readFileSync(join(HERE, "cases.json"), "utf-8"));
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
+/**
+ * تاريخٌ ISO داخل نصٍّ عربي.
+ *
+ * «2026-09-01» في فقرةٍ يمينية يُعرض **«01-09-2026»** — والشرطة ES لا تلتحق
+ * بالرقم العربي الصنف (قاعدة W4 من UAX #9)، فتبقى محايدةً وتنعكس المقاطع.
+ * وهو **سلوك يونيكود الصحيح** لا عيبُ متصفّح.
+ *
+ * وقد وثّقنا هذه الحالة بعينها في مقياس الـPDF عندنا، ثم ارتكبناها على
+ * صفحتينا المنشورتين: التاريخ في تذييلهما كان مقلوباً على الشاشة. اكتشفه
+ * قياسُ الترتيب البصري لا النظر.
+ *
+ * والعلاج عزلُ المقطع، وهو ما يفعله `<bdi dir="ltr">`.
+ */
+const isoDate = (s) => `<bdi dir="ltr">${esc(s)}</bdi>`;
+
 /** المقاطع الاتجاهية تُعرض داخل عزلٍ حتى لا تفسد ترتيب الصفحة نفسها. */
 const iso = (s) => `<bdi>${esc(s)}</bdi>`;
 
@@ -228,7 +243,7 @@ node run.mjs</code></pre>
 
 <footer>
   <p>
-    وُلِّدت في ${esc(results.generated_utc)} من تشغيلٍ فعلي.
+    وُلِّدت في ${isoDate(results.generated_utc)} من تشغيلٍ فعلي.
     الأدوات:
     <a href="https://opusstudiohq-max.github.io/arabic-invoice-mcp/invoice/">فاتورة PDF</a> ·
     <a href="https://opusstudiohq-max.github.io/arabic-invoice-mcp/checker/">فاحص QR</a> ·
