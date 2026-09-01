@@ -9,6 +9,8 @@ export {
   resolveRuns,
   paragraphDirection,
   mirror,
+  isolate,
+  stripIsolates,
   type DirectionalRun,
   type BaseDirection,
 } from "./runs.js";

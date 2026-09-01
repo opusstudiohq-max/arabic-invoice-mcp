@@ -27,6 +27,12 @@ _ISO8601_STRICT = re.compile(
 )
 
 
+#: سقف طول نصّ Base64 كما تنصّ عليه المواصفة الرسمية، §4.1.
+#: [ZATCA — Electronic Invoice Security Features Implementation Standards v1.1،
+#:  الصفحة 25؛ مُنزَّل ومُستخرَج نصّاً في 1 سبتمبر 2026]
+MAX_QR_BASE64_LENGTH = 700
+
+
 def _tlv(tag: int, value: str) -> bytes:
     """
     بناء TLV field: Tag (1 byte) + Length (1 byte) + Value (UTF-8 bytes).
@@ -114,18 +120,27 @@ def encode_zatca_qr(
     Returns:
         نص Base64 — يتم تحويله لـ QR code
 
+    Raises:
+        ValueError: إن تجاوز الناتج 700 حرف، وهو سقف المواصفة
+
     Example:
         >>> encode_zatca_qr(
-        ...     "Opus Studio",
-        ...     "300123456700003",
-        ...     "2026-07-04T15:30:00Z",
-        ...     "1150.00",
-        ...     "150.00"
+        ...     "Bobs Records", "310122393500003",
+        ...     "2022-04-25T15:30:00Z", "1000.00", "150.00"
         ... )
-        'Ak5vciDihqjih4...'
+        'AQxCb2JzIFJlY29yZHMCDzMxMDEyMjM5MzUwMDAwMwMUMjAyMi0wNC0yNVQxNTozMDowMFoEBzEwMDAuMDAFBjE1MC4wMA=='
     """
     tlv_buffer = build_zatca_tlv(seller_name, vat_number, timestamp, total_with_vat, vat_amount)
-    return base64.b64encode(tlv_buffer).decode("ascii")
+    encoded = base64.b64encode(tlv_buffer).decode("ascii")
+    # سقف المواصفة نصّاً: «encoded in Base64 format with up to 700 characters»
+    # [ZATCA — E-Invoice Security Features Implementation Standards v1.1، §4.1].
+    # ويُبلغ باسمٍ عربي طويل: كل حرف عربي ثلاث بايتات في UTF-8.
+    if len(encoded) > MAX_QR_BASE64_LENGTH:
+        raise ValueError(
+            f"ناتج QR {len(encoded)} حرفاً ويتجاوز سقف المواصفة "
+            f"({MAX_QR_BASE64_LENGTH}) — اختصر اسم البائع"
+        )
+    return encoded
 
 
 def generate_qr_image(

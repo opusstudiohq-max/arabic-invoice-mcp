@@ -6,7 +6,7 @@
     "من يكتبه: الإنسان. عدّل باليد بعد كل إعادة تحقق: حدّث verified_on وادفع recheck_by للأمام.",
     "الحقول: id ثابت لا يتغير • claim نص الحقيقة كما ننشرها • source_url الرابط الرسمي (null = لم يُوثَّق بعد ويجب توثيقه عند أول إعادة فحص) • verified_on آخر تحقق فعلي • recheck_by آخر يوم مقبول بلا إعادة تحقق • expires_on يوم تتوقف فيه الحقيقة عن الصحة بذاتها (null = لا انتهاء معلوم) • watch_keywords كلمات مُطبَّعة (بدون همزات وبهاء بدل التاء المربوطة) يطابق بها الحسّاس عناوين الأخبار • published_in أين ننشر هذه الحقيقة"
   ],
-  "updated": "2026-08-21",
+  "updated": "2026-09-01",
   "facts": [
     {
       "id": "penalty-ladder",
@@ -208,6 +208,24 @@
       "published_in": [
         "BUSINESS-MODEL.md",
         "zatca-checker/index.html"
+      ]
+    },
+    {
+      "id": "zatca-qr-tlv-spec",
+      "claim": "رمز QR للفاتورة يُرمَّز TLV ثم Base64: الوسم بايت واحد، والطول = عدد بايتات ترميز UTF-8 للقيمة في بايت واحد، والقيمة بايتات UTF-8. وحدّ الناتج 700 حرفاً. الوسوم 1-5 من 4 ديسمبر 2021، والوسوم 6-9 (هاش XML، توقيع ECDSA، المفتاح العام، توقيع الهيئة للفواتير المبسطة) من 1 يناير 2023.",
+      "source_url": "https://zatca.gov.sa/ar/E-Invoicing/SystemsDevelopers/Documents/20220624_ZATCA_Electronic_Invoice_Security_Features_Implementation_Standards.pdf",
+      "source_note": "Electronic Invoice Security Features Implementation Standards v1.1، §4.1 والجدول 3، الصفحتان 25-26. نُزِّل المستند (1,409,842 بايتاً) واستُخرج نصّه، ولم يُنقل عن ذاكرة: عيّنة Base64 «رسمية» مستعادة من الذاكرة ثبت أنها فاسدة عند تفكيكها.",
+      "verified_on": "2026-09-01",
+      "recheck_by": "2027-03-01",
+      "watch_keywords": [
+        "QR",
+        "TLV",
+        "Security Features",
+        "Implementation Standards"
+      ],
+      "published_in": [
+        "zatca-checker/index.html",
+        "arabic-invoice-mcp/src/arabic_invoice_mcp/zatca_qr.py"
       ]
     }
   ]

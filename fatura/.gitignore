@@ -1,0 +1,6 @@
+
+# التبعيات والبناء والعيّنات
+node_modules/
+dist/
+invoice-sample.pdf
+invoice-sample.png

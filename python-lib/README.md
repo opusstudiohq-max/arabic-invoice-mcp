@@ -4,7 +4,7 @@
 
 > **توافق ZATCA Wave 24 وتفقيط مالي فصيح خلال 30 دقيقة فقط — تجنّب غرامات الهيئة وسرّع أعمالك دون الحاجة لأنظمة ERP معقدة وباهظة التكلفة.**
 
-خادم MCP لأدوات الفوترة العربية: توليد رمز QR بترميز TLV/Base64 (حقول المرحلة الأولى)، تفقيط الأرقام إلى كلمات عربية صحيحة نحوياً، وحسابات ضريبة القيمة المضافة والتأمينات. يعمل مع Claude Desktop و Claude Code و Cursor، ومغطى بـ **160 اختباراً آلياً**.
+خادم MCP لأدوات الفوترة العربية: توليد رمز QR بترميز TLV/Base64 (حقول المرحلة الأولى)، تفقيط الأرقام إلى كلمات عربية صحيحة نحوياً، وحسابات ضريبة القيمة المضافة والتأمينات. يعمل مع Claude Desktop و Claude Code و Cursor، ومغطى بـ **183 اختباراً آلياً**.
 
 > ⚠️ **النطاق بصراحة:** هذه أدوات توليد وفحص بنيوي. لا تشمل الوسوم التشفيرية للمرحلة الثانية (الهاش/التوقيع) ولا الربط بمنصة «فاتورة»، **ولا يمكنها تأكيد قبول الهيئة لأي فاتورة** — فحالة القبول تعيش في استجابة المنصة لا في الملف.
 
@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/badge/docker-build-blue.svg?logo=docker" alt="Docker Build">
   <a href="https://www.python.org/downloads/"><img src="https://img.shields.io/badge/python-3.10%2B-blue.svg" alt="Python"></a>
   <a href="https://pypi.org/project/arabic-invoice-mcp/"><img src="https://img.shields.io/badge/pypi-v3.0.0-orange.svg" alt="PyPI"></a>
-  <a href="https://github.com/opusstudiohq-max/arabic-invoice-mcp/stargazers"><img src="https://img.shields.io/badge/stars-%E2%AD%90-yellow.svg" alt="Stars"></a>
+  <a href="https://github.com/opusstudiohq-max/arabic-invoice-mcp"><img src="https://img.shields.io/github/stars/opusstudiohq-max/arabic-invoice-mcp?style=flat" alt="Stars"></a>
   <a href="#zatca-compliance"><img src="https://img.shields.io/badge/ZATCA-Phase%201%20(B2C)-green.svg" alt="ZATCA"></a>
 </p>
 
@@ -42,7 +42,7 @@
 - 🌍 **دعم اللهجات** — قواعد عربية فصحى صحيحة لكل دولة
 - 🔐 **ZATCA Compliance** — TLV + Base64 QR code + SHA-256 hash support
 - 🛡️ **Input validation** — VAT number, timestamp, seller name — كله validated
-- 📦 **Production-ready** — 160 tests، type hints، linting، CI/CD
+- 📦 **Production-ready** — 183 tests، type hints، linting، CI/CD
 
 </div>
 

@@ -66,6 +66,7 @@ LEGACY_SCAN_GLOBS = [
     "eta-lib/README.md",
     "eta-lib/ts/README.md",
     "arabic-text/README.md",
+    "invoice-pdf/README.md",
     "marketing/**/*.md",
     # كانت ثلاثة أنماط فقط، فبقيت أربعة ملفات خارج الحراسة — منها mostaql-profile.md
     # وهو نصّ الملف الشخصي الذي يُلصق على المنصة حرفياً. سطحٌ يراه العميل خارج
@@ -84,7 +85,12 @@ LEGACY_SCAN_GLOBS = [
 EXCLUDE_SUBSTRINGS = [
     "STRATEGY-V5", "BUSINESS-MODEL", "MASTER-REFERENCE", "REVENUE-PLAYBOOK",
     "ADVISOR-REVIEW", "CLAIMS-POLICY", "legal/", "_antigravity/", "_archive/",
-    "node_modules", "docs-site/site/", "/dist/", "tools/claims_lint.py",
+    "node_modules", "docs-site/site/", "tools/claims_lint.py",
+    # ناتج ترجمة TypeScript — مصدره مفحوص، ونسخته المترجَمة ضجيج مكرَّر.
+    # ولا يُستثنى `dist` عامةً: `cheque-tool/dist/` هو **الأداة المشحونة**
+    # نفسها، ملفٌ واحد يُرسَل للمستعمل — وإخفاؤه كان يُعيد العلّة عينها.
+    "arabic-invoice-mcp-ts/dist/", "eta-lib/ts/dist/", "arabic-text/dist/",
+    "typescript-lib/dist/", "nasq/dist/",
     # سجلّات قرارٍ ومراجعةٍ وبحث — تقتبس الادعاء المقتول لتوثّق قتله
     "AUDIT-", "DECISION-", "CEO-DECISIONS", "METHODOLOGY", "ROADMAP",
     "AI-MACHINE-DESIGN", "V3_MASTER_PLAN", "SESSION-", "PRODUCT-DISCOVERY",
@@ -199,9 +205,9 @@ TEST_COUNT_RE = re.compile(r"(\d{2,4})\s*(?:اختبار|اختباراً|اخت
 # بالواقع. أمّا الأصول خارج هذه الجذور فتتكلم عن حزمة المشروع كلها، ويجب
 # أن تتفق على رقم واحد.
 PACKAGE_ROOTS = (
-    "eta-lib/", "arabic-text/", "tafgeet-benchmark/",
+    "eta-lib/", "arabic-text/", "invoice-pdf/", "tafgeet-benchmark/",
     # أسماء المجلدات نفسها في المستودع العام — نسخة البوابة واحدة في الاثنين
-    "nasq/", "tafgeet/", "typescript-lib/", "python-lib/", "checker/",
+    "nasq/", "fatura/", "tafgeet/", "typescript-lib/", "python-lib/", "checker/",
 )
 
 

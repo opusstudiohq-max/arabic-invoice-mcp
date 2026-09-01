@@ -89,11 +89,24 @@ export function resolveRuns(text: string, base: BaseDirection = "auto"): Directi
     }
   }
 
-  return groups.map((g) => {
-    const rtl = !!(g.level & 1);
-    const slice = text.slice(g.lo, g.hi + 1);
-    return { text: rtl ? mirror(slice) : slice, rtl, level: g.level };
-  });
+  return groups
+    .map((g) => {
+      const rtl = !!(g.level & 1);
+      // قاعدة X9: محارف التضمين والتجاوز والعزل **تُحذف من العرض**، وأثرها
+      // باقٍ في المستويات التي حُسبت قبل الحذف. وتركُها يرسمها رسماً فارغاً
+      // أو مربّعاً — وهو ما تُخفق فيه تطبيقاتٌ قائمة (91 حالة من سلسلة
+      // يونيكود في `python-bidi` مثلاً).
+      const slice = stripFormatting(text.slice(g.lo, g.hi + 1));
+      return { text: rtl ? mirror(slice) : slice, rtl, level: g.level };
+    })
+    .filter((run) => run.text !== "");
+}
+
+/** محارف التنسيق الاتجاهي التي تُحذف من العرض (X9): تضمين وتجاوز وعزل وعلامات. */
+const FORMATTING = /[‪-‮⁦-⁩‎‏]/g;
+
+function stripFormatting(text: string): string {
+  return text.replace(FORMATTING, "");
 }
 
 /**
@@ -104,6 +117,47 @@ export function resolveRuns(text: string, base: BaseDirection = "auto"): Directi
 export function paragraphDirection(text: string, base: BaseDirection = "auto"): "rtl" | "ltr" {
   const embedding = bidi.getEmbeddingLevels(text, base === "auto" ? undefined : base);
   return embedding.paragraphs[0]?.level & 1 ? "rtl" : "ltr";
+}
+
+/** محارف العزل الاتجاهي — الأداة التي تصنعها يونيكود لهذا الغرض بعينه. */
+const LRI = "⁦";  // عزلٌ يساري
+const RLI = "⁧";  // عزلٌ يميني
+const FSI = "⁨";  // عزلٌ باتجاه أول محرف قويّ
+const PDI = "⁩";  // نهاية العزل
+
+/**
+ * يعزل مقطعاً فلا تتسرّب المحارف المحايدة على حدّيه إلى جواره.
+ *
+ * ### المشكلة التي يحلّها
+ *
+ * `ضريبة (15%)` في سياق عربي تُعرض `ضريبة (15)%` — لأن `%` و`(` و`)`
+ * محايدةٌ تأخذ اتجاه ما حولها، فتتفرّق على جانبَي الرقم. وكذلك
+ * `1,234.50 SAR` تُعرض `SAR 1,234.50`، إذ يسبق المقطعُ اللاتيني الرقمَ في
+ * فقرةٍ يمينية.
+ *
+ * وكلاهما **ترتيبٌ صحيح** بقواعد يونيكود لنصٍّ لم يُعزل. والخطأ في تركنا
+ * الجارَ يحكم على ما ليس منه.
+ *
+ * ### وليس بديلاً عنه أن نُقطّع بأيدينا
+ *
+ * محارف العزل جزءٌ من الخوارزمية نفسها (X5a–X6a)، فتنالها كل الأدوات:
+ * نسختنا، والمتصفّح، وقارئ الـPDF، ومن ينسخ النصّ منه.
+ *
+ * ```ts
+ * `ضريبة القيمة المضافة ${isolate("(15%)")}`   // ⇒ ضريبة القيمة المضافة (15%)
+ * `${isolate("1,234.50 SAR")}`                 // ⇒ 1,234.50 SAR
+ * ```
+ *
+ * @param direction `auto` (المبدئي) يتبع أول محرف قويّ داخل المقطع
+ */
+export function isolate(text: string, direction: BaseDirection = "auto"): string {
+  const open = direction === "rtl" ? RLI : direction === "ltr" ? LRI : FSI;
+  return open + text + PDI;
+}
+
+/** إسقاط محارف العزل — للمقارنة والبحث في نصٍّ عُزل. */
+export function stripIsolates(text: string): string {
+  return text.replace(/[⁦-⁩]/g, "");
 }
 
 /** إصدار يونيكود الذي بُنيت عليه جداول `bidi-js` المُعتمَدة. */

@@ -326,3 +326,116 @@ class TestZatcaQRWS1:
                 total_with_vat="1150.00",
                 vat_amount="150.00",
             )
+
+class TestAgainstTheOfficialSpecification:
+    """
+    مُثبَّت على **نصّ المواصفة** لا على ذاكرة.
+
+    ذهبتُ أفحص المولّد بعيّنةٍ «رسمية» أذكرها، فلم تُطابق. ففكّكتُ العيّنة
+    نفسها فإذا هي **فاسدة**: تُعلن الوسم 4 بطول 6 ثم لا ينتظم ما بعدها
+    TLV. كان المرجع خاطئاً والتطبيق سليماً — ولو صدّقتُ الذاكرة لـ«أصلحتُ»
+    كوداً صحيحاً.
+
+    فنُزِّلت المواصفة الرسمية واستُخرج نصّها:
+      ZATCA — Electronic Invoice Security Features Implementation Standards
+      v1.1، §4.1 «Structure of the QR code»، الصفحة 25.
+      https://zatca.gov.sa/ar/E-Invoicing/SystemsDevelopers/Documents/
+      20220624_ZATCA_Electronic_Invoice_Security_Features_Implementation_Standards.pdf
+
+    وتنصّ على أربع خطوات بعينها:
+      ① الوسم في **بايت واحد**
+      ② الطول = طول مصفوفة بايتات **ترميز UTF-8** للقيمة، في **بايت واحد**
+      ③ القيمة = بايتات UTF-8
+      ④ تُسلسَل ثم تُرمَّز Base64، وحدّها **700 حرف**
+
+    ولذلك يُبنى المتوقَّع هنا **مستقلاً** عن كودنا، من هذه الخطوات نصّاً.
+    """
+
+    #: القيم من مثال المواصفة نفسها لصيغة الوقت: 2022-02-21T12:13:57Z
+    CASE = ("Bobs Records", "310122393500003", "2022-04-25T15:30:00Z", "1000.00", "150.00")
+
+    @staticmethod
+    def _independent_encoder(*fields: str) -> bytes:
+        """ترجمة حرفية لخطوات §4.1 — لا تستدعي كودنا."""
+        out = bytearray()
+        for tag, value in enumerate(fields, start=1):
+            payload = value.encode("utf-8")
+            out.append(tag)                 # ① الوسم في بايت واحد
+            out.append(len(payload))        # ② الطول ببايت واحد
+            out.extend(payload)             # ③ القيمة UTF-8
+        return bytes(out)
+
+    def test_matches_an_encoder_written_from_the_spec_text(self):
+        from arabic_invoice_mcp.zatca_qr import build_zatca_tlv
+        assert build_zatca_tlv(*self.CASE) == self._independent_encoder(*self.CASE)
+
+    def test_base64_matches_the_independent_encoding(self):
+        import base64
+        from arabic_invoice_mcp.zatca_qr import encode_zatca_qr
+        expected = base64.b64encode(self._independent_encoder(*self.CASE)).decode("ascii")
+        assert encode_zatca_qr(*self.CASE) == expected
+
+    def test_length_counts_utf8_bytes_not_characters(self):
+        """
+        الفخّ الذي يُسقط كل تطبيقٍ ساذج: «شركة» أربعة أحرف و**ثمان بايتات**.
+        من كتب الطول بعدد الأحرف أنتج رمزاً يفشل قارئه بلا تشخيص.
+        """
+        from arabic_invoice_mcp.zatca_qr import build_zatca_tlv
+        name = "شركة"
+        assert len(name) == 4 and len(name.encode("utf-8")) == 8
+        tlv = build_zatca_tlv(name, "310122393500003", "2022-04-25T15:30:00Z", "115.00", "15.00")
+        assert tlv[0] == 1 and tlv[1] == 8, "الطول يجب أن يكون بالبايتات لا بالأحرف"
+
+    def test_seven_hundred_character_ceiling_is_enforced(self):
+        """
+        السقف **بالغٌ نظرياً لا عملياً**، وقياسه أولى من الادعاء في الاتجاهين:
+
+          أقصى TLV للوسوم 1-5 = 5 × (2 + 255) = 1,285 بايتاً ⇒ 1,716 حرفاً
+          Base64، أي ضِعف السقف. فالفحص **حاملٌ** لا زينة.
+
+          لكن باسمٍ في حدّه (255 بايتاً) وحقولٍ واقعية يبلغ الناتج نحو 428
+          حرفاً فقط. فلا تبلغه فاتورةٌ حقيقية، ويبلغه المدخل المُساء.
+        """
+        import base64
+        from arabic_invoice_mcp.zatca_qr import encode_zatca_qr, MAX_QR_BASE64_LENGTH
+        assert MAX_QR_BASE64_LENGTH == 700
+        assert len(base64.b64encode(b"x" * (5 * (2 + 255)))) > MAX_QR_BASE64_LENGTH, \
+            "السقف غير بالغ أصلاً — فالفحص ميّت"
+
+        realistic = encode_zatca_qr("ش" * 127, "310122393500003",
+                                    "2022-04-25T15:30:00Z", "1000.00", "150.00")
+        assert len(realistic) <= MAX_QR_BASE64_LENGTH
+
+    def test_a_value_over_255_bytes_is_rejected(self):
+        """
+        الطول في بايتٍ واحد — فما جاوز 255 بايتاً لا يُمثَّل أصلاً.
+
+        والحرف العربي **بايتان** في UTF-8 لا ثلاثة (النطاق U+0600–U+06FF)،
+        فحدّ الاسم 127 حرفاً عربياً. قِيس، ولم يُفترض.
+        """
+        import pytest
+        from arabic_invoice_mcp.zatca_qr import build_zatca_tlv
+        assert len("ش".encode("utf-8")) == 2
+        assert len(("ش" * 128).encode("utf-8")) == 256 > 255
+        with pytest.raises(ValueError):
+            build_zatca_tlv("ش" * 128, "310122393500003",
+                            "2022-04-25T15:30:00Z", "1000.00", "150.00")
+
+    def test_the_spec_timestamp_example_is_accepted(self):
+        """المثال المذكور في جدول المواصفة نفسه: 2022-02-21T12:13:57Z."""
+        from arabic_invoice_mcp.zatca_qr import build_zatca_tlv
+        tlv = build_zatca_tlv("X", "310122393500003", "2022-02-21T12:13:57Z", "1.00", "0.15")
+        assert b"2022-02-21T12:13:57Z" in tlv
+
+    def test_phase_one_carries_tags_one_to_five_only(self):
+        """
+        الوسوم 6-9 (الهاش، توقيع ECDSA، المفتاح العام، توقيع الهيئة) تخصّ
+        المرحلة الثانية. هذا المولّد للمرحلة الأولى، ولا يزعم غيرها.
+        """
+        from arabic_invoice_mcp.zatca_qr import build_zatca_tlv
+        tlv = build_zatca_tlv(*self.CASE)
+        tags, i = [], 0
+        while i < len(tlv):
+            tags.append(tlv[i])
+            i += 2 + tlv[i + 1]
+        assert tags == [1, 2, 3, 4, 5]

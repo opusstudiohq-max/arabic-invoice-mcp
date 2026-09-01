@@ -9,7 +9,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { resolveRuns, paragraphDirection, mirror } from "../dist/index.js";
+import { resolveRuns, paragraphDirection, mirror, isolate, stripIsolates } from "../dist/index.js";
 
 /** ما تخرج به الدالة، منسوقاً للقراءة. */
 const shape = (text, base) => resolveRuns(text, base).map((r) => `${r.rtl ? "◀" : "▶"}${r.text}`);
@@ -142,4 +142,55 @@ test("عدد الاختبارات في README يطابق الواقع", async ()
     assert.equal(n, actual,
       `README يعلن ${n} اختباراً و«npm test» يشغّل ${actual} — أحدهما انجرف`);
   }
+});
+
+/**
+ * العزل — الأداة التي تصنعها يونيكود لمنع الجار من الحكم على ما ليس منه.
+ *
+ * كشفت هذه الحاجةَ **عينٌ لا اختبار**: نظرتُ إلى فاتورة مولَّدة فوجدت
+ * «(15% )150.00» بدل «150.00 (15%)»، و«SAR 1,571.75» بدل «1,571.75 SAR».
+ * وكلاهما ترتيبٌ صحيح بقواعد يونيكود لنصٍّ لم يُعزل — والخطأ خطؤنا.
+ */
+test("العزل يُبقي الجزء المحايد مع رقمه", () => {
+  const bare = resolveRuns("ضريبة القيمة المضافة (15%)", "rtl").map((r) => r.text);
+  assert.ok(bare.length > 2, "بلا عزل تتفرّق الأقواس وعلامة النسبة");
+
+  const held = resolveRuns(`ضريبة القيمة المضافة ${isolate("(15%)")}`, "rtl");
+  assert.ok(held.some((r) => r.text === "(15%)"),
+    `لم يبقَ الجزء واحداً: ${JSON.stringify(held.map((r) => r.text))}`);
+});
+
+test("العزل يُبقي المبلغ قبل عملته", () => {
+  const held = resolveRuns(`الإجمالي ${isolate("1,234.50 SAR")}`, "rtl");
+  assert.ok(held.some((r) => r.text === "1,234.50 SAR"),
+    `العملة سبقت المبلغ: ${JSON.stringify(held.map((r) => r.text))}`);
+});
+
+/**
+ * قاعدة X9: محارف التنسيق الاتجاهي **تُحذف من العرض**، وأثرها باقٍ في
+ * المستويات المحسوبة قبل الحذف. وتركُها يرسمها مربّعاً فارغاً — وهو ما
+ * تُخفق فيه تطبيقاتٌ قائمة (91 حالة من سلسلة يونيكود في `python-bidi`).
+ */
+test("محارف التنسيق لا تصل إلى الرسم (قاعدة X9)", () => {
+  const drawn = resolveRuns(`الإجمالي ${isolate("100 SAR")}`, "rtl").map((r) => r.text).join("");
+  for (const code of [0x2066, 0x2067, 0x2068, 0x2069, 0x202a, 0x202c, 0x200e]) {
+    assert.ok(!drawn.includes(String.fromCodePoint(code)),
+      `محرف التنسيق U+${code.toString(16).toUpperCase()} وصل إلى الرسم`);
+  }
+  assert.ok(drawn.includes("100 SAR"));
+});
+
+test("المقطع الذي لا يحمل إلا محارف تنسيق يسقط", () => {
+  assert.deepEqual(resolveRuns(isolate("")), []);
+});
+
+test("stripIsolates يعكس العزل للمقارنة", () => {
+  assert.equal(stripIsolates(isolate("(15%)")), "(15%)");
+  assert.equal(stripIsolates("بلا عزل"), "بلا عزل");
+});
+
+test("اتجاه العزل يُصرَّح أو يُستنبط", () => {
+  assert.equal(isolate("x", "ltr").codePointAt(0), 0x2066);
+  assert.equal(isolate("x", "rtl").codePointAt(0), 0x2067);
+  assert.equal(isolate("x").codePointAt(0), 0x2068, "المبدئي عزلٌ باتجاه أول محرف قويّ");
 });
