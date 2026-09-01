@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://opusstudiohq-max.github.io/arabic-invoice-mcp/sitemap.xml
