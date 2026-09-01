@@ -34,8 +34,14 @@
 /** حدّ طول نصّ Base64 كما تنصّ المواصفة، §4.1. */
 export const MAX_QR_BASE64_LENGTH = 700;
 
-/** أقصى طول لقيمة واحدة: الطول يُخزَّن في بايت واحد. */
-export const MAX_TLV_VALUE_BYTES = 255;
+/**
+ * أقصى طول قيمةٍ يُمثَّل — بقواعد BER، لا ببايتٍ واحد.
+ *
+ * كان هذا الثابت 255، لأن نصّ المواصفة يقول «The length shall be stored in
+ * one byte». **وذلك تبسيطٌ ينكسر عند 128 بايتاً**، وكان يُنتج رمزاً يرفضه
+ * مُحقِّق الهيئة.
+ */
+export const MAX_TLV_VALUE_BYTES = 0xFFFF;
 
 export interface ZatcaQrFields {
   /** الوسم 1 — اسم البائع. */
@@ -52,19 +58,43 @@ export interface ZatcaQrFields {
 
 const ISO8601 = /^\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/;
 
-/** ثلاثية TLV واحدة: وسم، طول بالبايتات، قيمة. */
+/**
+ * ترميز الطول بقواعد BER.
+ *
+ * ### لماذا، وقد كان الكود يقول «بايت واحد»
+ *
+ * نصّ المواصفة يقول: «The length shall be stored in one byte» — وهو
+ * **تبسيطٌ ينكسر عند 128 بايتاً**. والحسم من منتدى الهيئة نفسه، في موضوع
+ * «QR Code Rejected When Tag 1 Exceeds 127 Characters»، وبنصّ صاحب
+ * المشكلة بعد إصلاحها:
+ *
+ *     «our code assumed that the maximum length of the value is 1 byte and
+ *      therefore when the value was bigger than 127, we were not properly
+ *      convert it to TLV value»
+ *
+ * https://zatca1.discourse.group/t/qr-code-rejected-when-tag-1-company-name-exceeds-127-characters/7202
+ *
+ *     الطول < 128        بايتٌ واحد يحمله
+ *     128 ≤ الطول ≤ 255  `0x81` ثم بايت الطول
+ *     256 ≤ الطول        `0x82` ثم بايتان بترتيب كبير-أولاً
+ *
+ * **وحدُّ 128 يبلغه اسمٌ عربي من 64 حرفاً** — فالحرف العربي بايتان. وذاك
+ * اسمُ منشأةٍ سعودية عادي الطول، لا حالةٌ حدّية مصطنعة.
+ */
+function berLength(length: number): number[] {
+  if (length < 0x80) return [length];
+  if (length <= 0xFF) return [0x81, length];
+  if (length <= 0xFFFF) return [0x82, length >> 8, length & 0xFF];
+  throw new RangeError(`طول القيمة ${length} بايتاً يتجاوز ما يُمثَّل في رمز QR`);
+}
+
+/** ثلاثية TLV واحدة: وسم، طول بالبايتات (BER)، قيمة. */
 function tlv(tag: number, value: string): Uint8Array {
   const payload = new TextEncoder().encode(value);
-  if (payload.length > MAX_TLV_VALUE_BYTES) {
-    throw new RangeError(
-      `قيمة الوسم ${tag} طولها ${payload.length} بايتاً وتتجاوز ${MAX_TLV_VALUE_BYTES}` +
-        " — والطول يُخزَّن في بايت واحد فلا يُمثَّل ما جاوزه",
-    );
-  }
-  const out = new Uint8Array(2 + payload.length);
-  out[0] = tag;
-  out[1] = payload.length;      // ← بالبايتات، لا بالأحرف
-  out.set(payload, 2);
+  const header = [tag, ...berLength(payload.length)];
+  const out = new Uint8Array(header.length + payload.length);
+  out.set(header, 0);
+  out.set(payload, header.length);
   return out;
 }
 
@@ -147,18 +177,31 @@ export function decodeZatcaQr(base64: string): DecodedTlv[] {
   let i = 0;
   while (i < raw.length) {
     if (i + 2 > raw.length) throw new Error(`ثلاثية مبتورة عند البايت ${i}`);
-    const tag = raw[i], length = raw[i + 1];
-    if (i + 2 + length > raw.length) {
+    const tag = raw[i];
+
+    // الطول بقواعد BER — والفكّ ببايتٍ واحد يقرأ `0x81` طولاً قدره 129
+    // فيُنتج قيمةً مبتورة بلا شكوى.
+    let length = raw[i + 1];
+    let header = 2;
+    if (length === 0x81) {
+      length = raw[i + 2];
+      header = 3;
+    } else if (length === 0x82) {
+      length = (raw[i + 2] << 8) | raw[i + 3];
+      header = 4;
+    }
+
+    if (i + header + length > raw.length) {
       throw new Error(`الوسم ${tag} يعلن طول ${length} ويتجاوز نهاية البيانات`);
     }
-    const slice = raw.subarray(i + 2, i + 2 + length);
+    const slice = raw.subarray(i + header, i + header + length);
     out.push({
       tag,
       value: tag >= 6
         ? Array.from(slice).map((b) => b.toString(16).padStart(2, "0")).join("")
         : new TextDecoder("utf-8").decode(slice),
     });
-    i += 2 + length;
+    i += header + length;
   }
   return out;
 }

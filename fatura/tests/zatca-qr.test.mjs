@@ -101,9 +101,48 @@ test("⑤ سقف الـ700 حاملٌ لا زينة", () => {
   assert.ok(encodeZatcaQr({ ...CASE, sellerName: "ش".repeat(127) }).length <= MAX_QR_BASE64_LENGTH);
 });
 
-test("⑥ ما جاوز 255 بايتاً يُرفض — الطول في بايت واحد", () => {
+/**
+ * **الاختبار الذي كان يفرض الخطأ.**
+ *
+ * كان هنا: «ما جاوز 255 بايتاً يُرفض — الطول في بايت واحد»، مأخوذاً من
+ * نصّ المواصفة حرفياً. وهو **تبسيطٌ ينكسر عند 128**، وكان يُنتج رمزاً
+ * يرفضه مُحقِّق الهيئة.
+ *
+ * والحسم من منتدى الهيئة، بنصّ صاحب المشكلة بعد إصلاحها: «our code assumed
+ * that the maximum length of the value is 1 byte … we were not properly
+ * convert it to TLV value».
+ * https://zatca1.discourse.group/t/qr-code-rejected-when-tag-1-company-name-exceeds-127-characters/7202
+ *
+ * فصار الاختبار يفرض **قواعد BER** عند الحدّ بالضبط — لا القاعدة الساذجة.
+ */
+test("⑥ الطول بقواعد BER عند حدّ 128 بايتاً", () => {
   assert.equal(Buffer.from("ش", "utf-8").length, 2, "الحرف العربي بايتان لا ثلاثة");
-  assert.throws(() => buildZatcaTlv({ ...CASE, sellerName: "ش".repeat(128) }), RangeError);
+
+  // 63 حرفاً = 126 بايتاً ⇒ بايتٌ واحد يحمله
+  const short = buildZatcaTlv({ ...CASE, sellerName: "ش".repeat(63) });
+  assert.equal(short[0], 1);
+  assert.equal(short[1], 126);
+
+  // 64 حرفاً = 128 بايتاً ⇒ 0x81 ثم الطول. **وهنا كان الكسر.**
+  const long = buildZatcaTlv({ ...CASE, sellerName: "ش".repeat(64) });
+  assert.equal(long[0], 1);
+  assert.equal(long[1], 0x81, "الطول ≥128 يجب أن يُسبق بـ0x81");
+  assert.equal(long[2], 128);
+
+  // 128 حرفاً = 256 بايتاً ⇒ 0x82 ثم بايتان
+  const huge = buildZatcaTlv({ ...CASE, sellerName: "ش".repeat(128) });
+  assert.equal(huge[1], 0x82);
+  assert.equal((huge[2] << 8) | huge[3], 256);
+});
+
+test("⑥ب الفكّ يقرأ BER فلا يبتر القيمة", () => {
+  for (const count of [63, 64, 127, 128, 200]) {
+    const name = "ش".repeat(count);
+    const decoded = decodeZatcaQr(
+      Buffer.from(buildZatcaTlv({ ...CASE, sellerName: name })).toString("base64"));
+    assert.equal(decoded[0].value, name, `الاسم بـ${count} حرفاً عاد مبتوراً`);
+    assert.deepEqual(decoded.map((d) => d.tag), [1, 2, 3, 4, 5]);
+  }
 });
 
 test("⑦ المدخل الخاطئ يُرفض ولا يُصلَح بصمت", () => {
