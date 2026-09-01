@@ -20,9 +20,9 @@ cd zatca-checker && python -m http.server 8123
 # ثم افتح http://localhost:8123
 ```
 
-## الاختبارات (12 اختبار تكافؤ)
+## الاختبارات (13 تكافؤ + 6 لمسار التواصل + 7 للفحص الجماعي)
 ```bash
-node zatca-checker/tests/validator.test.mjs
+node --test zatca-checker/tests/
 ```
 > ملاحظة: `node --test tests/` قد يفشل في اكتشاف الملفات بسبب رمز `#` في مسار المشروع — استخدم الأمر المباشر أعلاه.
 > اختبارات المتصفح: افتح الصفحة مع `?test=1` وراجع الـ console.
