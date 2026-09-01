@@ -100,3 +100,46 @@ test("الحالات المتخطّاة لا تُحسب نجاحاً", built, ()
     assert.equal(engine.total, scored, `${engine.id}: المقام يشمل حالاتٍ متخطّاة`);
   }
 });
+
+/**
+ * الـREADME الإنجليزي يحمل النتائج **مكتوبةً بيد** — وهو صنف الانحراف
+ * نفسه الذي وقع مرّتين. فتُقارن كل نتيجة فيه بما في `results.json`.
+ */
+test("نتائج README تطابق التشغيل الفعلي", built, () => {
+  const readme = existsSync(join(ROOT, "README.md"))
+    ? readFileSync(join(ROOT, "README.md"), "utf-8")
+    : null;
+  if (!readme) return;
+
+  const byId = Object.fromEntries(
+    results.engines.filter((e) => !e.skipped).map((e) => [e.id, e]));
+  const claims = [
+    ["pdf-lib", /`pdf-lib` as-is \| \*\*(\d+)\/(\d+)\*\*/],
+    ["naqqash", /`naqqash`[^|]*\| \*\*(\d+)\/(\d+)\*\*/],
+    ["bidi-shaper", /`bidi-shaper`[^|]*\| \*\*(\d+)\/(\d+)\*\*/],
+    ["nasq", /`nasq`\*\* \(ours\) \| \*\*(\d+)\/(\d+)\*\*/],
+  ];
+  for (const [id, pattern] of claims) {
+    const engine = byId[id];
+    if (!engine) continue;                    // لم يُقَس في هذا التشغيل
+    const match = readme.match(pattern);
+    assert.ok(match, `README لا يذكر نتيجة ${id} بصيغة يمكن فحصها`);
+    assert.equal(Number(match[1]), engine.pass, `${id}: README يعلن ${match[1]} والواقع ${engine.pass}`);
+    assert.equal(Number(match[2]), engine.total, `${id}: المقام ${match[2]} والواقع ${engine.total}`);
+  }
+});
+
+test("عدد الكتابات المذكور في README مقيسٌ فعلاً", built, () => {
+  const readme = existsSync(join(ROOT, "README.md"))
+    ? readFileSync(join(ROOT, "README.md"), "utf-8")
+    : null;
+  if (!readme) return;
+  // كل كتابة يذكرها الجدول يجب أن تقابلها حالة مقيسة أو سلوك موثَّق
+  const measured = new Set(cases.cases.map((c) => c.id));
+  for (const [script, id] of [["Hebrew", "hebrew-money"], ["Persian", "persian-money"],
+                              ["Urdu", "urdu-money"]]) {
+    if (readme.includes(`| ${script} |`)) {
+      assert.ok(measured.has(id), `README يذكر ${script} بلا حالة مقيسة (${id})`);
+    }
+  }
+});
