@@ -87,6 +87,26 @@ node --test tests/
 ظاهراً في حالة «الطابع الزمني كما أُعطي» وحدها. والتحويل **معروضٌ على الصفحة**،
 ويحرسه اختبارٌ يمنع إخفاءه.
 
+## ما أُبلِغ به أصحابُه
+
+مقياسٌ يجد عيباً ولا يُبلغ صاحبه **نميمةٌ مُحكمة**. فكلُّ ما وُجد رُفع مسألةً
+عامة بالبرهان وسطور الإصلاح، في 2026-09-01:
+
+| الحزمة | المسألة |
+| --- | --- |
+| `zatca-xml-js` | [wes4m/zatca-xml-js#61](https://github.com/wes4m/zatca-xml-js/issues/61) |
+| `@axenda/zatca` | [axenda/zatca#19](https://github.com/axenda/zatca/issues/19) |
+| `zatca` | [abdo-host/ZATCA-JS#1](https://github.com/abdo-host/ZATCA-JS/issues/1) |
+| `zatca-qr-generator` | [Wasim-Zaman/zatca-qr-generator#1](https://github.com/Wasim-Zaman/zatca-qr-generator/issues/1) |
+| `zatca-sdk` | [aashahin/zatca-sdk#1](https://github.com/aashahin/zatca-sdk/issues/1) |
+| `zatca-simplified-invoice-sdk` | [sharahsa0-creator/zatca-simplified-invoice-sdk#6](https://github.com/sharahsa0-creator/zatca-simplified-invoice-sdk/issues/6) |
+
+وثلاثٌ تعذّر الإبلاغ عنها: `@pioneersoft/zatca-einvoice` (المسائل معطَّلة في
+مستودعها)، و`@zatca/qr` و`zatca-qr-tlv` (لا مستودع معلن على npm).
+
+والسجلّ في `disclosures.json`، ويحرسه اختبارٌ يمنع أن تُنشر إخفاقةٌ بلا
+إبلاغٍ أو مانعٍ مذكور.
+
 ## ما لا يُقاس هنا
 
 - **الوسوم 6-9** (هاش المستند، توقيع ECDSA، المفتاح العام، ختم الهيئة). تخصّ
@@ -103,6 +123,7 @@ cases.json      الحالات والقواعد ومصادرها
 run.mjs         المحوّلات، والفاكّ المستقل، والحارس على محرّكاتنا
 build.mjs       يبني index.html — لا رقم فيه مكتوبٌ بيد
 downloads.json  أعداد التنزيلات بتاريخ قياسها
+disclosures.json سجلّ ما أُبلِغ به أصحابُه
 results.json    ناتج التشغيل
-tests/          أربعة عشر حارساً على المقياس نفسه
+tests/          خمسة عشر حارساً على المقياس نفسه
 ```

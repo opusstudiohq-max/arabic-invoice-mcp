@@ -129,6 +129,17 @@ const findings = others.filter((e) => e.fail > 0).map((e) => {
     </div>`;
 }).join("");
 
+/** سجلّ الإبلاغ: ما وُجد، وأين رُفع، وما تعذّر ولماذا. */
+const reported = (r.disclosures?.items ?? []).map((d) => `
+  <tr>
+    <td><code>${esc(d.npm)}</code></td>
+    <td>${isoTech(d.defect)}</td>
+    <td><a href="${esc(d.url)}">${esc(d.url.replace("https://github.com/", ""))}</a></td>
+  </tr>`).join("");
+
+const notReported = (r.disclosures?.not_reported ?? []).map((d) =>
+  `<li><code>${esc(d.npm)}</code> — ${esc(d.reason)}</li>`).join("");
+
 const skippedList = skipped.length
   ? `<ul>${skipped.map((e) => `<li><code>${esc(e.npm ?? e.name)}</code> — ${esc(e.skipped)}</li>`).join("")}</ul>`
   : "";
@@ -265,6 +276,19 @@ const html = `<!DOCTYPE html>
 
 <h2>ما وُجد بالضبط</h2>
 ${findings}
+
+<h2>ما أُبلِغ به أصحابُه</h2>
+<p class="lede" style="margin-bottom:1rem">
+  مقياسٌ يجد عيباً ولا يُبلغ صاحبه <strong>نميمةٌ مُحكمة</strong>. فكل ما وُجد
+  هنا رُفع مسألةً عامة، بالبرهان وسطور الإصلاح — وروابطها مفتوحة للحكم.
+</p>
+<div class="scroll">
+<table>
+  <thead><tr><th>الحزمة</th><th>العيب</th><th>المسألة</th></tr></thead>
+  <tbody>${reported}</tbody>
+</table>
+</div>
+${notReported ? `<p class="lede" style="margin-top:1rem">وما تعذّر الإبلاغ عنه:</p><ul>${notReported}</ul>` : ""}
 
 <h2>الحالة × المكتبة</h2>
 <div class="scroll">

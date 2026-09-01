@@ -151,3 +151,36 @@ test("⑭ نسخة الحزم المقيسة مسجّلة — النتيجة ت�
   const lock = join(ROOT, "package-lock.json");
   assert.ok(existsSync(lock), "لا ملف قفل — فالنتيجة غير قابلة لإعادة الإنتاج");
 });
+
+/**
+ * **العيب الذي يُنشر ولا يُبلَّغ به صاحبه نميمةٌ مُحكمة.**
+ *
+ * فكل حزمةٍ سجّلت إخفاقاً على هذه الصفحة يجب أن يقابلها إمّا مسألةٌ مرفوعة
+ * برابطٍ عام، أو سببٌ مذكور يمنع الرفع (مسائل معطَّلة، أو لا مستودع معلن).
+ * وبلا هذا الحارس يسهل أن يُنشر الحكم ويُنسى الإبلاغ.
+ */
+test("⑮ كل حزمةٍ مُخفقة إمّا أُبلِغ أصحابُها أو ذُكر المانع", () => {
+  const d = results.disclosures;
+  assert.ok(d, "لا سجلّ إبلاغ — disclosures.json مفقود أو لم يُضمّ إلى النتائج");
+
+  const covered = new Set([
+    ...d.items.map((x) => x.npm),
+    ...d.not_reported.map((x) => x.npm),
+  ]);
+
+  for (const engine of scored.filter((e) => !e.ours && e.fail > 0)) {
+    assert.ok(covered.has(engine.npm),
+      `«${engine.npm}» تُخفق في ${engine.fail} حالة ولا إبلاغ ولا سبب — ` +
+      `أضفها إلى disclosures.json`);
+  }
+
+  for (const item of d.items) {
+    assert.match(item.url, /^https:\/\/github\.com\/[^/]+\/[^/]+\/issues\/\d+$/,
+      `رابط المسألة عند «${item.npm}» ليس رابط مسألةٍ عامة`);
+    assert.ok(page.includes(item.url), `مسألة «${item.npm}» غير معروضة على الصفحة`);
+  }
+
+  for (const item of d.not_reported) {
+    assert.ok((item.reason ?? "").length > 10, `مانعُ الإبلاغ عند «${item.npm}» غير مفهوم`);
+  }
+});

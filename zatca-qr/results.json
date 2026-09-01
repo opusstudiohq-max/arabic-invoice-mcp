@@ -206,6 +206,63 @@
       }
     }
   ],
+  "disclosures": {
+    "_doc": "سجلّ الإبلاغ. المقياس الذي يجد عيباً ولا يُبلغ صاحبه نميمةٌ مُحكمة. وكل سطر هنا يحمل رابطاً عاماً يستطيع القارئ فتحه والحكم بنفسه.",
+    "reported_on": "2026-09-01",
+    "items": [
+      {
+        "npm": "zatca-xml-js",
+        "repo": "wes4m/zatca-xml-js",
+        "url": "https://github.com/wes4m/zatca-xml-js/issues/61",
+        "defect": "الطول في بايتٍ واحد: 128 بايتاً تُكتب 0x80، و256 بايتاً تُعلن طولاً صفراً"
+      },
+      {
+        "npm": "@axenda/zatca",
+        "repo": "axenda/zatca",
+        "url": "https://github.com/axenda/zatca/issues/19",
+        "defect": "الطول يمرّ بجولة UTF-8 فيصير محرف الاستبدال EF BF BD عند 128 بايتاً"
+      },
+      {
+        "npm": "zatca",
+        "repo": "abdo-host/ZATCA-JS",
+        "url": "https://github.com/abdo-host/ZATCA-JS/issues/1",
+        "defect": "الطول بعدد الأحرف لا البايتات — كل اسمٍ عربي يُنتج رمزاً مشوّهاً"
+      },
+      {
+        "npm": "zatca-qr-generator",
+        "repo": "Wasim-Zaman/zatca-qr-generator",
+        "url": "https://github.com/Wasim-Zaman/zatca-qr-generator/issues/1",
+        "defect": "الطول في بايتٍ واحد؛ و256 بايتاً تُعلن طولاً صفراً بلا خطأ"
+      },
+      {
+        "npm": "zatca-sdk",
+        "repo": "aashahin/zatca-sdk",
+        "url": "https://github.com/aashahin/zatca-sdk/issues/1",
+        "defect": "الطول في بايتٍ واحد عند 128 بايتاً بلا خطأ؛ ويرفض ما فوق 255"
+      },
+      {
+        "npm": "zatca-simplified-invoice-sdk",
+        "repo": "sharahsa0-creator/zatca-simplified-invoice-sdk",
+        "url": "https://github.com/sharahsa0-creator/zatca-simplified-invoice-sdk/issues/6",
+        "defect": "الطول في بايتٍ واحد عند 128 بايتاً بلا خطأ؛ ويرفض ما فوق 255"
+      }
+    ],
+    "not_reported": [
+      {
+        "npm": "@pioneersoft/zatca-einvoice",
+        "repo": "PioneerSoft-sa/zatca-einvoice",
+        "reason": "المسائل مُعطَّلة في المستودع — لا سبيل للإبلاغ العام"
+      },
+      {
+        "npm": "@zatca/qr",
+        "reason": "لا مستودع معلن في بيانات الحزمة على npm"
+      },
+      {
+        "npm": "zatca-qr-tlv",
+        "reason": "لا مستودع معلن في بيانات الحزمة على npm"
+      }
+    ]
+  },
   "engines": [
     {
       "id": "fatura",

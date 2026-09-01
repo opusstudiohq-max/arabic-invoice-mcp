@@ -30,6 +30,17 @@ const require = createRequire(import.meta.url);
 const HERE = dirname(fileURLToPath(import.meta.url));
 const data = JSON.parse(readFileSync(join(HERE, "cases.json"), "utf-8"));
 
+/**
+ * سجلّ الإبلاغ — يُضمّ إلى النتائج فتحمله الصفحة.
+ *
+ * **مقياسٌ يجد عيباً ولا يُبلغ صاحبه نميمةٌ مُحكمة.** فما وُجد هنا رُفع
+ * مسألةً عامة عند كل مستودعٍ يقبلها، وما تعذّر يُذكر بسببه.
+ */
+const disclosures = (() => {
+  try { return JSON.parse(readFileSync(join(HERE, "disclosures.json"), "utf-8")); }
+  catch { return null; }
+})();
+
 // ── الفاكّ المستقل ───────────────────────────────────────────────────────
 /**
  * يفكّ TLV بقواعد BER ويُعيد **الشكل الذي كُتب به الطول** أيضاً — فالسؤال
@@ -405,6 +416,7 @@ const out = {
   sources: data.sources,
   rules: data.rules,
   cases: data.cases,
+  disclosures,
   engines: results,
 };
 writeFileSync(join(HERE, "results.json"), JSON.stringify(out, null, 2), "utf-8");

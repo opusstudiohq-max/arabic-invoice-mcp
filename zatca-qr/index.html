@@ -332,6 +332,49 @@
       <ul class="findings"><li><span class="tag">Q1</span> <code>arabic-byte-length</code> — <bdi>لا يُفكّ: الوسم 217 يُعلن 131 بايتاً ويتجاوز نهاية البيانات</bdi></li><li><span class="tag">Q1</span> <code>arabic-63-chars</code> — <bdi>لا يُفكّ: الوسم 180 يُعلن 216 بايتاً ويتجاوز نهاية البيانات</bdi></li><li><span class="tag">Q2</span> <code>arabic-64-chars</code> — <bdi>لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات</bdi></li></ul>
     </div>
 
+<h2>ما أُبلِغ به أصحابُه</h2>
+<p class="lede" style="margin-bottom:1rem">
+  مقياسٌ يجد عيباً ولا يُبلغ صاحبه <strong>نميمةٌ مُحكمة</strong>. فكل ما وُجد
+  هنا رُفع مسألةً عامة، بالبرهان وسطور الإصلاح — وروابطها مفتوحة للحكم.
+</p>
+<div class="scroll">
+<table>
+  <thead><tr><th>الحزمة</th><th>العيب</th><th>المسألة</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><code>zatca-xml-js</code></td>
+    <td>الطول في بايتٍ واحد: 128 بايتاً تُكتب 0x80، و256 بايتاً تُعلن طولاً صفراً</td>
+    <td><a href="https://github.com/wes4m/zatca-xml-js/issues/61">wes4m/zatca-xml-js/issues/61</a></td>
+  </tr>
+  <tr>
+    <td><code>@axenda/zatca</code></td>
+    <td>الطول يمرّ بجولة <bdi dir="ltr">UTF-8</bdi> فيصير محرف الاستبدال EF BF BD عند 128 بايتاً</td>
+    <td><a href="https://github.com/axenda/zatca/issues/19">axenda/zatca/issues/19</a></td>
+  </tr>
+  <tr>
+    <td><code>zatca</code></td>
+    <td>الطول بعدد الأحرف لا البايتات — كل اسمٍ عربي يُنتج رمزاً مشوّهاً</td>
+    <td><a href="https://github.com/abdo-host/ZATCA-JS/issues/1">abdo-host/ZATCA-JS/issues/1</a></td>
+  </tr>
+  <tr>
+    <td><code>zatca-qr-generator</code></td>
+    <td>الطول في بايتٍ واحد؛ و256 بايتاً تُعلن طولاً صفراً بلا خطأ</td>
+    <td><a href="https://github.com/Wasim-Zaman/zatca-qr-generator/issues/1">Wasim-Zaman/zatca-qr-generator/issues/1</a></td>
+  </tr>
+  <tr>
+    <td><code>zatca-sdk</code></td>
+    <td>الطول في بايتٍ واحد عند 128 بايتاً بلا خطأ؛ ويرفض ما فوق 255</td>
+    <td><a href="https://github.com/aashahin/zatca-sdk/issues/1">aashahin/zatca-sdk/issues/1</a></td>
+  </tr>
+  <tr>
+    <td><code>zatca-simplified-invoice-sdk</code></td>
+    <td>الطول في بايتٍ واحد عند 128 بايتاً بلا خطأ؛ ويرفض ما فوق 255</td>
+    <td><a href="https://github.com/sharahsa0-creator/zatca-simplified-invoice-sdk/issues/6">sharahsa0-creator/zatca-simplified-invoice-sdk/issues/6</a></td>
+  </tr></tbody>
+</table>
+</div>
+<p class="lede" style="margin-top:1rem">وما تعذّر الإبلاغ عنه:</p><ul><li><code>@pioneersoft/zatca-einvoice</code> — المسائل مُعطَّلة في المستودع — لا سبيل للإبلاغ العام</li><li><code>@zatca/qr</code> — لا مستودع معلن في بيانات الحزمة على npm</li><li><code>zatca-qr-tlv</code> — لا مستودع معلن في بيانات الحزمة على npm</li></ul>
+
 <h2>الحالة × المكتبة</h2>
 <div class="scroll">
 <table>
