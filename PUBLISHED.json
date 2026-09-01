@@ -34,6 +34,13 @@
       "url": "https://opusstudiohq-max.github.io/arabic-invoice-mcp/checker/",
       "published_on": "2026-08-21",
       "source": "zatca-checker/"
+    },
+    {
+      "name": "أداة طباعة الشيكات (ملف واحد)",
+      "url": "https://opusstudiohq-max.github.io/arabic-invoice-mcp/cheque/dist/mutawafiq-cheque.html",
+      "published_on": "2026-09-01",
+      "source": "cheque-tool/dist/mutawafiq-cheque.html",
+      "note": "لم تُنشر قبل اليوم رغم بنائها: قاعدة `dist/` في .gitignore العام كانت تبتلعها بصمت."
     }
   ],
   "github_repos": [
