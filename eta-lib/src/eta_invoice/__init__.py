@@ -6,9 +6,12 @@
 
     from eta_invoice import InvoiceBuilder, canonical_hash, validate_document
 
-**ما ليس هنا عمداً:** التوقيع `CAdES-BES` والإرسال. الهيئة لا تمنح حساب
-بيئة تجريبية لمطوّر مستقل، والختم لا يرتبط إلا بكيان قانوني — ولن نشحن
-كوداً لم يُشغَّل على المنظومة الحقيقية.
+**التوقيع `CAdES-BES` موجود** ومطابقٌ لنصّ مواصفة ITIDA، ومُتحقَّقٌ من كل
+حقلٍ فيه بالتفكيك. **ولم يُشغَّل على وحدة تحقّق الهيئة** ولا على شهادة ختمٍ
+حقيقية — فتلك تلزمها بطاقة ممول. ولا يُدَّعى قبولٌ لم يُرَ.
+
+**وما ليس هنا:** الإرسال إلى المنظومة. لا يُبنى قبل قراءة شروط البوابة من
+داخل حسابٍ مسجَّل.
 """
 from .builder import (
     Address,
@@ -30,6 +33,14 @@ from .serialization_xml import (
     load_xml_document,
     serialize_xml_document,
 )
+from .signing import (
+    ID_DIGESTED_DATA,
+    CadesReport,
+    SignerLike,
+    build_cades_bes,
+    build_signed_attributes,
+    inspect_cades_bes,
+)
 from .validation import (
     UNRESOLVED,
     Finding,
@@ -50,6 +61,13 @@ __all__ = [
     "serialize_xml_document",
     "canonical_hash_xml",
     "escape_quotes",
+    # التوقيع — CAdES-BES، مطابقٌ للمواصفة ولم يُشغَّل على وحدة تحقّق ITIDA بعد
+    "build_cades_bes",
+    "build_signed_attributes",
+    "inspect_cades_bes",
+    "SignerLike",
+    "CadesReport",
+    "ID_DIGESTED_DATA",
     # التحقق
     "validate_document",
     "format_report",

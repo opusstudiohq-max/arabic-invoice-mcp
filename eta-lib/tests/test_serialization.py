@@ -175,11 +175,26 @@ class TestPublicSurface:
             assert hasattr(eta_invoice, name), f"{name} غائب عن السطح العام"
             assert name in eta_invoice.__all__
 
-    def test_signing_is_not_exported_because_it_is_not_built(self):
-        """لو ظهر توقيع في السطح العام يوماً فليكن مقصوداً ومُختبَراً."""
+    def test_signing_is_exported_and_tested(self):
+        """
+        كان هذا الاختبار يفرض **ألا** يُصدَّر التوقيع، وكان صادقاً يوم كُتب:
+        لم يكن مبنياً. وقد بُني الآن مطابقاً لنصّ مواصفة ITIDA ومُختبَراً
+        بستّة وعشرين اختباراً — فانتقل الحدُّ ولم يُلغَ.
+        """
         import eta_invoice
-        leaked = [n for n in eta_invoice.__all__ if "sign" in n.lower() or "submit" in n.lower()]
-        assert leaked == [], f"تسرّب توقيع/إرسال غير مبنيّ: {leaked}"
+        for name in ("build_cades_bes", "inspect_cades_bes", "SignerLike"):
+            assert hasattr(eta_invoice, name), f"{name} غائب عن السطح العام"
+            assert name in eta_invoice.__all__
+
+    def test_submission_is_not_exported_because_it_is_not_built(self):
+        """
+        الإرسال إلى المنظومة **لا يُبنى** قبل قراءة شروط البوابة من داخل
+        حسابٍ مسجَّل. ولو ظهر يوماً فليكن مقصوداً ومُختبَراً لا مُتسرِّباً.
+        """
+        import eta_invoice
+        leaked = [n for n in eta_invoice.__all__
+                  if any(w in n.lower() for w in ("submit", "upload", "send", "client"))]
+        assert leaked == [], f"تسرّب إرسال غير مبنيّ: {leaked}"
 
     def test_version_is_declared(self):
         import eta_invoice
