@@ -1,0 +1,19 @@
+{
+  "name": "invoice-tool",
+  "version": "0.1.0",
+  "description": "أداة الفاتورة الضريبية العربية — صفحة واحدة تعمل داخل المتصفّح",
+  "scripts": {
+    "build": "node build.mjs",
+    "serve": "node --experimental-strip-types serve.mjs"
+  },
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "fatura": "file:../invoice-pdf"
+  },
+  "private": true,
+  "devDependencies": {
+    "esbuild": "^0.28.0"
+  }
+}

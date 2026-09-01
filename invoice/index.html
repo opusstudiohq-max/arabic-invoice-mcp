@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فاتورة ضريبية عربية بصيغة PDF — أداة مجانية تعمل داخل متصفحك | مُتوافِق</title>
+<meta name="description" content="أنشئ فاتورة ضريبية عربية بصيغة PDF مع رمز QR لحقول المرحلة الأولى. تعمل بالكامل داخل متصفحك — بياناتك لا تُرفع لأي خادم.">
+<meta property="og:title" content="فاتورة ضريبية عربية بصيغة PDF — أداة مجانية">
+<meta property="og:description" content="نصّ عربي مرتَّب صحيحاً، ومجاميع بالهللات، ورمز QR مبنيّ على نصّ مواصفة الهيئة. لا يُرفع شيء.">
+<meta property="og:type" content="website">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h1>فاتورة ضريبية عربية — بصيغة PDF</h1>
+  <p class="lede">
+    تعمل بالكامل <strong>داخل متصفحك</strong>. أسماءُ عملائك ومبالغُك ورقمُك
+    الضريبي لا تغادر جهازك — ولا يوجد في هذه الصفحة طلبُ شبكةٍ واحد يرسل شيئاً.
+  </p>
+</header>
+
+<main>
+  <section class="form" aria-label="بيانات الفاتورة">
+
+    <fieldset>
+      <legend>البائع</legend>
+      <label>الاسم <input id="sellerName" type="text" placeholder="مؤسسة …" autocomplete="organization"></label>
+      <label>الرقم الضريبي
+        <input id="sellerVat" type="text" inputmode="numeric" maxlength="15" placeholder="15 رقماً يبدأ بـ3">
+        <small>يلزم لإدراج رمز QR بحقول المرحلة الأولى.</small>
+      </label>
+      <label>العنوان <input id="sellerAddress" type="text" placeholder="المدينة — الحي"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>المشتري <span class="opt">(اختياري)</span></legend>
+      <label>الاسم <input id="buyerName" type="text" placeholder="اتركه فارغاً للفاتورة المبسّطة"></label>
+      <label>الرقم الضريبي <input id="buyerVat" type="text" inputmode="numeric" maxlength="15"></label>
+    </fieldset>
+
+    <fieldset>
+      <legend>الفاتورة</legend>
+      <div class="grid3">
+        <label>الرقم <input id="number" type="text" value="INV-1"></label>
+        <label>التاريخ <input id="date" type="date"></label>
+        <label>الوقت <input id="time" type="time"></label>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>البنود</legend>
+      <div class="head">
+        <span>البيان</span><span>الكمية</span><span>السعر</span><span>الضريبة</span><span></span>
+      </div>
+      <div id="lines"></div>
+      <button id="addLine" type="button" class="ghost">+ بند</button>
+    </fieldset>
+
+    <fieldset>
+      <legend>ملاحظات <span class="opt">(اختياري)</span></legend>
+      <textarea id="notes" rows="2" placeholder="الدفع خلال 14 يوماً…"></textarea>
+    </fieldset>
+
+  </section>
+
+  <section class="side" aria-label="المجاميع والمخرَج">
+    <div id="summary" class="card"></div>
+    <button id="build" type="button" class="primary">أنشئ الفاتورة</button>
+    <p id="status" role="status" aria-live="polite"></p>
+    <a id="download" class="download" hidden download>تحميل الملف</a>
+    <iframe id="preview" title="معاينة الفاتورة" hidden></iframe>
+  </section>
+</main>
+
+<footer>
+  <h2>ما تفعله هذه الأداة، وما لا تفعله</h2>
+
+  <div class="cards">
+    <div class="card">
+      <h3>الحساب بالهللات</h3>
+      <p>
+        <code>0.1 + 0.2 ≠ 0.3</code> في كل لغة تستعمل الفاصلة العائمة، و
+        <code>(1.005).toFixed(2)</code> تُعطي <code>1.00</code> والصواب
+        <code>1.01</code>. فكل المبالغ هنا أعدادٌ صحيحة بالهللة، والقسمة على
+        مئة آخرُ عملية. <strong>والضريبة تُحسب لكل بند ثم تُجمع</strong> — لا
+        على المجموع، لأن الفرق هللةٌ في فاتورةٍ ذات بنود كثيرة.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>النصّ العربي مرتَّبٌ صحيحاً</h3>
+      <p>
+        مكتبات PDF في جافاسكربت تعكس السطر كلَّه حين ترى نصّاً عربياً، فينعكس
+        معه الرقم: <code dir="ltr">الإجمالي 1,234.50</code> تُطبع
+        <code dir="ltr">05.432,1</code>. نُطبّق خوارزمية يونيكود الثنائية
+        الاتجاه (UAX #9) — <strong>مطابقةً لـ91,707 حالة</strong> من سلسلة
+        المطابقة الرسمية.
+      </p>
+    </div>
+
+    <div class="card">
+      <h3>رمز QR من نصّ المواصفة</h3>
+      <p>
+        الوسوم 1-5 بترميز TLV ثم Base64، كما تنصّ عليه
+        <em>Electronic Invoice Security Features Implementation Standards</em>
+        §4.1. والطول بعدد <strong>بايتات</strong> ترميز UTF-8 لا بعدد الأحرف —
+        وهو الفخّ الذي يجعل الرمز يفشل عند القارئ بلا رسالة.
+      </p>
+    </div>
+
+    <div class="card warn">
+      <h3>وما لا تفعله</h3>
+      <p>
+        <strong>لا تُدرج الوسوم 6-9</strong> (هاش المستند، توقيع ECDSA، المفتاح
+        العام، توقيع الهيئة) — وهي تلزم من ربطته الهيئة بمنصة «فاتورة»، ولا
+        تُبنى بلا شهادة ختمٍ حقيقية.
+        <br><br>
+        <strong>ولا تؤكّد قبول الهيئة لفاتورتك.</strong> حالة القبول حدثٌ في
+        استجابة المنصة، ولا تملكها أداةٌ تعمل في متصفحك.
+      </p>
+    </div>
+  </div>
+
+  <p class="fine">
+    مفتوحة المصدر (MIT) — <a href="https://github.com/opusstudiohq-max/arabic-invoice-mcp">المستودع</a>.
+    الخطّ <a href="fonts/OFL.txt">Almarai</a> برخصة SIL Open Font License.
+  </p>
+</footer>
+
+<script type="module">
+  import { start } from "./app.js";
+  start();
+</script>
+</body>
+</html>

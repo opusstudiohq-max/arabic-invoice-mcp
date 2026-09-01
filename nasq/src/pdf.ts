@@ -12,11 +12,21 @@
  * ```
  */
 import type { PDFPage, PDFFont, Color } from "pdf-lib";
-import { resolveRuns, paragraphDirection, type BaseDirection } from "./runs.js";
+import { resolveRuns, paragraphDirection, type BaseDirection, type DirectionalRun } from "./runs.js";
+
+/**
+ * الخطّ: واحدٌ للسطر كله، أو دالّةٌ تختاره **لكل مقطع**.
+ *
+ * والاختيار لكل مقطع ليس ترفاً: كثيرٌ من الخطوط العربية المرخَّصة بحرية لا
+ * تحمل الحروف اللاتينية ولا الأقواس ولا علامة النسبة — قِسنا Noto Sans
+ * Arabic فوجدناه يغطي 1,161 محرفاً، فيها الأرقام وليس فيها `(` ولا `%` ولا
+ * `A`. وسطرٌ يُرسم بخطٍّ لا يحمل محرفه يخرج **فارغاً بلا شكوى**.
+ */
+export type FontChoice = PDFFont | ((run: DirectionalRun) => PDFFont);
 
 export interface DrawOptions {
-  /** خطّ مُضمَّن يحمل الحروف العربية — سجّل `fontkit` قبل تضمينه. */
-  font: PDFFont;
+  /** خطّ مُضمَّن يحمل الحروف العربية، أو دالّة تختاره لكل مقطع. */
+  font: FontChoice;
   size: number;
   /** موضع السطر أفقياً: حافته اليمنى إن كانت المحاذاة `right`. */
   x: number;
@@ -38,13 +48,18 @@ export interface DrawOptions {
  */
 export function measureArabicText(
   text: string,
-  font: PDFFont,
+  font: FontChoice,
   size: number,
   base: BaseDirection = "auto",
 ): number {
   let total = 0;
-  for (const run of resolveRuns(text, base)) total += font.widthOfTextAtSize(run.text, size);
+  for (const run of resolveRuns(text, base)) total += pick(font, run).widthOfTextAtSize(run.text, size);
   return total;
+}
+
+/** الخطّ لهذا المقطع — واحدٌ للجميع أو اختيارٌ لكل مقطع. */
+function pick(font: FontChoice, run: DirectionalRun): PDFFont {
+  return typeof font === "function" ? font(run) : font;
 }
 
 /**
@@ -56,15 +71,16 @@ export function measureArabicText(
 export function drawArabicText(page: PDFPage, text: string, options: DrawOptions): number {
   const { font, size, y, color, base = "auto" } = options;
   const runs = resolveRuns(text, base);
-  const width = runs.reduce((sum, r) => sum + font.widthOfTextAtSize(r.text, size), 0);
+  const width = runs.reduce((sum, r) => sum + pick(font, r).widthOfTextAtSize(r.text, size), 0);
 
   const align = options.align ?? "auto";
   const rightAligned = align === "right" || (align === "auto" && paragraphDirection(text, base) === "rtl");
   let cursor = rightAligned ? options.x - width : options.x;
 
   for (const run of runs) {
-    page.drawText(run.text, { x: cursor, y, size, font, ...(color ? { color } : {}) });
-    cursor += font.widthOfTextAtSize(run.text, size);
+    const chosen = pick(font, run);
+    page.drawText(run.text, { x: cursor, y, size, font: chosen, ...(color ? { color } : {}) });
+    cursor += chosen.widthOfTextAtSize(run.text, size);
   }
   return width;
 }

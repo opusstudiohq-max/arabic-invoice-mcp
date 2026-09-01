@@ -2,7 +2,13 @@
  * فاتورة ضريبية عربية بصيغة PDF — نصٌّ صحيح، ومجاميع بالهللات، ورمز QR
  * مبنيّ على نصّ مواصفة الهيئة.
  */
-export { renderInvoice, type RenderOptions, type RenderResult } from "./render.js";
+export {
+  renderInvoice,
+  inspectFont,
+  type RenderOptions,
+  type RenderResult,
+  type FontGaps,
+} from "./render.js";
 export {
   computeTotals,
   formatMinor,

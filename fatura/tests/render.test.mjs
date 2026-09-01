@@ -22,7 +22,7 @@ import { fileURLToPath } from "node:url";
 import * as fontkitModule from "fontkit";
 import jsQRModule from "jsqr";
 
-import { renderInvoice } from "../dist/render.js";
+import { renderInvoice, inspectFont } from "../dist/render.js";
 import { decodeZatcaQr } from "../dist/zatca-qr.js";
 
 const fk = fontkitModule.default ?? fontkitModule;
@@ -38,16 +38,14 @@ const FONT_PATH = [
 
 const skip = { skip: FONT_PATH ? false : "لا يوجد خطّ عربي على هذا النظام" };
 const fontBytes = FONT_PATH ? readFileSync(FONT_PATH) : null;
-const analysed = fontBytes ? fk.create(fontBytes) : null;
 
-const glyphToChar = new Map();
-if (analysed) {
-  for (let cp = 0x20; cp <= 0xfeff; cp++) {
-    const g = analysed.glyphForCodePoint(cp);
-    if (g && !glyphToChar.has(g.id)) glyphToChar.set(g.id, String.fromCodePoint(cp));
-  }
-}
-
+/**
+ * خريطة عكسية (رسم ← محرف) **لكل خطّ على حدة**.
+ *
+ * الخريطة تخصّ خطّها: بناؤها من Arial ثم قراءةُ ملفٍ بخطٍّ آخر يُعطي
+ * محارف عشوائية، فيبدو أن النصّ غاب وهو حاضر. حدٌّ في أداة الفحص، لا في
+ * المنتج — وقد أوقعني مرّة.
+ */
 const INVOICE = {
   number: "INV-2026-0042",
   issuedAt: "2026-09-01T13:45:00+03:00",
@@ -77,8 +75,55 @@ function contentStreams(pdf) {
   return out;
 }
 
+/**
+ * خريطة الرسم ← المحرف، بترتيب أولوية.
+ *
+ * ⚠️ **ناقصة بطبعها، ومقصورة على خطّ الفحص.** الرسم الواحد تبلغه نقاط
+ * ترميز كثيرة، فالعكس ظنٌّ لا يقين. وجرّبنا البديل الصحيح — جدول
+ * `ToUnicode` داخل الملف — فوجدنا أن **`pdf-lib` لا تكتبه إطلاقاً**؛
+ * وذلك سببُ أن نصّ فاتورةٍ مولّدة بها لا يُنسخ ولا يُبحث فيه.
+ *
+ * فتبقى هذه للخطّ الذي نفحص به، ويُفحص غيرُه بمطابقة **معرّفات الرسوم**
+ * مباشرةً (`showsShaped` أدناه) — وهي مطابقة لا تخمين فيها.
+ */
+const glyphToChar = new Map();
+if (fontBytes) {
+  const probe = fk.create(fontBytes);
+  for (const [from, to] of [[0x20, 0x7e], [0x0600, 0x06ff], [0xfb50, 0xfeff], [0x00a0, 0xfb4f]]) {
+    for (let cp = from; cp <= to; cp++) {
+      const g = probe.glyphForCodePoint(cp);
+      if (g && g.id !== 0 && !glyphToChar.has(g.id)) glyphToChar.set(g.id, String.fromCodePoint(cp));
+    }
+  }
+}
+
+/** كل تسلسل رسوم كُتب في الملف. */
+function drawnGlyphRuns(pdf) {
+  const runs = [];
+  for (const stream of contentStreams(pdf)) {
+    for (const m of stream.matchAll(/<([0-9A-Fa-f]+)>\s*Tj/g)) {
+      runs.push((m[1].match(/..../g) ?? []).map((h) => parseInt(h, 16)));
+    }
+  }
+  return runs;
+}
+
+/**
+ * هل رُسمت هذه العبارة؟ — **بمطابقة معرّفات الرسوم لا بترجمتها**.
+ *
+ * نُشكّل العبارة بالخطّ نفسه فنحصل على تسلسل الرسوم الذي *يجب* أن يظهر،
+ * ثم نبحث عنه في الملف. مطابقةٌ تامّة تعمل مع أي خطّ، وبلا خريطة عكسية
+ * ولا ظنّ.
+ */
+function showsShaped(pdf, phrase, fontFileBytes) {
+  const font = fk.create(fontFileBytes);
+  const want = font.layout(phrase).glyphs.map((g) => g.id);
+  const key = want.join(",");
+  return drawnGlyphRuns(pdf).some((run) => run.join(",").includes(key));
+}
+
 /** ما كُتب من نصّ في الملف، يساراً ← يميناً. */
-function textInPdf(pdf) {
+function textInPdf(pdf, map = glyphToChar) {
   let all = "";
   for (const stream of contentStreams(pdf)) {
     for (const m of stream.matchAll(/<([0-9A-Fa-f]+)>\s*Tj/g)) {
@@ -120,9 +165,9 @@ function foldArabic(text) {
  * المقطع العربي يُكتب بترتيبه **البصري** — أي معكوساً عن المنطقي — فيُبحث
  * عن العبارة معكوسة. وليس ذلك عيباً: هو الترتيب الصحيح على الورق.
  */
-function showsArabic(pdf, phrase) {
+function showsArabic(pdf, phrase, map = glyphToChar) {
   const visual = [...foldArabic(phrase)].reverse().join("");
-  return foldArabic(textInPdf(pdf)).includes(visual);
+  return foldArabic(textInPdf(pdf, map)).includes(visual);
 }
 
 /**
@@ -318,4 +363,71 @@ test("المبلغ يسبق عملته لا العكس", skip, async () => {
 test("التاريخ والوقت يبقيان معاً وبترتيبهما", skip, async () => {
   const text = textInPdf((await render()).buffer);
   assert.ok(text.includes("2026/09/01 13:45:00"), `التاريخ والوقت تفرّقا:\n${text}`);
+});
+
+/**
+ * فخّ خطّ الويب — مقيسٌ بقارئ مستقل.
+ *
+ * `pdf-lib.embedFont` تقبل WOFF2 بلا شكوى وتُخرج ملفاً يبدو سليماً، ثم
+ * يرفضه كلُّ قارئ: «FT_New_Memory_Face: unknown file format». و`fontkit`
+ * تقرأ الخطّ قراءةً صحيحة (47.7KB بجداول GSUB كاملة)، فتنجح كل خطوة
+ * ويسقط الملف عند القارئ وحده — وهو أسوأ إخفاق ممكن.
+ */
+test("خطّ الويب المضغوط يُرفض قبل أن يُنتج ملفاً لا يُقرأ", async () => {
+  const woff2 = new Uint8Array(64);
+  woff2.set([0x77, 0x4f, 0x46, 0x32]);            // "wOF2"
+  await assert.rejects(
+    () => renderInvoice(INVOICE, { fontBytes: woff2 }), /WOFF2/);
+
+  const woff = new Uint8Array(64);
+  woff.set([0x77, 0x4f, 0x46, 0x46]);             // "wOFF"
+  await assert.rejects(
+    () => renderInvoice(INVOICE, { fontBytes: woff }), /WOFF/);
+});
+
+test("والخطّ العادي يمرّ", skip, async () => {
+  const { buffer } = await render();
+  assert.equal(buffer.subarray(0, 5).toString("latin1"), "%PDF-");
+});
+
+
+// ── الخطّ: النقص لا يُخفق، يرسم فراغاً ──────────────────────────────────
+//
+// قِسنا ثمانية خطوط مرخَّصة عبر pdf-lib فسقط نصفها بصرياً — والنصّ يُستخرج
+// سليماً منها كلها. فالفحص هنا على **التغطية**، والفحص البصري وراءه.
+
+// مسار الخطّ يختلف بين مستودع العمل والمستودع العام — يُجرَّب الاثنان،
+// وإلا تخطّى الاختبارُ نفسَه هناك بلا أثر ظاهر.
+const ALMARAI = [
+  join(HERE, "..", "..", "invoice-tool", "fonts", "Almarai.ttf"),
+  join(HERE, "..", "..", "invoice", "fonts", "Almarai.ttf"),
+].find(existsSync) ?? "";
+
+test("الخطّ المُوصى به يغطّي كل ما تحتاجه فاتورة عربية", { skip: ALMARAI ? false : "الخطّ غير مجلوب في أيٍّ من التخطيطين" }, () => {
+  const gaps = inspectFont(readFileSync(ALMARAI));
+  assert.deepEqual(gaps.missing, [], "الخطّ الموصى به صار ناقصاً — راجع التوصية");
+  assert.equal(gaps.selfSufficient, true);
+});
+
+test("inspectFont يكشف النقص ولا يبتلعه", skip, () => {
+  // Arial يغطّي كل شيء عدا رمز الريال ﷼
+  const gaps = inspectFont(fontBytes);
+  assert.ok(Array.isArray(gaps.missing));
+  assert.equal(gaps.selfSufficient, gaps.missing.length === 0);
+});
+
+test("inspectFont يرفض خطّ الويب كما يرفضه الرسم", () => {
+  const woff2 = new Uint8Array(64);
+  woff2.set([0x77, 0x4f, 0x46, 0x32]);
+  assert.throws(() => inspectFont(woff2), /WOFF2/);
+});
+
+test("الفاتورة تُرسم بالخطّ الموصى به بلا فراغ", { skip: ALMARAI ? false : "الخطّ غير مجلوب في أيٍّ من التخطيطين" }, async () => {
+  const almarai = readFileSync(ALMARAI);
+  const result = await renderInvoice(INVOICE, { fontBytes: almarai });
+  const buffer = Buffer.from(result.pdf);
+  for (const phrase of ["1,546.75", "INV-2026-0042", "(15%)", "فاتورة ضريبية مبسطة",
+                        "مؤسسة الأمل التجارية", "الإجمالي شامل الضريبة"]) {
+    assert.ok(showsShaped(buffer, phrase, almarai), `«${phrase}» لم تُرسم`);
+  }
 });

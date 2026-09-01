@@ -7,10 +7,11 @@
  * ولا يُضمَّن خطّ في هذه الحزمة: يمرّره المستدعي. فالخطوط لها رخصها،
  * وحزمةٌ تحمل خطاً بلا داعٍ تُثقل من لا يحتاجه.
  */
-import { PDFDocument, rgb, StandardFonts, type PDFFont, type PDFPage, type RGB } from "pdf-lib";
+import { PDFDocument, rgb, StandardFonts, type PDFPage, type RGB } from "pdf-lib";
 import qrcode from "qrcode-generator";
+import fontkitModule from "@pdf-lib/fontkit";
 
-import { drawArabicText, measureArabicText } from "nasq/pdf-lib";
+import { drawArabicText, measureArabicText, type FontChoice } from "nasq/pdf-lib";
 import { isolate } from "nasq";
 import { computeTotals, formatMinor, type Invoice, type InvoiceTotals } from "./model.js";
 import { encodeZatcaQr } from "./zatca-qr.js";
@@ -29,6 +30,14 @@ export interface RenderOptions {
   fontBytes: Uint8Array | ArrayBuffer;
   /** خطّ عريض للعناوين — يُستعمل الخطُّ نفسه إن غاب. */
   boldFontBytes?: Uint8Array | ArrayBuffer;
+  /**
+   * خطّ احتياطي لما لا يحمله الخطّ العربي.
+   *
+   * كثيرٌ من الخطوط العربية المرخَّصة بحرية لا تحمل `A` ولا `(` ولا `%`.
+   * فإن غاب هذا الخيار استُعمل Helvetica المدمج في مواصفة PDF — بلا
+   * تضمين ولا بايت إضافي.
+   */
+  latinFontBytes?: Uint8Array | ArrayBuffer;
   /**
    * المبلغ بالحروف. يُمرَّر من `mutawafiq` أو أي محرّك تفقيط.
    * وإن غاب لم يُطبع السطر — ولا نخترع صياغةً نحوية بأنفسنا هنا.
@@ -71,15 +80,107 @@ function drawQr(page: PDFPage, payload: string, x: number, y: number, size: numb
   }
 }
 
+/**
+ * يرفض خطّ الويب المضغوط قبل أن يُنتج ملفاً لا يُقرأ.
+ *
+ * **فخٌّ مقيس:** `pdf-lib.embedFont` تقبل `WOFF` و`WOFF2` بلا شكوى وتُخرج
+ * ملفاً يبدو سليماً — ثم يرفضه كل قارئ:
+ *
+ *     MuPDF error: FT_New_Memory_Face(...): unknown file format
+ *
+ * لأن مواصفة PDF تُضمّن برنامج خطٍّ TrueType أو CFF، لا حاويةً مضغوطة.
+ * و`fontkit` تقرأ WOFF2 قراءةً صحيحة (47.7 كيلوبايت، بجداول GSUB كاملة)،
+ * فتنجح كل خطوة ويسقط الملف عند القارئ وحده.
+ *
+ * والخطأ هنا **قبل** البناء، لأن فشلاً صريحاً أرحم من ملفٍ يصل العميل
+ * فارغاً.
+ */
+function rejectWebFont(bytes: Uint8Array): void {
+  const tag = String.fromCharCode(...bytes.subarray(0, 4));
+  if (tag === "wOFF" || tag === "wOF2") {
+    throw new Error(
+      `الخطّ بصيغة ${tag === "wOF2" ? "WOFF2" : "WOFF"} — ومواصفة PDF لا تقبل إلا ` +
+        "TrueType أو OpenType. فُكّ ضغطه أولاً (fontTools.ttLib.woff2.decompress " +
+        "أو أداة مكافئة). وتمريره كما هو يُنتج ملفاً لا يفتحه أي قارئ.",
+    );
+  }
+}
+
+/**
+ * مجموعة المحارف التي يحملها الخطّ.
+ *
+ * تُحسب مرّة واحدة لكل خطّ — والحساب لكل محرفٍ على حدة كان يُعيد فتح
+ * جداول الخط آلاف المرات في فاتورة واحدة.
+ */
+function coverageOf(bytes: Uint8Array): (codePoint: number) => boolean {
+  const cache = new Map<number, boolean>();
+  let analysed: { hasGlyphForCodePoint(cp: number): boolean } | null = null;
+  try {
+    analysed = (fontkitModule as unknown as {
+      create(b: Uint8Array): { hasGlyphForCodePoint(cp: number): boolean };
+    }).create(bytes);
+  } catch {
+    analysed = null;      // تعذّر التحليل: نفترض التغطية ولا نُسقط الرسم
+  }
+  return (codePoint) => {
+    if (!analysed) return true;
+    let hit = cache.get(codePoint);
+    if (hit === undefined) {
+      hit = analysed.hasGlyphForCodePoint(codePoint);
+      cache.set(codePoint, hit);
+    }
+    return hit;
+  };
+}
+
+
+/** ما ينقص خطّاً من محارف تظهر في فاتورة عربية. */
+export interface FontGaps {
+  /** المحارف الناقصة، مرتّبة. */
+  missing: string[];
+  /** أيصلح الخطّ وحده بلا احتياطي؟ */
+  selfSufficient: boolean;
+}
+
+/**
+ * يفحص خطّاً قبل استعماله.
+ *
+ * **لماذا يلزم فحصٌ أصلاً:** الخطّ الناقص لا يُخفق — يرسم فراغاً. وقِسنا
+ * خطوطاً مرخَّصة بحرية عبر `pdf-lib` فوجدنا:
+ *
+ * | الخط | الحجم | النتيجة |
+ * |---|---|---|
+ * | Almarai | 149 KB | ✓ سليم، وتغطية كاملة |
+ * | Tajawal | 59 KB | ✓ سليم، ينقصه ﷼ |
+ * | IBM Plex Sans Arabic | 230 KB | ✓ سليم |
+ * | Cairo | 585 KB | ✓ سليم، ينقصه ﷼ |
+ * | Noto Sans Arabic | 235 KB | ✗ الألف تنفصل عمّا بعدها |
+ * | Noto Naskh Arabic | 300 KB | ✗ مكسور تماماً |
+ * | Readex Pro | 272 KB | ✗ مكسور تماماً |
+ * | Amiri | 421 KB | ✗ مكسور تماماً |
+ *
+ * والقياس بصريّ لا نصّي: النصّ يُستخرج سليماً من الملفات المكسورة كلها.
+ */
+export function inspectFont(fontBytes: Uint8Array | ArrayBuffer): FontGaps {
+  const bytes = new Uint8Array(fontBytes as ArrayBufferLike);
+  rejectWebFont(bytes);
+  const covers = coverageOf(bytes);
+  const needed = "0123456789.,:()%-/ ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    + "abcdefghijklmnopqrstuvwxyz"
+    + "ابتثجحخدذرزسشصضطظعغفقكلمنهوي" + "أإآءةؤئى" + "—﷼";
+  const missing = [...new Set(needed)].filter((ch) => !covers(ch.codePointAt(0)!)).sort();
+  return { missing, selfSufficient: missing.length === 0 };
+}
+
 /** سطرٌ عربي مُحاذى إلى اليمين عند `right`. */
 function rtl(page: PDFPage, text: string, right: number, y: number,
-             font: PDFFont, size: number, color: RGB = INK) {
+             font: FontChoice, size: number, color: RGB = INK) {
   drawArabicText(page, text, { font, size, x: right, y, color, align: "right", base: "rtl" });
 }
 
 /** سطرٌ يساري — للأرقام اللاتينية المستقلة. */
 function ltr(page: PDFPage, text: string, left: number, y: number,
-             font: PDFFont, size: number, color: RGB = INK) {
+             font: FontChoice, size: number, color: RGB = INK) {
   drawArabicText(page, text, { font, size, x: left, y, color, align: "left", base: "ltr" });
 }
 
@@ -94,14 +195,64 @@ export async function renderInvoice(invoice: Invoice, options: RenderOptions): P
   const totals = computeTotals(invoice);
 
   const doc = await PDFDocument.create();
-  // fontkit يُسجَّل من طرف المستدعي في المتصفح؛ وفي Node نستورده كسولاً
-  const fontkit = (await import("@pdf-lib/fontkit")).default;
-  doc.registerFontkit(fontkit);
+  doc.registerFontkit(fontkitModule);
 
-  const font = await doc.embedFont(options.fontBytes as Uint8Array, { subset: false });
-  const bold = options.boldFontBytes
-    ? await doc.embedFont(options.boldFontBytes as Uint8Array, { subset: false })
-    : font;
+  const primary = new Uint8Array(options.fontBytes as ArrayBufferLike);
+  rejectWebFont(primary);
+  const arabic = await doc.embedFont(primary, { subset: false });
+  let arabicBold = arabic;
+  if (options.boldFontBytes) {
+    const heavy = new Uint8Array(options.boldFontBytes as ArrayBufferLike);
+    rejectWebFont(heavy);
+    arabicBold = await doc.embedFont(heavy, { subset: false });
+  }
+
+  // ── الاحتياطي: ما لا يحمله الخطّ العربي ────────────────────────────────
+  //
+  // **الخطر أن الإخفاق صامت.** سطرٌ يُرسم بخطٍّ لا يحمل محرفه يخرج فارغاً
+  // بلا رسالة، فتصل الفاتورة ناقصةً ولا يعلم أحد. وقياسنا: Noto Sans Arabic
+  // يغطي 1,161 محرفاً فيها الأرقام، وليس فيها `A` ولا `(` ولا `%` ولا `/`.
+  let latin = arabic, latinBold = arabicBold;
+  if (options.latinFontBytes) {
+    const bytes = new Uint8Array(options.latinFontBytes as ArrayBufferLike);
+    rejectWebFont(bytes);
+    latin = latinBold = await doc.embedFont(bytes, { subset: false });
+  } else {
+    latin = await doc.embedFont(StandardFonts.Helvetica);
+    latinBold = await doc.embedFont(StandardFonts.HelveticaBold);
+  }
+
+  const covers = coverageOf(primary);
+  const embeddedLatin = Boolean(options.latinFontBytes);
+
+  /**
+   * اختيار الخطّ للمقطع الواحد، بثلاث قواعد مرتّبة:
+   *
+   * ①  مقطعٌ فيه حرفٌ عربي ⇒ **الخطّ العربي حتماً**، ولو نقصه محرفٌ آخر.
+   *    فلا يُشكّل العربيةَ غيرُه، والمحرف الناقص يظهر مربّعاً — نقصٌ مرئي
+   *    أهون من سطرٍ يختفي كله.
+   * ②  مقطعٌ لا عربية فيه والخطّ العربي يغطّيه ⇒ الخطّ العربي، حفاظاً على
+   *    اتّساق الشكل.
+   * ③  وإلا ⇒ الاحتياطي — بشرط أن يقدر عليه. فـHelvetica المدمج يرمي
+   *    استثناءً عند أول محرف خارج WinAnsi، فيُفحص قبل التحويل لا بعده.
+   *
+   * والقاعدة الأولى وُلدت من إخفاق: كانت القسمة «يغطّي/لا يغطّي» وحدها،
+   * فذهب «الرياض — طريق الملك فهد» كلُّه إلى Helvetica بسبب شَرطةٍ واحدة،
+   * فانهار التشغيل بـ«WinAnsi cannot encode ا».
+   */
+  const hasArabic = (text: string) => /[؀-ۿݐ-ݿﭐ-﻿]/.test(text);
+  const winAnsiSafe = (text: string) => [...text].every((c) => c.codePointAt(0)! < 0x100);
+
+  const choose = (heavy: boolean): FontChoice => (run) => {
+    const ar = heavy ? arabicBold : arabic;
+    if (hasArabic(run.text)) return ar;                                   // ①
+    if ([...run.text].every((ch) => covers(ch.codePointAt(0)!))) return ar; // ②
+    const fallback = heavy ? latinBold : latin;                            // ③
+    if (!embeddedLatin && !winAnsiSafe(run.text)) return ar;
+    return fallback;
+  };
+  const font = choose(false);
+  const bold = choose(true);
 
   const page = doc.addPage(A4);
   const right = A4[0] - MARGIN;

@@ -1,0 +1,173 @@
+/* أداة الفاتورة — تنسيق واحد، بلا إطار عمل. */
+
+:root {
+  --ink: #14161a;
+  --muted: #5b6270;
+  --line: #e3e6eb;
+  --bg: #ffffff;
+  --panel: #f7f8fa;
+  --accent: #0d5c47;
+  --accent-ink: #ffffff;
+  --warn: #8a4b12;
+  --error: #a11c25;
+  --radius: 10px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #e8eaee; --muted: #9aa3b2; --line: #2b3038;
+    --bg: #14161a; --panel: #1b1f26; --accent: #3fae8f; --accent-ink: #0b1512;
+    --warn: #d6a054; --error: #ef8189;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0 1rem 3rem;
+  font: 16px/1.7 "Segoe UI", "Noto Sans Arabic", system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+}
+
+header, main, footer { max-width: 1080px; margin: 0 auto; }
+
+header { padding: 2.4rem 0 1.6rem; border-bottom: 1px solid var(--line); }
+h1 { font-size: clamp(1.5rem, 4vw, 2.1rem); margin: 0 0 .5rem; letter-spacing: -0.01em; }
+.lede { margin: 0; color: var(--muted); max-width: 60ch; }
+
+main {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(300px, 1fr);
+  gap: 1.6rem;
+  padding: 1.6rem 0;
+  align-items: start;
+}
+@media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+
+fieldset {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem 1.1rem;
+  margin: 0 0 1rem;
+}
+legend { font-weight: 600; padding: 0 .4rem; font-size: .95rem; }
+.opt { color: var(--muted); font-weight: 400; }
+
+label { display: block; margin-bottom: .7rem; font-size: .9rem; color: var(--muted); }
+label small { display: block; margin-top: .25rem; font-size: .78rem; }
+
+input, select, textarea {
+  width: 100%;
+  margin-top: .25rem;
+  padding: .5rem .6rem;
+  font: inherit;
+  font-size: .95rem;
+  color: var(--ink);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+}
+input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+textarea { resize: vertical; }
+
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .7rem; }
+@media (max-width: 560px) { .grid3 { grid-template-columns: 1fr; } }
+
+.head, .line {
+  display: grid;
+  grid-template-columns: 1fr 5rem 7rem 6.5rem 2rem;
+  gap: .5rem;
+  align-items: center;
+}
+.head { font-size: .78rem; color: var(--muted); padding: 0 0 .35rem; }
+.line { margin-bottom: .5rem; }
+.line input, .line select { margin-top: 0; }
+@media (max-width: 640px) {
+  .head { display: none; }
+  .line { grid-template-columns: 1fr 1fr; }
+  .line .desc { grid-column: 1 / -1; }
+}
+
+button { font: inherit; cursor: pointer; border-radius: 7px; }
+.ghost {
+  background: none; border: 1px dashed var(--line); color: var(--muted);
+  padding: .45rem .9rem; font-size: .88rem;
+}
+.ghost:hover { border-color: var(--accent); color: var(--accent); }
+.drop {
+  background: none; border: none; color: var(--muted);
+  font-size: 1.3rem; line-height: 1; padding: 0;
+}
+.drop:hover { color: var(--error); }
+
+.primary {
+  width: 100%;
+  padding: .75rem 1rem;
+  margin-top: .9rem;
+  font-size: 1rem; font-weight: 600;
+  color: var(--accent-ink); background: var(--accent);
+  border: none;
+}
+.primary:disabled { opacity: .45; cursor: not-allowed; }
+
+.side { position: sticky; top: 1rem; }
+
+.card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem;
+  background: var(--panel);
+}
+.card table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+.card td { padding: .3rem 0; }
+.card .num { text-align: left; font-variant-numeric: tabular-nums; direction: ltr; }
+.card tr.total td { border-top: 1px solid var(--line); padding-top: .55rem; font-weight: 700; font-size: 1.02rem; }
+.words { margin: .8rem 0 0; font-size: .85rem; color: var(--muted); }
+.hint { margin: 0; color: var(--muted); font-size: .9rem; }
+
+#status { min-height: 1.5rem; margin: .7rem 0 0; font-size: .88rem; color: var(--muted); }
+#status.ok { color: var(--accent); }
+#status.error { color: var(--error); }
+
+.download {
+  display: block; text-align: center;
+  padding: .6rem; margin-bottom: .9rem;
+  border: 1px solid var(--accent); border-radius: 7px;
+  color: var(--accent); text-decoration: none; font-size: .92rem;
+}
+.download:hover { background: var(--accent); color: var(--accent-ink); }
+
+#preview {
+  width: 100%; height: 520px;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--panel);
+}
+
+footer { padding-top: 2rem; border-top: 1px solid var(--line); }
+footer h2 { font-size: 1.15rem; margin: 0 0 1rem; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1rem; }
+.cards .card h3 { margin: 0 0 .5rem; font-size: .98rem; }
+.cards .card p { margin: 0; font-size: .88rem; color: var(--muted); }
+.cards .card.warn { border-color: var(--warn); }
+.cards .card.warn h3 { color: var(--warn); }
+
+code {
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: .86em;
+  background: var(--bg);
+  padding: .1em .35em;
+  border-radius: 4px;
+  border: 1px solid var(--line);
+}
+
+.fine { margin-top: 1.4rem; font-size: .82rem; color: var(--muted); }
+a { color: var(--accent); }
+
+/*
+ * `hidden` سمةٌ في HTML تعني «غير معروض»، لكن أي قاعدة `display` في CSS
+ * تتغلّب عليها — فظهر زرّ التحميل قبل وجود ملفٍ يُحمَّل. كشفه النظرُ إلى
+ * الصفحة لا قراءةُ الكود.
+ */
+[hidden] { display: none !important; }

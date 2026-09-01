@@ -18,6 +18,7 @@ claims-lint — بوابة آلية تمنع عودة الادعاءات الم�
 from __future__ import annotations
 
 import argparse
+import os
 import re
 import sys
 from pathlib import Path
@@ -99,6 +100,17 @@ EXCLUDE_SUBSTRINGS = [
     "/cache/", "/coverage/", "/.venv/", "/build/",
 ]
 
+# مجلدات تُقلَّم قبل الدخول إليها — لا لأنها تُستثنى فقط، بل لأن الدخول
+# نفسه مكلف أو خطر (مسارات تتجاوز حدّ الطول في ويندوز).
+# ولا يُقلَّم `dist`: فيه **الأداة المشحونة** (`cheque-tool/dist/…html`
+# و`invoice/`)، وإخفاؤها يُعيد العلّة التي قُلبت القائمة من أجلها.
+# ما يُقلَّم هنا ما لا يُنشر أصلاً، أو ما يخطر المرورُ به:
+# `node_modules` مسارٌ يتجاوز حدّ الطول في ويندوز، والباقي مخرَجات أدوات.
+PRUNED_DIRS = {
+    "node_modules", ".git", "__pycache__",
+    ".venv", "venv", ".pytest_cache", ".mypy_cache", ".ruff_cache",
+}
+
 # ── الادعاءات المحظورة: (النمط، سبب الحظر) ──
 FORBIDDEN: list[tuple[str, str, str | None]] = [   # (نمط، سبب، استثناء سياقي)
     # سلالم الغرامات متعددة وتختلف باختلاف المخالفة [ZATCA — دليل تصنيف المخالفات،
@@ -168,10 +180,20 @@ def iter_public_files():
     يجب أن يُكرَّر بعدد الفحوص، وأن نسيان واحدٍ يترك فحصاً أضيق من إخوته
     بلا أثر ظاهر. مصدرٌ واحد للنطاق يجعل ذلك مستحيلاً.
     """
+    # **التقليم أثناء المرور لا بعده.** كان الفحص يستعمل `Path.glob`، وهي
+    # تدخل كل مجلد ثم يُستبعد ما يُستبعد — فانهارت على مسارٍ داخل
+    # `node_modules` تجاوز حدّ الطول في ويندوز:
+    #     FileNotFoundError: [WinError 3] … _class_check_private_static_field
+    # ولا علاقة للحدّ بنا: نحن لا نفحص تلك الملفات أصلاً، وإنما دخلناها.
+    suffixes = {"." + g.rsplit(".", 1)[-1] for g in SCAN_GLOBS if "." in g}
     seen: set[Path] = set()
-    for pattern in SCAN_GLOBS:
-        for path in ROOT.glob(pattern):
-            if not path.is_file() or path in seen or is_excluded(path):
+    for folder, subdirs, files in os.walk(ROOT):
+        here = Path(folder)
+        subdirs[:] = [d for d in subdirs
+                      if d not in PRUNED_DIRS and not is_excluded(here / d)]
+        for name in files:
+            path = here / name
+            if path.suffix not in suffixes or path in seen or is_excluded(path):
                 continue
             seen.add(path)
             yield path
@@ -205,9 +227,9 @@ TEST_COUNT_RE = re.compile(r"(\d{2,4})\s*(?:اختبار|اختباراً|اخت
 # بالواقع. أمّا الأصول خارج هذه الجذور فتتكلم عن حزمة المشروع كلها، ويجب
 # أن تتفق على رقم واحد.
 PACKAGE_ROOTS = (
-    "eta-lib/", "arabic-text/", "invoice-pdf/", "tafgeet-benchmark/",
+    "eta-lib/", "arabic-text/", "invoice-pdf/", "invoice-tool/", "tafgeet-benchmark/",
     # أسماء المجلدات نفسها في المستودع العام — نسخة البوابة واحدة في الاثنين
-    "nasq/", "fatura/", "tafgeet/", "typescript-lib/", "python-lib/", "checker/",
+    "nasq/", "fatura/", "invoice/", "invoice-tool/", "tafgeet/", "typescript-lib/", "python-lib/", "checker/",
 )
 
 
