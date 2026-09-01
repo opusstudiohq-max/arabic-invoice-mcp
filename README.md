@@ -19,6 +19,7 @@
 | **[أداة الفاتورة الضريبية](https://opusstudiohq-max.github.io/arabic-invoice-mcp/invoice/)** | تملأ نموذجاً فتنزل فاتورة PDF عربية بمجاميعها ورمزها — داخل متصفحك، بلا رفع |
 | **[فاحص رمز QR](https://opusstudiohq-max.github.io/arabic-invoice-mcp/checker/)** | يفكّ رمز الفاتورة ويفحص **بنية** حقول المرحلة الأولى |
 | **[أداة طباعة الشيكات](https://opusstudiohq-max.github.io/arabic-invoice-mcp/cheque/dist/mutawafiq-cheque.html)** | ملفٌ واحد يعمل بالنقر المزدوج — بلا خادم وبلا إنترنت |
+| **[مقياس النصّ في PDF](https://opusstudiohq-max.github.io/arabic-invoice-mcp/pdf/)** | هل تصل المبالغ كما كُتبت؟ يبني ملفات فعلية ويقرأ منها الرسوم |
 | **[مقياس التفقيط العربي](https://opusstudiohq-max.github.io/arabic-invoice-mcp/tafgeet/)** | 52 حالة، كلٌّ تحمل قاعدةً نحوية مسمّاة — ومحرّكُنا أول من فُحص بها |
 
 ## مكتبات

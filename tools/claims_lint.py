@@ -234,9 +234,9 @@ NAMES_A_PACKAGE = re.compile(
 # بالواقع. أمّا الأصول خارج هذه الجذور فتتكلم عن حزمة المشروع كلها، ويجب
 # أن تتفق على رقم واحد.
 PACKAGE_ROOTS = (
-    "eta-lib/", "arabic-text/", "invoice-pdf/", "invoice-tool/", "tafgeet-benchmark/",
+    "eta-lib/", "arabic-text/", "invoice-pdf/", "invoice-tool/", "tafgeet-benchmark/", "pdf-benchmark/",
     # أسماء المجلدات نفسها في المستودع العام — نسخة البوابة واحدة في الاثنين
-    "nasq/", "fatura/", "invoice/", "invoice-tool/", "tafgeet/", "typescript-lib/", "python-lib/", "checker/",
+    "nasq/", "fatura/", "invoice/", "invoice-tool/", "tafgeet/", "pdf/", "pdf-benchmark/", "typescript-lib/", "python-lib/", "checker/",
 )
 
 

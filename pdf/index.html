@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مقياس النصّ العربي في PDF — هل يصل المبلغ كما كُتب؟</title>
+<meta name="description" content="مقياس مفتوح يبني ملفات PDF فعلية ويقرأ منها الرسوم: هل تُطبع «1,234.50» كما كُتبت أم مقلوبة؟ الحالات والقواعد وطريقة إعادة التشغيل منشورة.">
+<link rel="canonical" href="https://opusstudiohq-max.github.io/arabic-invoice-mcp/pdf/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="ar_AR">
+<meta property="og:site_name" content="أدوات الفوترة العربية">
+<meta property="og:url" content="https://opusstudiohq-max.github.io/arabic-invoice-mcp/pdf/">
+<meta property="og:title" content="فاتورتك تطبع «05.432,1» بدل «1,234.50»">
+<meta property="og:description" content="0/9 — نتيجة أشهر مكتبة PDF في جافاسكربت على 9 حالة، كلٌّ بقاعدة من يونيكود. المقياس يُعاد تشغيله بأمرٍ واحد.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="فاتورتك تطبع «05.432,1» بدل «1,234.50»">
+<meta name="twitter:description" content="مقياس مفتوح يبني ملفات PDF فعلية ويقرأ منها الرسوم. 9 حالة بقواعد يونيكود مسمّاة.">
+<style>
+  :root{
+    --bg:#f7f8fa; --card:#fff; --ink:#16202b; --muted:#5d6b7a; --line:#e0e6ec;
+    --ok:#0a7d5a; --ok-bg:#e8f5f0; --bad:#b4232a; --bad-bg:#fdeeee;
+    --warn:#8a5a00; --warn-bg:#fff8e8; --accent:#0d5c47;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{--bg:#12161b; --card:#1a1f26; --ink:#e6eaef; --muted:#9aa6b4; --line:#2a323c;
+          --ok:#3fae8f; --ok-bg:#14261f; --bad:#ef7c84; --bad-bg:#2a1618;
+          --warn:#d6a054; --warn-bg:#2a2113; --accent:#3fae8f;}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:0 1rem 4rem;background:var(--bg);color:var(--ink);
+       font:16px/1.75 "Segoe UI","Noto Sans Arabic",system-ui,sans-serif}
+  main{max-width:1000px;margin:0 auto}
+  header{padding:3rem 0 1.5rem;border-bottom:1px solid var(--line)}
+  h1{font-size:clamp(1.6rem,4.5vw,2.3rem);margin:0 0 .6rem;letter-spacing:-.01em}
+  h2{font-size:1.25rem;margin:2.5rem 0 1rem}
+  h3{font-size:1rem;margin:0 0 .5rem}
+  .lede{color:var(--muted);max-width:62ch;margin:0}
+  .hero{background:var(--bad-bg);border:1px solid var(--bad);border-radius:12px;
+        padding:1.2rem 1.4rem;margin:1.6rem 0}
+  .hero img{max-width:100%;height:auto;border-radius:8px;background:#fff}
+  /* سلسلة العطب تُعرض **كما هي بايتاً بايت**: المتصفّح عارضٌ مطابق، فلو
+     تُرك لها لأعاد ترتيبها فأصلحها بصرياً — وضاعت البرهنة نفسها. */
+  .verbatim{unicode-bidi:bidi-override;direction:ltr;display:inline-block}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;
+        padding:1rem 1.2rem;margin-bottom:1rem}
+  .scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{width:100%;border-collapse:collapse;background:var(--card);
+        border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  th,td{padding:.65rem .8rem;text-align:right;border-bottom:1px solid var(--line);
+        vertical-align:top}
+  th{background:var(--bg);font-size:.82rem;color:var(--muted);font-weight:600}
+  tr:last-child td{border-bottom:none}
+  tr.ours{background:var(--ok-bg)}
+  .num{text-align:center;font-variant-numeric:tabular-nums}
+  .ok{color:var(--ok)} .bad{color:var(--bad)} .warn{color:var(--warn)}
+  .rule{font-size:.8rem;color:var(--muted);margin-top:.25rem;font-weight:400}
+  .tag{display:inline-block;padding:.05rem .45rem;border:1px solid var(--line);
+       border-radius:5px;font-size:.78rem;color:var(--muted)}
+  code{font-family:ui-monospace,Consolas,monospace;font-size:.88em;
+       background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:.1em .35em}
+  pre{background:var(--card);border:1px solid var(--line);border-radius:10px;
+      padding:1rem;overflow-x:auto;direction:ltr;text-align:left}
+  pre code{background:none;border:none;padding:0}
+  a{color:var(--accent)}
+  footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--line);
+         color:var(--muted);font-size:.88rem}
+  .cta{background:var(--ok-bg);border:1px solid var(--ok);border-radius:10px;
+       padding:1rem 1.2rem;margin:1.5rem 0}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1>هل تصل المبالغ إلى فاتورتك كما كُتبت؟</h1>
+  <p class="lede">
+    مقياسٌ مفتوح يبني <strong>ملفات PDF فعلية</strong> ويقرأ منها الرسوم —
+    لا يفحص ما تُعيده الدوال. 9 حالة، كلٌّ تحمل قاعدةً
+    مسمّاة من خوارزمية يونيكود الثنائية الاتجاه (UAX&nbsp;#9).
+  </p>
+</header>
+
+<div class="hero">
+  <p style="margin:0 0 .9rem"><strong>السطر نفسه، والخطّ نفسه، ومحرّكان:</strong></p>
+  <img src="evidence.png" alt="مقارنة: pdf-lib تطبع المبلغ 05.432,1 بينما نَسْق تطبعه 1,234.50"
+       width="1048" height="476" loading="lazy">
+  <p class="rule" style="margin:.9rem 0 0">
+    <strong>هذه صورةٌ مُصيَّرة من ملفَي PDF فعليين</strong>، لا نصّ في الصفحة —
+    لأن المتصفّح عارضٌ مطابق لخوارزمية يونيكود، فلو وُضعت السلسلة المكسورة
+    نصّاً لأعاد ترتيبها فأصلحها بصرياً، وضاعت البرهنة.
+    ولّدها <code>evidence.py</code> من الملفات نفسها.
+  </p>
+  <p class="rule" style="margin:.5rem 0 0">
+    والعيب ليس في تشكيل الحروف — تلك صحيحة في الاثنين — بل في
+    <strong>ترتيب المقاطع الاتجاهية</strong>.
+  </p>
+</div>
+
+<h2>اللوحة</h2>
+<div class="scroll"><table>
+  <tr><th>المحرّك</th><th class="num">النتيجة</th></tr>
+  
+    <tr class="ours">
+      <td><strong>نَسْق (محرّكنا)</strong><div class="rule">يقطع السطر إلى مقاطع اتجاهية بـUAX #9 ويرسم كلاً في موضعه. bidi-js اجتازت 91,707 حالة من سلسلة يونيكود.</div></td>
+      <td class="num ok">
+        <strong>9/9</strong><div class="rule">100%</div>
+      </td>
+    </tr>
+    <tr class="">
+      <td><strong>bidi-shaper → pdf-lib</strong><div class="rule">تُخرج سلسلةً بصرية صحيحة، ثم تُمرَّر إلى drawText. تُقاس هنا في هذا التركيب بعينه.</div></td>
+      <td class="num warn">
+        <strong>2/9</strong><div class="rule">22.2%</div>
+      </td>
+    </tr>
+    <tr class="">
+      <td><strong>pdf-lib (كما هي)</strong><div class="rule">المكتبة الأشهر لتوليد PDF في جافاسكربت — 5.5 ألف نجمة. تُشكّل العربية صحيحةً عبر fontkit، ولا تطبّق خوارزمية الاتجاه.</div></td>
+      <td class="num bad">
+        <strong>0/9</strong><div class="rule">0%</div>
+      </td>
+    </tr>
+    <tr class="">
+      <td><strong>naqqash + مُهايئها لـpdf-lib</strong><div class="rule">تُصرّح في صفحتها الأولى أنها لا تطبّق الخوارزمية الثنائية الاتجاه. تُقاس هنا على الفاتورة، لا على نطاقها المُعلَن — والفرق مذكور.</div></td>
+      <td class="num bad">
+        <strong>0/9</strong><div class="rule">0%</div>
+      </td>
+    </tr>
+</table></div>
+
+
+<div class="card" style="margin-top:1rem">
+  <h3>إنصافٌ واجب</h3>
+  <p class="rule" style="margin:0">
+    <code>naqqash</code> <strong>تُصرّح في صفحتها الأولى</strong> أنها لا تطبّق
+    الخوارزمية الثنائية الاتجاه، وتُحيل إلى <code>bidi-js</code>. فالنتيجة أعلاه
+    ليست اتهاماً لها بمخالفة ما تَعِد به — بل بيانٌ لما يكلّفه ذلك الحدُّ
+    المُعلَن حين تكون على الورق فاتورةٌ فيها مبلغ. والأمر نفسه في
+    <code>bidi-shaper</code>: تُخرج سلسلةً صحيحة، ثم تعكسها مكتبةُ الرسم بعدها
+    — <strong>فالمقياس على التركيب لا على الحزمة وحدها</strong>.
+  </p>
+</div>
+
+<h2>الحالات، حالةً حالة</h2>
+<div class="scroll"><table>
+  <tr>
+    <th>النصّ</th><th>القاعدة</th><th>يجب أن يظهر</th>
+    <th class="num">نَسْق</th><th class="num">bidi-shaper</th><th class="num">pdf-lib</th><th class="num">naqqash</th>
+  </tr>
+  
+    <tr>
+      <td><code><bdi>الإجمالي 1,234.50 ج.م</bdi></code><div class="rule">أشهر عيب يصل العميل: المبلغ مقلوباً على فاتورته.</div></td>
+      <td><span class="tag">B1</span></td>
+      <td><code><bdi>1,234.50</bdi></code></td>
+      <td class="num ok">✓</td>
+      <td class="num bad">✗</td><td class="num bad">✗</td><td class="num bad">✗</td>
+    </tr>
+    <tr>
+      <td><code><bdi>المبلغ 9,876.54</bdi></code></td>
+      <td><span class="tag">B2</span></td>
+      <td><code><bdi>9,876.54</bdi></code></td>
+      <td class="num ok">✓</td>
+      <td class="num bad">✗</td><td class="num bad">✗</td><td class="num bad">✗</td>
+    </tr>
+    <tr>
+      <td><code><bdi>الباقي 15 جنيهاً</bdi></code></td>
+      <td><span class="tag">B1</span></td>
+      <td><code><bdi>15</bdi></code></td>
+      <td class="num ok">✓</td>
+      <td class="num bad">✗</td><td class="num bad">✗</td><td class="num bad">✗</td>
+    </tr>
+    <tr>
+      <td><code><bdi>شركة ABC للتجارة</bdi></code></td>
+      <td><span class="tag">B3</span></td>
+      <td><code><bdi>ABC</bdi></code></td>
+      <td class="num ok">✓</td>
+      <td class="num bad">✗</td><td class="num bad">✗</td><td class="num bad">✗</td>
+    </tr>
+    <tr>
+      <td><code><bdi>الفاتورة رقم INV-2026/001</bdi></code><div class="rule">رقم الفاتورة معرّفٌ قانوني — انعكاسه يجعل المستند غير قابل للمطابقة.</div></td>
+      <td><span class="tag">B3</span></td>
+      <td><code><bdi>INV-2026/001</bdi></code></td>
+      <td class="num ok">✓</td>
+      <td class="num ok">✓</td><td class="num bad">✗</td><td class="num bad">✗</td>
+    </tr>
+    <tr>
+      <td><code><bdi>الرقم الضريبي: 310122393500003</bdi></code></td>
+      <td><span class="tag">B1</span></td>
+      <td><code><bdi>310122393500003</bdi></code></td>
+      <td class="num ok">✓</td>
+      <td class="num bad">✗</td><td class="num bad">✗</td><td class="num bad">✗</td>
+    </tr>
+    <tr>
+      <td><code><bdi>بتاريخ 2026/09/01</bdi></code></td>
+      <td><span class="tag">B5</span></td>
+      <td><code><bdi>2026/09/01</bdi></code></td>
+      <td class="num ok">✓</td>
+      <td class="num bad">✗</td><td class="num bad">✗</td><td class="num bad">✗</td>
+    </tr>
+    <tr>
+      <td><code><bdi>ضريبة القيمة المضافة ⁨(15%)⁩</bdi></code><div class="rule">بلا عزل تتفرّق «%» و«)» عن الرقم.</div></td>
+      <td><span class="tag">B7</span></td>
+      <td><code><bdi>(15%)</bdi></code></td>
+      <td class="num ok">✓</td>
+      <td class="num bad">✗</td><td class="num bad">✗</td><td class="num bad">✗</td>
+    </tr>
+    <tr>
+      <td><code><bdi>الإجمالي ⁨1,571.75 SAR⁩</bdi></code><div class="rule">بلا عزل يسبق مقطعُ العملة الرقمَ في فقرة يمينية.</div></td>
+      <td><span class="tag">B7</span></td>
+      <td><code><bdi>1,571.75 SAR</bdi></code></td>
+      <td class="num ok">✓</td>
+      <td class="num ok">✓</td><td class="num bad">✗</td><td class="num bad">✗</td>
+    </tr>
+</table></div>
+
+<h2>القواعد — الحَكَم يونيكود لا نحن</h2>
+<div class="scroll"><table>
+  <tr><td><span class="tag">B1</span></td>
+      <td><strong>الرقم داخل نصّ عربي</strong><div class="rule">الأرقام في فقرة يمينية تُعرض بترتيبها من اليسار إلى اليمين (قاعدتا I1/I2 بعد W2). فـ«1,234.50» تُقرأ كما كُتبت، ولا تنعكس مع الفقرة.</div></td></tr>
+  <tr><td><span class="tag">B2</span></td>
+      <td><strong>الفاصلة والنقطة داخل الرقم</strong><div class="rule">الفاصل المشترك (CS) بين رقمين من الصنف نفسه يصير منهما (قاعدة W4). فـ«1,234.50» رقمٌ واحد لا ثلاثة، ولا تتفرّق فواصله.</div></td></tr>
+  <tr><td><span class="tag">B3</span></td>
+      <td><strong>اللاتينية داخل نصّ عربي</strong><div class="rule">المقطع اللاتيني مستوى زوجي داخل فقرة فردية، فيُعرض يساراً-يميناً كما كُتب. «ABC» لا «CBA».</div></td></tr>
+  <tr><td><span class="tag">B4</span></td>
+      <td><strong>قلب الأقواس</strong><div class="rule">قاعدة L4: المحرف المتناظر يُرسم بنظيره داخل مقطع يميني. فالقوس الذي كُتب «(» يظهر «)» ما لم يُعزل.</div></td></tr>
+  <tr><td><span class="tag">B5</span></td>
+      <td><strong>الشرطة المائلة تلتحق بالرقم</strong><div class="rule">الشرطة المائلة فاصلٌ مشترك (CS)، فتلتحق بالرقمين حولها (W4). فـ«2026/09/01» يبقى بترتيبه.</div></td></tr>
+  <tr><td><span class="tag">B6</span></td>
+      <td><strong>الشرطة لا تلتحق بالرقم العربي الصنف</strong><div class="rule">الأرقام بعد حرف عربي تصير AN (قاعدة W2)، والشرطة ES لا تلتحق بـAN (W4) فتبقى محايدة. فـ«2026-09-01» يُعرض «01-09-2026» — سلوكٌ صحيح يُنتجه كل عارضٍ مطابق.</div></td></tr>
+  <tr><td><span class="tag">B7</span></td>
+      <td><strong>العزل يحمي المقطع</strong><div class="rule">محارف العزل (U+2066..U+2069) تمنع المحايدات على الحدّ من التسرّب إلى الجوار (X5a-X6a). فـ«(15%)» معزولةً تبقى كما كُتبت.</div></td></tr></table></div>
+
+<h2>سلوكٌ موثَّق لا يُسجَّل عليه</h2>
+<p class="lede" style="margin-bottom:1rem">
+  ما لا يقيسه هذا المشغّل قياساً تامّاً <strong>لا يُمنح عليه درجة</strong>.
+</p>
+
+  <div class="card">
+    <h3><code><bdi>بتاريخ 2026-09-01</bdi></code></h3>
+    <p><strong>يُعرض:</strong> <bdi>01-09-2026</bdi></p>
+    <p class="rule">ليست إخفاقاً: هذا ترتيب يونيكود الصحيح، ويُنتجه كل عارضٍ مطابق ومنه المتصفّح. مذكورةٌ هنا لأنها تفاجئ من يراها على فاتورته، والعلاج استعمال «/» أو العزل.</p>
+  </div>
+  <div class="card">
+    <h3><code><bdi>المبلغ (نقداً)</bdi></code></h3>
+    <p><strong>يُعرض:</strong> <bdi>القوس المكتوب «(» يُرسم برسم «)» والعكس</bdi></p>
+    <p class="rule">أُخرجت من التسجيل لأن هذا المشغّل **لا يستطيع قياسها**: القلب يُبدّل رسمَي القوسين، فتبقى مجموعة الرسوم المرسومة كما هي ولا يكشفه وجودُ رسم. وكانت الحالة تمرّ لمجرّد ظهور قوسٍ ما — فحصٌ يمنح درجةً بلا معنى. ولا يُسجَّل ما لا يُقاس؛ والقلب مُختبَرٌ في نَسْق على مستوى المقاطع.</p>
+  </div>
+
+<h2>أعِد تشغيله بنفسك</h2>
+<pre><code>git clone https://github.com/opusstudiohq-max/arabic-invoice-mcp
+cd arabic-invoice-mcp/pdf-benchmark
+npm install
+node run.mjs</code></pre>
+<p class="rule">
+  المشغّل يبني الملفات ويقرأ منها، ويكتب <code>results.json</code>. وهذه
+  الصفحة <strong>مولَّدة منه</strong> — لا رقم فيها مكتوبٌ بيد.
+  الخطّ المستعمل: <code>Almarai.ttf</code>.
+</p>
+
+<div class="cta">
+  <h3>وجدتَ خطأً في حالة؟ أو محرّكاً يستحق القياس؟</h3>
+  <p style="margin:0">
+    كل حالة هنا تحمل قاعدتها، فمن يخالفها فليخالف القاعدة علناً.
+    <a href="https://github.com/opusstudiohq-max/arabic-invoice-mcp/issues/new?labels=%D8%A7%D9%84%D9%85%D9%82%D9%8A%D8%A7%D8%B3&title=%D9%85%D9%82%D9%8A%D8%A7%D8%B3%20PDF%3A%20">افتح مسألةً</a>
+    — نُصحّح علناً ونذكر من صحّح.
+  </p>
+</div>
+
+<footer>
+  <p>
+    وُلِّدت في 2026-09-01 من تشغيلٍ فعلي.
+    الأدوات:
+    <a href="https://opusstudiohq-max.github.io/arabic-invoice-mcp/invoice/">فاتورة PDF</a> ·
+    <a href="https://opusstudiohq-max.github.io/arabic-invoice-mcp/checker/">فاحص QR</a> ·
+    <a href="https://opusstudiohq-max.github.io/arabic-invoice-mcp/tafgeet/">مقياس التفقيط</a> ·
+    <a href="https://github.com/opusstudiohq-max/arabic-invoice-mcp">المستودع</a>
+  </p>
+  <p>مفتوح المصدر (MIT) — <code>opus.studio.hq@gmail.com</code></p>
+</footer>
+
+</main>
+</body>
+</html>
