@@ -11,10 +11,10 @@
 <meta property="og:site_name" content="أدوات الفوترة العربية">
 <meta property="og:url" content="https://opusstudiohq-max.github.io/arabic-invoice-mcp/pdf/">
 <meta property="og:title" content="فاتورتك تطبع «05.432,1» بدل «1,234.50»">
-<meta property="og:description" content="0/9 — نتيجة أشهر مكتبة PDF في جافاسكربت على 9 حالة، كلٌّ بقاعدة من يونيكود. المقياس يُعاد تشغيله بأمرٍ واحد.">
+<meta property="og:description" content="0/12 — نتيجة أشهر مكتبة PDF في جافاسكربت على 12 حالة، كلٌّ بقاعدة من يونيكود. المقياس يُعاد تشغيله بأمرٍ واحد.">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="فاتورتك تطبع «05.432,1» بدل «1,234.50»">
-<meta name="twitter:description" content="مقياس مفتوح يبني ملفات PDF فعلية ويقرأ منها الرسوم. 9 حالة بقواعد يونيكود مسمّاة.">
+<meta name="twitter:description" content="مقياس مفتوح يبني ملفات PDF فعلية ويقرأ منها الرسوم. 12 حالة بقواعد يونيكود مسمّاة.">
 <style>
   :root{
     --bg:#f7f8fa; --card:#fff; --ink:#16202b; --muted:#5d6b7a; --line:#e0e6ec;
@@ -75,7 +75,7 @@
   <h1>هل تصل المبالغ إلى فاتورتك كما كُتبت؟</h1>
   <p class="lede">
     مقياسٌ مفتوح يبني <strong>ملفات PDF فعلية</strong> ويقرأ منها الرسوم —
-    لا يفحص ما تُعيده الدوال. 9 حالة، كلٌّ تحمل قاعدةً
+    لا يفحص ما تُعيده الدوال. 12 حالة، كلٌّ تحمل قاعدةً
     مسمّاة من خوارزمية يونيكود الثنائية الاتجاه (UAX&nbsp;#9).
   </p>
 </header>
@@ -103,25 +103,25 @@
     <tr class="ours">
       <td><strong>نَسْق (محرّكنا)</strong><div class="rule">يقطع السطر إلى مقاطع اتجاهية بـUAX #9 ويرسم كلاً في موضعه. bidi-js اجتازت 91,707 حالة من سلسلة يونيكود.</div></td>
       <td class="num ok">
-        <strong>9/9</strong><div class="rule">100%</div>
+        <strong>12/12</strong><div class="rule">100%</div>
       </td>
     </tr>
     <tr class="">
       <td><strong>bidi-shaper → pdf-lib</strong><div class="rule">تُخرج سلسلةً بصرية صحيحة، ثم تُمرَّر إلى drawText. تُقاس هنا في هذا التركيب بعينه.</div></td>
       <td class="num warn">
-        <strong>2/9</strong><div class="rule">22.2%</div>
+        <strong>2/12</strong><div class="rule">16.7%</div>
       </td>
     </tr>
     <tr class="">
       <td><strong>pdf-lib (كما هي)</strong><div class="rule">المكتبة الأشهر لتوليد PDF في جافاسكربت — 5.5 ألف نجمة. تُشكّل العربية صحيحةً عبر fontkit، ولا تطبّق خوارزمية الاتجاه.</div></td>
       <td class="num bad">
-        <strong>0/9</strong><div class="rule">0%</div>
+        <strong>0/12</strong><div class="rule">0%</div>
       </td>
     </tr>
     <tr class="">
       <td><strong>naqqash + مُهايئها لـpdf-lib</strong><div class="rule">تُصرّح في صفحتها الأولى أنها لا تطبّق الخوارزمية الثنائية الاتجاه. تُقاس هنا على الفاتورة، لا على نطاقها المُعلَن — والفرق مذكور.</div></td>
       <td class="num bad">
-        <strong>0/9</strong><div class="rule">0%</div>
+        <strong>0/12</strong><div class="rule">0%</div>
       </td>
     </tr>
 </table></div>
@@ -142,72 +142,93 @@
 <h2>الحالات، حالةً حالة</h2>
 <div class="scroll"><table>
   <tr>
-    <th>النصّ</th><th>القاعدة</th><th>يجب أن يظهر</th>
+    <th>النصّ</th><th>القاعدة</th><th>يجب أن يظهر<div class="rule">والخطّ الذي جرت به</div></th>
     <th class="num">نَسْق</th><th class="num">bidi-shaper</th><th class="num">pdf-lib</th><th class="num">naqqash</th>
   </tr>
   
     <tr>
       <td><code><bdi>الإجمالي 1,234.50 ج.م</bdi></code><div class="rule">أشهر عيب يصل العميل: المبلغ مقلوباً على فاتورته.</div></td>
       <td><span class="tag">B1</span></td>
-      <td><code><bdi>1,234.50</bdi></code></td>
+      <td><code><bdi>1,234.50</bdi></code><div class="rule">Almarai</div></td>
       <td class="num ok">✓</td>
       <td class="num bad">✗</td><td class="num bad">✗</td><td class="num bad">✗</td>
     </tr>
     <tr>
       <td><code><bdi>المبلغ 9,876.54</bdi></code></td>
       <td><span class="tag">B2</span></td>
-      <td><code><bdi>9,876.54</bdi></code></td>
+      <td><code><bdi>9,876.54</bdi></code><div class="rule">Almarai</div></td>
       <td class="num ok">✓</td>
       <td class="num bad">✗</td><td class="num bad">✗</td><td class="num bad">✗</td>
     </tr>
     <tr>
       <td><code><bdi>الباقي 15 جنيهاً</bdi></code></td>
       <td><span class="tag">B1</span></td>
-      <td><code><bdi>15</bdi></code></td>
+      <td><code><bdi>15</bdi></code><div class="rule">Almarai</div></td>
       <td class="num ok">✓</td>
       <td class="num bad">✗</td><td class="num bad">✗</td><td class="num bad">✗</td>
     </tr>
     <tr>
       <td><code><bdi>شركة ABC للتجارة</bdi></code></td>
       <td><span class="tag">B3</span></td>
-      <td><code><bdi>ABC</bdi></code></td>
+      <td><code><bdi>ABC</bdi></code><div class="rule">Almarai</div></td>
       <td class="num ok">✓</td>
       <td class="num bad">✗</td><td class="num bad">✗</td><td class="num bad">✗</td>
     </tr>
     <tr>
       <td><code><bdi>الفاتورة رقم INV-2026/001</bdi></code><div class="rule">رقم الفاتورة معرّفٌ قانوني — انعكاسه يجعل المستند غير قابل للمطابقة.</div></td>
       <td><span class="tag">B3</span></td>
-      <td><code><bdi>INV-2026/001</bdi></code></td>
+      <td><code><bdi>INV-2026/001</bdi></code><div class="rule">Almarai</div></td>
       <td class="num ok">✓</td>
       <td class="num ok">✓</td><td class="num bad">✗</td><td class="num bad">✗</td>
     </tr>
     <tr>
       <td><code><bdi>الرقم الضريبي: 310122393500003</bdi></code></td>
       <td><span class="tag">B1</span></td>
-      <td><code><bdi>310122393500003</bdi></code></td>
+      <td><code><bdi>310122393500003</bdi></code><div class="rule">Almarai</div></td>
       <td class="num ok">✓</td>
       <td class="num bad">✗</td><td class="num bad">✗</td><td class="num bad">✗</td>
     </tr>
     <tr>
       <td><code><bdi>بتاريخ 2026/09/01</bdi></code></td>
       <td><span class="tag">B5</span></td>
-      <td><code><bdi>2026/09/01</bdi></code></td>
+      <td><code><bdi>2026/09/01</bdi></code><div class="rule">Almarai</div></td>
       <td class="num ok">✓</td>
       <td class="num bad">✗</td><td class="num bad">✗</td><td class="num bad">✗</td>
     </tr>
     <tr>
       <td><code><bdi>ضريبة القيمة المضافة ⁨(15%)⁩</bdi></code><div class="rule">بلا عزل تتفرّق «%» و«)» عن الرقم.</div></td>
       <td><span class="tag">B7</span></td>
-      <td><code><bdi>(15%)</bdi></code></td>
+      <td><code><bdi>(15%)</bdi></code><div class="rule">Almarai</div></td>
       <td class="num ok">✓</td>
       <td class="num bad">✗</td><td class="num bad">✗</td><td class="num bad">✗</td>
     </tr>
     <tr>
       <td><code><bdi>الإجمالي ⁨1,571.75 SAR⁩</bdi></code><div class="rule">بلا عزل يسبق مقطعُ العملة الرقمَ في فقرة يمينية.</div></td>
       <td><span class="tag">B7</span></td>
-      <td><code><bdi>1,571.75 SAR</bdi></code></td>
+      <td><code><bdi>1,571.75 SAR</bdi></code><div class="rule">Almarai</div></td>
       <td class="num ok">✓</td>
       <td class="num ok">✓</td><td class="num bad">✗</td><td class="num bad">✗</td>
+    </tr>
+    <tr>
+      <td><code><bdi>סה״כ 1,234.50 ש״ח</bdi></code><div class="rule">فاتورة عبرية — العيب نفسه بلا تغيير.</div></td>
+      <td><span class="tag">B8</span></td>
+      <td><code><bdi>1,234.50</bdi></code><div class="rule">Arial</div></td>
+      <td class="num ok">✓</td>
+      <td class="num bad">✗</td><td class="num bad">✗</td><td class="num bad">✗</td>
+    </tr>
+    <tr>
+      <td><code><bdi>مبلغ کل 1,234.50 ریال</bdi></code></td>
+      <td><span class="tag">B8</span></td>
+      <td><code><bdi>1,234.50</bdi></code><div class="rule">Almarai</div></td>
+      <td class="num ok">✓</td>
+      <td class="num bad">✗</td><td class="num bad">✗</td><td class="num bad">✗</td>
+    </tr>
+    <tr>
+      <td><code><bdi>کل رقم 1,234.50 روپے</bdi></code></td>
+      <td><span class="tag">B8</span></td>
+      <td><code><bdi>1,234.50</bdi></code><div class="rule">Almarai</div></td>
+      <td class="num ok">✓</td>
+      <td class="num bad">✗</td><td class="num bad">✗</td><td class="num bad">✗</td>
     </tr>
 </table></div>
 
@@ -226,7 +247,9 @@
   <tr><td><span class="tag">B6</span></td>
       <td><strong>الشرطة لا تلتحق بالرقم العربي الصنف</strong><div class="rule">الأرقام بعد حرف عربي تصير AN (قاعدة W2)، والشرطة ES لا تلتحق بـAN (W4) فتبقى محايدة. فـ«2026-09-01» يُعرض «01-09-2026» — سلوكٌ صحيح يُنتجه كل عارضٍ مطابق.</div></td></tr>
   <tr><td><span class="tag">B7</span></td>
-      <td><strong>العزل يحمي المقطع</strong><div class="rule">محارف العزل (U+2066..U+2069) تمنع المحايدات على الحدّ من التسرّب إلى الجوار (X5a-X6a). فـ«(15%)» معزولةً تبقى كما كُتبت.</div></td></tr></table></div>
+      <td><strong>العزل يحمي المقطع</strong><div class="rule">محارف العزل (U+2066..U+2069) تمنع المحايدات على الحدّ من التسرّب إلى الجوار (X5a-X6a). فـ«(15%)» معزولةً تبقى كما كُتبت.</div></td></tr>
+  <tr><td><span class="tag">B8</span></td>
+      <td><strong>العيب ليس عربياً</strong><div class="rule">الخوارزمية الثنائية الاتجاه لا تعرف لغةً بعينها، بل أصنافَ محارف. فكل كتابةٍ من اليمين إلى اليسار — العبرية والفارسية والأردية والسريانية — يصيبها ما يصيب العربية بالضبط.</div></td></tr></table></div>
 
 <h2>سلوكٌ موثَّق لا يُسجَّل عليه</h2>
 <p class="lede" style="margin-bottom:1rem">
@@ -252,7 +275,10 @@ node run.mjs</code></pre>
 <p class="rule">
   المشغّل يبني الملفات ويقرأ منها، ويكتب <code>results.json</code>. وهذه
   الصفحة <strong>مولَّدة منه</strong> — لا رقم فيها مكتوبٌ بيد.
-  الخطّ المستعمل: <code>Almarai.ttf</code>.
+  والخطّ يُختار <strong>لكل حالة</strong>: أول خطٍّ يغطّي محارفها كلها،
+  ويُسجَّل مع نتيجتها. فتشغيلُ حالةٍ عبرية بخطٍّ لا يحمل العبرية يرسم
+  مربّعاتٍ ويقيس الأرقام وحدها، ثم تُعرض النتيجة نجاحاً — وذلك تضليل.
+  الخطوط في هذا التشغيل: <code>Almarai، Arial</code>.
 </p>
 
 <div class="cta">

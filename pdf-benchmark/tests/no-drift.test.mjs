@@ -78,6 +78,25 @@ test("الصفحة تحمل صورة البرهان لا نصّاً مكسورا
   assert.ok(existsSync(join(ROOT, "evidence.png")), "الصورة نفسها غير مبنيّة");
 });
 
-test("النتائج تذكر الخطّ المستعمل", built, () => {
-  assert.ok(results.font, "نتيجةٌ بلا ذكر الخطّ لا تُعاد — ونصف الخطوط تُنتج مكسوراً");
+test("النتائج تذكر الخطوط المستعملة", built, () => {
+  assert.ok(Array.isArray(results.fonts) && results.fonts.length,
+    "نتيجةٌ بلا ذكر الخطّ لا تُعاد — ونصف الخطوط تُنتج مكسوراً");
+});
+
+/**
+ * حالةٌ جرت بخطٍّ لا يغطّي محارفها ترسم مربّعاتٍ وتقيس ما تبقّى، ثم تُعرض
+ * نجاحاً. فكل حالة مسجَّلة يجب أن تحمل اسم الخطّ الذي غطّاها.
+ */
+test("كل حالة مسجَّلة تحمل الخطّ الذي غطّى محارفها", built, () => {
+  for (const engine of results.engines.filter((e) => !e.skipped)) {
+    const nameless = engine.rows.filter((r) => !r.skipped && !r.font).map((r) => r.id);
+    assert.deepEqual(nameless, [], `${engine.id}: حالات بلا خطّ مسجَّل: ${nameless}`);
+  }
+});
+
+test("الحالات المتخطّاة لا تُحسب نجاحاً", built, () => {
+  for (const engine of results.engines.filter((e) => !e.skipped)) {
+    const scored = engine.rows.filter((r) => !r.skipped).length;
+    assert.equal(engine.total, scored, `${engine.id}: المقام يشمل حالاتٍ متخطّاة`);
+  }
 });

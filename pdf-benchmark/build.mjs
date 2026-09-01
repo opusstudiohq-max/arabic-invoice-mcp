@@ -48,7 +48,7 @@ const caseRows = ours.rows.map((r) => {
     <tr>
       <td><code>${iso(r.text)}</code>${r.why ? `<div class="rule">${esc(r.why)}</div>` : ""}</td>
       <td><span class="tag">${esc(r.rule)}</span></td>
-      <td><code>${iso(r.must_show)}</code></td>
+      <td><code>${iso(r.must_show)}</code>${r.font ? `<div class="rule">${esc(r.font)}</div>` : ""}</td>
       <td class="num ok">✓</td>
       ${others}
     </tr>`;
@@ -188,7 +188,7 @@ ${skipped ? `<p class="rule">محرّكات لم تُقَس في هذا التش
 <h2>الحالات، حالةً حالة</h2>
 <div class="scroll"><table>
   <tr>
-    <th>النصّ</th><th>القاعدة</th><th>يجب أن يظهر</th>
+    <th>النصّ</th><th>القاعدة</th><th>يجب أن يظهر<div class="rule">والخطّ الذي جرت به</div></th>
     <th class="num">نَسْق</th>${otherHeads}
   </tr>
   ${caseRows}
@@ -211,7 +211,10 @@ node run.mjs</code></pre>
 <p class="rule">
   المشغّل يبني الملفات ويقرأ منها، ويكتب <code>results.json</code>. وهذه
   الصفحة <strong>مولَّدة منه</strong> — لا رقم فيها مكتوبٌ بيد.
-  الخطّ المستعمل: <code>${esc(results.font)}</code>.
+  والخطّ يُختار <strong>لكل حالة</strong>: أول خطٍّ يغطّي محارفها كلها،
+  ويُسجَّل مع نتيجتها. فتشغيلُ حالةٍ عبرية بخطٍّ لا يحمل العبرية يرسم
+  مربّعاتٍ ويقيس الأرقام وحدها، ثم تُعرض النتيجة نجاحاً — وذلك تضليل.
+  الخطوط في هذا التشغيل: <code>${esc(results.fonts.join("، "))}</code>.
 </p>
 
 <div class="cta">

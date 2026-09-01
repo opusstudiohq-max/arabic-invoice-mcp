@@ -1,7 +1,10 @@
 {
   "generated_utc": "2026-09-01",
-  "font": "Almarai.ttf",
-  "cases_total": 9,
+  "fonts": [
+    "Almarai",
+    "Arial"
+  ],
+  "cases_total": 12,
   "rules": {
     "B1": {
       "name": "الرقم داخل نصّ عربي",
@@ -30,6 +33,10 @@
     "B7": {
       "name": "العزل يحمي المقطع",
       "text": "محارف العزل (U+2066..U+2069) تمنع المحايدات على الحدّ من التسرّب إلى الجوار (X5a-X6a). فـ«(15%)» معزولةً تبقى كما كُتبت."
+    },
+    "B8": {
+      "name": "العيب ليس عربياً",
+      "text": "الخوارزمية الثنائية الاتجاه لا تعرف لغةً بعينها، بل أصنافَ محارف. فكل كتابةٍ من اليمين إلى اليسار — العبرية والفارسية والأردية والسريانية — يصيبها ما يصيب العربية بالضبط."
     }
   },
   "documented_behaviour": [
@@ -54,9 +61,10 @@
       "name": "pdf-lib (كما هي)",
       "note": "المكتبة الأشهر لتوليد PDF في جافاسكربت — 5.5 ألف نجمة. تُشكّل العربية صحيحةً عبر fontkit، ولا تطبّق خوارزمية الاتجاه.",
       "ours": false,
-      "total": 9,
+      "total": 12,
       "pass": 0,
-      "fail": 9,
+      "fail": 12,
+      "skipped_cases": 0,
       "rate": 0,
       "rows": [
         {
@@ -66,6 +74,7 @@
           "must_show": "1,234.50",
           "must_not_show": "05.432,1",
           "why": "أشهر عيب يصل العميل: المبلغ مقلوباً على فاتورته.",
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         },
@@ -76,6 +85,7 @@
           "must_show": "9,876.54",
           "must_not_show": "45.678,9",
           "why": null,
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         },
@@ -86,6 +96,7 @@
           "must_show": "15",
           "must_not_show": null,
           "why": null,
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         },
@@ -96,6 +107,7 @@
           "must_show": "ABC",
           "must_not_show": "CBA",
           "why": null,
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         },
@@ -106,6 +118,7 @@
           "must_show": "INV-2026/001",
           "must_not_show": null,
           "why": "رقم الفاتورة معرّفٌ قانوني — انعكاسه يجعل المستند غير قابل للمطابقة.",
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         },
@@ -116,6 +129,7 @@
           "must_show": "310122393500003",
           "must_not_show": null,
           "why": null,
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         },
@@ -126,6 +140,7 @@
           "must_show": "2026/09/01",
           "must_not_show": null,
           "why": null,
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         },
@@ -136,6 +151,7 @@
           "must_show": "(15%)",
           "must_not_show": "(15)%",
           "why": "بلا عزل تتفرّق «%» و«)» عن الرقم.",
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         },
@@ -146,6 +162,40 @@
           "must_show": "1,571.75 SAR",
           "must_not_show": null,
           "why": "بلا عزل يسبق مقطعُ العملة الرقمَ في فقرة يمينية.",
+          "font": "Almarai",
+          "ok": false,
+          "kind": "لم يظهر المتوقَّع"
+        },
+        {
+          "id": "hebrew-money",
+          "rule": "B8",
+          "text": "סה״כ 1,234.50 ש״ח",
+          "must_show": "1,234.50",
+          "must_not_show": null,
+          "why": "فاتورة عبرية — العيب نفسه بلا تغيير.",
+          "font": "Arial",
+          "ok": false,
+          "kind": "لم يظهر المتوقَّع"
+        },
+        {
+          "id": "persian-money",
+          "rule": "B8",
+          "text": "مبلغ کل 1,234.50 ریال",
+          "must_show": "1,234.50",
+          "must_not_show": null,
+          "why": null,
+          "font": "Almarai",
+          "ok": false,
+          "kind": "لم يظهر المتوقَّع"
+        },
+        {
+          "id": "urdu-money",
+          "rule": "B8",
+          "text": "کل رقم 1,234.50 روپے",
+          "must_show": "1,234.50",
+          "must_not_show": null,
+          "why": null,
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         }
@@ -156,9 +206,10 @@
       "name": "نَسْق (محرّكنا)",
       "note": "يقطع السطر إلى مقاطع اتجاهية بـUAX #9 ويرسم كلاً في موضعه. bidi-js اجتازت 91,707 حالة من سلسلة يونيكود.",
       "ours": true,
-      "total": 9,
-      "pass": 9,
+      "total": 12,
+      "pass": 12,
       "fail": 0,
+      "skipped_cases": 0,
       "rate": 100,
       "rows": [
         {
@@ -168,6 +219,7 @@
           "must_show": "1,234.50",
           "must_not_show": "05.432,1",
           "why": "أشهر عيب يصل العميل: المبلغ مقلوباً على فاتورته.",
+          "font": "Almarai",
           "ok": true,
           "kind": "مطابق"
         },
@@ -178,6 +230,7 @@
           "must_show": "9,876.54",
           "must_not_show": "45.678,9",
           "why": null,
+          "font": "Almarai",
           "ok": true,
           "kind": "مطابق"
         },
@@ -188,6 +241,7 @@
           "must_show": "15",
           "must_not_show": null,
           "why": null,
+          "font": "Almarai",
           "ok": true,
           "kind": "مطابق"
         },
@@ -198,6 +252,7 @@
           "must_show": "ABC",
           "must_not_show": "CBA",
           "why": null,
+          "font": "Almarai",
           "ok": true,
           "kind": "مطابق"
         },
@@ -208,6 +263,7 @@
           "must_show": "INV-2026/001",
           "must_not_show": null,
           "why": "رقم الفاتورة معرّفٌ قانوني — انعكاسه يجعل المستند غير قابل للمطابقة.",
+          "font": "Almarai",
           "ok": true,
           "kind": "مطابق"
         },
@@ -218,6 +274,7 @@
           "must_show": "310122393500003",
           "must_not_show": null,
           "why": null,
+          "font": "Almarai",
           "ok": true,
           "kind": "مطابق"
         },
@@ -228,6 +285,7 @@
           "must_show": "2026/09/01",
           "must_not_show": null,
           "why": null,
+          "font": "Almarai",
           "ok": true,
           "kind": "مطابق"
         },
@@ -238,6 +296,7 @@
           "must_show": "(15%)",
           "must_not_show": "(15)%",
           "why": "بلا عزل تتفرّق «%» و«)» عن الرقم.",
+          "font": "Almarai",
           "ok": true,
           "kind": "مطابق"
         },
@@ -248,6 +307,40 @@
           "must_show": "1,571.75 SAR",
           "must_not_show": null,
           "why": "بلا عزل يسبق مقطعُ العملة الرقمَ في فقرة يمينية.",
+          "font": "Almarai",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "id": "hebrew-money",
+          "rule": "B8",
+          "text": "סה״כ 1,234.50 ש״ח",
+          "must_show": "1,234.50",
+          "must_not_show": null,
+          "why": "فاتورة عبرية — العيب نفسه بلا تغيير.",
+          "font": "Arial",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "id": "persian-money",
+          "rule": "B8",
+          "text": "مبلغ کل 1,234.50 ریال",
+          "must_show": "1,234.50",
+          "must_not_show": null,
+          "why": null,
+          "font": "Almarai",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "id": "urdu-money",
+          "rule": "B8",
+          "text": "کل رقم 1,234.50 روپے",
+          "must_show": "1,234.50",
+          "must_not_show": null,
+          "why": null,
+          "font": "Almarai",
           "ok": true,
           "kind": "مطابق"
         }
@@ -258,9 +351,10 @@
       "name": "naqqash + مُهايئها لـpdf-lib",
       "note": "تُصرّح في صفحتها الأولى أنها لا تطبّق الخوارزمية الثنائية الاتجاه. تُقاس هنا على الفاتورة، لا على نطاقها المُعلَن — والفرق مذكور.",
       "ours": false,
-      "total": 9,
+      "total": 12,
       "pass": 0,
-      "fail": 9,
+      "fail": 12,
+      "skipped_cases": 0,
       "rate": 0,
       "rows": [
         {
@@ -270,6 +364,7 @@
           "must_show": "1,234.50",
           "must_not_show": "05.432,1",
           "why": "أشهر عيب يصل العميل: المبلغ مقلوباً على فاتورته.",
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         },
@@ -280,6 +375,7 @@
           "must_show": "9,876.54",
           "must_not_show": "45.678,9",
           "why": null,
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         },
@@ -290,6 +386,7 @@
           "must_show": "15",
           "must_not_show": null,
           "why": null,
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         },
@@ -300,6 +397,7 @@
           "must_show": "ABC",
           "must_not_show": "CBA",
           "why": null,
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         },
@@ -310,6 +408,7 @@
           "must_show": "INV-2026/001",
           "must_not_show": null,
           "why": "رقم الفاتورة معرّفٌ قانوني — انعكاسه يجعل المستند غير قابل للمطابقة.",
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         },
@@ -320,6 +419,7 @@
           "must_show": "310122393500003",
           "must_not_show": null,
           "why": null,
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         },
@@ -330,6 +430,7 @@
           "must_show": "2026/09/01",
           "must_not_show": null,
           "why": null,
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         },
@@ -340,6 +441,7 @@
           "must_show": "(15%)",
           "must_not_show": "(15)%",
           "why": "بلا عزل تتفرّق «%» و«)» عن الرقم.",
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         },
@@ -350,6 +452,40 @@
           "must_show": "1,571.75 SAR",
           "must_not_show": null,
           "why": "بلا عزل يسبق مقطعُ العملة الرقمَ في فقرة يمينية.",
+          "font": "Almarai",
+          "ok": false,
+          "kind": "لم يظهر المتوقَّع"
+        },
+        {
+          "id": "hebrew-money",
+          "rule": "B8",
+          "text": "סה״כ 1,234.50 ש״ח",
+          "must_show": "1,234.50",
+          "must_not_show": null,
+          "why": "فاتورة عبرية — العيب نفسه بلا تغيير.",
+          "font": "Arial",
+          "ok": false,
+          "kind": "لم يظهر المتوقَّع"
+        },
+        {
+          "id": "persian-money",
+          "rule": "B8",
+          "text": "مبلغ کل 1,234.50 ریال",
+          "must_show": "1,234.50",
+          "must_not_show": null,
+          "why": null,
+          "font": "Almarai",
+          "ok": false,
+          "kind": "لم يظهر المتوقَّع"
+        },
+        {
+          "id": "urdu-money",
+          "rule": "B8",
+          "text": "کل رقم 1,234.50 روپے",
+          "must_show": "1,234.50",
+          "must_not_show": null,
+          "why": null,
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         }
@@ -360,10 +496,11 @@
       "name": "bidi-shaper → pdf-lib",
       "note": "تُخرج سلسلةً بصرية صحيحة، ثم تُمرَّر إلى drawText. تُقاس هنا في هذا التركيب بعينه.",
       "ours": false,
-      "total": 9,
+      "total": 12,
       "pass": 2,
-      "fail": 7,
-      "rate": 22.2,
+      "fail": 10,
+      "skipped_cases": 0,
+      "rate": 16.7,
       "rows": [
         {
           "id": "money-in-arabic",
@@ -372,6 +509,7 @@
           "must_show": "1,234.50",
           "must_not_show": "05.432,1",
           "why": "أشهر عيب يصل العميل: المبلغ مقلوباً على فاتورته.",
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         },
@@ -382,6 +520,7 @@
           "must_show": "9,876.54",
           "must_not_show": "45.678,9",
           "why": null,
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         },
@@ -392,6 +531,7 @@
           "must_show": "15",
           "must_not_show": null,
           "why": null,
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         },
@@ -402,6 +542,7 @@
           "must_show": "ABC",
           "must_not_show": "CBA",
           "why": null,
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         },
@@ -412,6 +553,7 @@
           "must_show": "INV-2026/001",
           "must_not_show": null,
           "why": "رقم الفاتورة معرّفٌ قانوني — انعكاسه يجعل المستند غير قابل للمطابقة.",
+          "font": "Almarai",
           "ok": true,
           "kind": "مطابق"
         },
@@ -422,6 +564,7 @@
           "must_show": "310122393500003",
           "must_not_show": null,
           "why": null,
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         },
@@ -432,6 +575,7 @@
           "must_show": "2026/09/01",
           "must_not_show": null,
           "why": null,
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         },
@@ -442,6 +586,7 @@
           "must_show": "(15%)",
           "must_not_show": "(15)%",
           "why": "بلا عزل تتفرّق «%» و«)» عن الرقم.",
+          "font": "Almarai",
           "ok": false,
           "kind": "لم يظهر المتوقَّع"
         },
@@ -452,8 +597,42 @@
           "must_show": "1,571.75 SAR",
           "must_not_show": null,
           "why": "بلا عزل يسبق مقطعُ العملة الرقمَ في فقرة يمينية.",
+          "font": "Almarai",
           "ok": true,
           "kind": "مطابق"
+        },
+        {
+          "id": "hebrew-money",
+          "rule": "B8",
+          "text": "סה״כ 1,234.50 ש״ח",
+          "must_show": "1,234.50",
+          "must_not_show": null,
+          "why": "فاتورة عبرية — العيب نفسه بلا تغيير.",
+          "font": "Arial",
+          "ok": false,
+          "kind": "لم يظهر المتوقَّع"
+        },
+        {
+          "id": "persian-money",
+          "rule": "B8",
+          "text": "مبلغ کل 1,234.50 ریال",
+          "must_show": "1,234.50",
+          "must_not_show": null,
+          "why": null,
+          "font": "Almarai",
+          "ok": false,
+          "kind": "لم يظهر المتوقَّع"
+        },
+        {
+          "id": "urdu-money",
+          "rule": "B8",
+          "text": "کل رقم 1,234.50 روپے",
+          "must_show": "1,234.50",
+          "must_not_show": null,
+          "why": null,
+          "font": "Almarai",
+          "ok": false,
+          "kind": "لم يظهر المتوقَّع"
         }
       ]
     }
