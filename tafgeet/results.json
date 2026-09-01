@@ -1,6 +1,6 @@
 {
   "generated_utc": "2026-09-01",
-  "cases_total": 50,
+  "cases_total": 52,
   "rules": {
     "R1": {
       "name": "المفرد",
@@ -48,8 +48,8 @@
       "id": "mutawafiq",
       "name": "مُتوافِق",
       "note": "محرّكنا — منقول عن نسخة بايثون بـ176 اختباراً، ومُثبت التكافؤ على 540 حالة",
-      "total": 50,
-      "pass": 50,
+      "total": 52,
+      "pass": 52,
       "fail": 0,
       "rate": 100,
       "broken": 0,
@@ -321,6 +321,24 @@
           "rule": "R8",
           "expected": "ثلاثة قروش",
           "got": "ثلاثة قروش",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 0.05,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "خمسة قروش",
+          "got": "خمسة قروش",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 1.05,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "جنيه واحد وخمسة قروش",
+          "got": "جنيه واحد وخمسة قروش",
           "ok": true,
           "kind": "مطابق"
         },
@@ -510,8 +528,8 @@
       "id": "mutawafiq-npm",
       "name": "مُتوافِق — حزمة npm",
       "note": "الحزمة المشحونة فعلاً (arabic-invoice-mcp-ts). تُفحص هنا عمداً: من ينشر مقياساً للصحّة يبدأ بنفسه",
-      "total": 50,
-      "pass": 50,
+      "total": 52,
+      "pass": 52,
       "fail": 0,
       "rate": 100,
       "broken": 0,
@@ -787,6 +805,24 @@
           "kind": "مطابق"
         },
         {
+          "amount": 0.05,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "خمسة قروش",
+          "got": "خمسة قروش",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
+          "amount": 1.05,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "جنيه واحد وخمسة قروش",
+          "got": "جنيه واحد وخمسة قروش",
+          "ok": true,
+          "kind": "مطابق"
+        },
+        {
           "amount": 0.25,
           "currency": "EGP",
           "rule": "R8",
@@ -972,11 +1008,11 @@
       "id": "sheekprint",
       "name": "sheekprint.com",
       "note": "محرّك أداة طباعة شيكات مجانية مصرية",
-      "total": 50,
+      "total": 52,
       "pass": 11,
-      "fail": 39,
-      "rate": 22,
-      "broken": 9,
+      "fail": 41,
+      "rate": 21.2,
+      "broken": 10,
       "rows": [
         {
           "amount": 1,
@@ -1247,6 +1283,24 @@
           "got": "فقط undefined جنيهاً وثلاثة قرش لا غير",
           "ok": false,
           "kind": "مخرَج مكسور"
+        },
+        {
+          "amount": 0.05,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "خمسة قروش",
+          "got": "فقط undefined جنيهاً وخمسة قرش لا غير",
+          "ok": false,
+          "kind": "مخرَج مكسور"
+        },
+        {
+          "amount": 1.05,
+          "currency": "EGP",
+          "rule": "R8",
+          "expected": "جنيه واحد وخمسة قروش",
+          "got": "فقط واحد جنيهاً وخمسة قرش لا غير",
+          "ok": false,
+          "kind": "اختلاف"
         },
         {
           "amount": 0.25,
