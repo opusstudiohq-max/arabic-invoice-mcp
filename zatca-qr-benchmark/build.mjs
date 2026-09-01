@@ -221,6 +221,13 @@ const html = `<!DOCTYPE html>
          color:var(--muted);font-size:.88rem}
   .own{background:var(--warn-bg);border:1px solid var(--warn);border-radius:10px;
        padding:1rem 1.3rem;margin:1.5rem 0}
+  /* من فتحنا عندهم مسألةً يصلون من رابطٍ إنجليزي إلى صفحةٍ عربية. فملخّصٌ
+     إنجليزي في صدرها ليس ترفاً — هو ما يجعل الإبلاغ مفهوماً عند متلقّيه. */
+  .en{direction:ltr;text-align:left;background:var(--card);border:1px solid var(--line);
+      border-radius:10px;padding:1rem 1.2rem;margin:1.6rem 0}
+  .en h2{margin:0 0 .5rem;font-size:1.05rem}
+  .en p{margin:.4rem 0}
+  .en .fig{font-weight:700;color:var(--bad);font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
@@ -249,6 +256,33 @@ const html = `<!DOCTYPE html>
     أي عند <strong>اسمٍ عربي من 64 حرفاً</strong>، وهو طولُ اسم منشأةٍ سعودية عادي.
   </p>
 </div>
+
+<section class="en" lang="en" dir="ltr">
+  <h2>In English</h2>
+  <p>
+    The ZATCA spec sentence everyone copies is
+    <em>&ldquo;The length shall be stored in one byte.&rdquo;</em>
+    It stops being true at 128 bytes — and Arabic is two bytes per character in
+    UTF-8, so <strong>a 64-character Arabic company name is 128 bytes</strong>.
+    That is an ordinary Saudi trade name, not an edge case.
+  </p>
+  <p>
+    <span class="fig">${brokenShare}%</span> of the ${num(totalReach)} monthly npm
+    downloads measured here go to packages that fail at least one rule.
+    Of ${others.length} third-party packages, <strong>${perfect}</strong> pass every case.
+    The rule is settled on
+    <a href="${esc(r.sources.forum)}">ZATCA&rsquo;s own forum</a>, not by us.
+  </p>
+  <p>
+    We found the same bug <strong>in our own code first</strong>, in three places
+    including our published checker. All were fixed before anyone else was measured,
+    and every finding was filed as a public issue with a runnable reproduction.
+  </p>
+  <p>
+    <a href="https://github.com/opusstudiohq-max/arabic-invoice-mcp/tree/main/zatca-qr-benchmark">Full
+    English write-up, method, and the adapters we got wrong &rarr;</a>
+  </p>
+</section>
 
 <div class="own">
   <h3>وكودُنا نحن كان أحدها</h3>

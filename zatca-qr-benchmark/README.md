@@ -1,98 +1,122 @@
-# مقياس رمز QR السعودي — المرحلة الأولى
+# ZATCA QR: a 64-character Arabic company name breaks most npm packages
 
-مقياسٌ مفتوح يبني رموز QR **فعلية** بثلاث عشرة مكتبة، ثم يفكّها **بايتاً
-بايت** بفاكٍّ مستقلٍّ لا يستدعي كود أحد.
+> The spec sentence everyone copies is **"The length shall be stored in one byte."**
+> It stops being true at 128 bytes.
+>
+> Arabic is 2 bytes per character in UTF-8, so **64 Arabic characters = 128 bytes**.
+> That is an ordinary Saudi company name.
 
-الصفحة: [`/zatca-qr/`](https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/)
+**91.7%** of the 44,915 monthly npm downloads measured here go to packages that
+fail at least one rule. Of 11 third-party packages measured, **2** pass every case.
 
-## لماذا وُجد هذا المقياس
+**[Arabic write-up and full results →](https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/)**
 
-ذهبنا نفحص حزمة غيرنا، فوجدنا أن **الخطأ عندنا**.
+---
 
-كودُنا كان يكتب طول الحقل في بايتٍ واحد، منقولاً حرفياً عن جملة المواصفة:
+## The rule
 
-> The length shall be stored in one byte
+The TLV length field is a BER length, not a plain byte:
 
-وهي **تبسيطٌ ينكسر عند 128 بايتاً**. والبايت الواحد يحمل حتى 127؛ وما فوقه
-يلزمه `0x81` ثم بايت الطول، أو `0x82` ثم بايتان — بقواعد BER.
+```
+length < 128        one byte
+128 <= length <= 255  0x81, then the length byte
+256 <= length         0x82, then two bytes, big-endian
+```
 
-والحسم من **منتدى الهيئة نفسه**، بنصّ صاحب المشكلة بعد إصلاحها:
+This is not our reading. It is settled on **ZATCA's own forum**, by a developer
+whose QR code was rejected and who traced it to exactly this. In their words after
+fixing it:
 
-> our code assumed that the maximum length of the value is 1 byte and
-> therefore when the value was bigger than 127, we were not properly convert
-> it to TLV value
+> our code assumed that the maximum length of the value is 1 byte and therefore
+> when the value was bigger than 127, we were not properly convert it to TLV value
 
 <https://zatca1.discourse.group/t/qr-code-rejected-when-tag-1-company-name-exceeds-127-characters/7202>
 
-**والحدّ ليس نظرياً: الحرف العربي بايتان، فاسمٌ من 64 حرفاً يبلغ 128 بايتاً**
-— وذاك اسمُ منشأةٍ سعودية عاديّ الطول.
+## Results
 
-أصلحناه في **ثلاث** نسخٍ عندنا — مكتبة PDF، وخادم MCP، وأداة الفحص المنشورة
-— *قبل* أن نقيس أحداً. والمشغّل يرفض أن يكتب `results.json` أصلاً إن أخفق
-محرّكٌ من محرّكاتنا.
+Measured 2026-09-01. Downloads are npm's last-month figure, fetched the same day.
 
-## الطريقة
+| package | downloads/mo | score |
+| --- | ---: | ---: |
+| [`zatca-xml-js`](https://www.npmjs.com/package/zatca-xml-js) | 21,943 | 7/10 |
+| [`@axenda/zatca`](https://www.npmjs.com/package/@axenda/zatca) | 17,376 | 6/10 |
+| [`@talha7k/zatca-qr`](https://www.npmjs.com/package/@talha7k/zatca-qr) | 1,991 | **10/10** |
+| [`@talha7k/zatca`](https://www.npmjs.com/package/@talha7k/zatca) | 1,729 | **10/10** |
+| [`@pioneersoft/zatca-einvoice`](https://www.npmjs.com/package/@pioneersoft/zatca-einvoice) | 646 | 6/10 |
+| [`@zatca/qr`](https://www.npmjs.com/package/@zatca/qr) | 503 | 6/10 |
+| [`zatca-sdk`](https://www.npmjs.com/package/zatca-sdk) | 300 | 7/10 |
+| [`zatca`](https://www.npmjs.com/package/zatca) | 190 | 2/10 |
+| [`zatca-qr-tlv`](https://www.npmjs.com/package/zatca-qr-tlv) | 123 | 7/10 |
+| [`zatca-qr-generator`](https://www.npmjs.com/package/zatca-qr-generator) | 104 | 7/10 |
+| [`zatca-simplified-invoice-sdk`](https://www.npmjs.com/package/zatca-simplified-invoice-sdk) | 10 | 7/10 |
 
-لكل محرّك يُستدعى مولّده بحقولٍ معلومة، ثم يُفكّ ناتجُه بـ`decode()` في
-`run.mjs` — فاكٍّ مكتوب هناك **لا يستدعي كود أحد**، وإلا كان الحكم دائرياً.
-والحكم على **البايتات**: الطول المُعلن، وشكلُ كتابته، وترتيبُ الوسوم، والقيمةُ
-بعد الفكّ.
+## Four distinct failure modes, all measured from bytes
 
-القواعد في `cases.json`، وكلٌّ تحمل مصدرها: نصّ المواصفة (§4.1 والجدول 3)، أو
-حسمُ منتدى الهيئة. فمن يخالف حالةً يخالف مصدرها، ويستطيع أن ينازع في المصدر
-نفسه علناً.
+Every row below came from calling the package's own public API and decoding the
+bytes it produced — not from reading its source.
 
-## التشغيل
+**1. `0x80` written as a short-form length** — `zatca-xml-js`, `zatca-sdk`,
+`zatca-qr-generator`, `zatca-qr-tlv`, `zatca-simplified-invoice-sdk`
 
-```bash
-cd zatca-qr-benchmark
-npm install
-node run.mjs --fetch && node build.mjs
-node --test tests/
+```
+seller name: 64 Arabic chars (128 bytes)
+emitted:  01 80 d8 b4 ...
+expected: 01 81 80 d8 ...
 ```
 
-`--fetch` يُحدّث أعداد التنزيلات من سجلّ npm ويخزّنها في `downloads.json`
-بتاريخها. وبدونه تُستعمل الأرقام المخزّنة، فلا يتبدّل الجدول تحت القارئ.
+**2. Length truncated to zero** — `zatca-xml-js`, `zatca-qr-generator`
 
-## المحوّلات — وأين أخطأنا فيها
+```
+seller name: 128 Arabic chars (256 bytes)
+emitted:  01 00 d8 b4 ...     <- declares length 0, no error raised
+expected: 01 82 01 00 ...
+```
 
-كل مكتبة واجهةٌ مختلفة، فيُكتب لها محوّل في `run.mjs` يحوّلها إلى
-`(fields) => base64`. **ولا يُعدَّل كود أحد.**
+`Buffer.from([tag, 256, ...])` silently truncates 256 to `0x00`. Every following
+tag is misparsed.
 
-وفي التشغيل الأول سجّلت **ثماني** مكتبات صفراً من عشرة. ونمطُ الأصفار ذاك
-علامةُ خطأٍ في المحوّل لا في المكتبة، فذهبنا نقرأ تعريفاتها واحدةً واحدة:
+**3. Length replaced by U+FFFD** — `@axenda/zatca`, `@zatca/qr`
 
-| المكتبة | ما ظنناه | الصواب |
-| --- | --- | --- |
-| `@axenda/zatca` | `toBase64(tags)` | `toBase64` تُرمّز نصّاً؛ الصواب `tagsToBase64([new Tag(…)])` |
-| `zatca-xml-js` | حقولٌ مسمّاة | تستقبل مستند فاتورة UBL |
-| `@pioneersoft/zatca-einvoice` | حقولٌ مسمّاة | فرعٌ من السابقة، مستندُ UBL |
-| `zatca-qr-generator` | `tlvEncode([...])` | `tlvEncode(tag, value)` لكل وسم |
-| `zatca-qr-tlv` | المبلغ نصّاً | يستقبله **هللات** عدداً صحيحاً |
-| `@zatca/qr` | `vatRegistrationNumber` | `vatNumber` و`total` |
-| `zatca-simplified-invoice-sdk` | `invoiceTimestamp` | `timestamp` |
-| `zatca-sdk` | مولّد مرحلةٍ أولى | مرحلةٌ ثانية، تلزمها حقول التوقيع |
-| `zatca` | دالّة | صنفٌ غير متزامن: `new GenerateQrCode(…).toBase64()` |
+```
+seller name: 64 Arabic chars (128 bytes)
+emitted:  01 ef bf bd d8 b4 ...
+expected: 01 81 80 d8 ...
+```
 
-**ومن رأى محوّلاً يظلم مكتبته فليفتح مسألة.** أخطأنا في تسعةٍ منها، ولا نستبعد
-بقيّة.
+The TLV is assembled as a JS **string**, and the length goes through
+`Buffer.from(hex, 'hex').toString('utf-8')`. `0x80` is not valid UTF-8 alone, so it
+becomes the replacement character — three bytes instead of one.
 
-### تحويلٌ واحد مُعلَن على المدخل
+**4. Length counted in characters, not bytes** — `zatca`
 
-`zatca` ترفض `2022-04-25T15:30:00Z` — وهي صيغة المثال في المواصفة — لأن فحصها
-يشترط كسور الثواني، وترفض كذلك الإزاحة `+03:00` وهي توقيت السعودية الفعلي.
+```
+seller name: "شركة" - 4 characters, 8 bytes
+emitted:  01 04 d8 b4 ...
+expected: 01 08 d8 b4 ...
+```
 
-ولو تُركت ترفض لسجّلت صفراً من عشرة، فقال الجدول إنها **تُخطئ الترميز** — وذاك
-ليس ما قِيس. فتُقاد بالصيغة التي تقبلها ليُقاس ترميزُها فعلاً، ويبقى الرفض
-ظاهراً في حالة «الطابع الزمني كما أُعطي» وحدها. والتحويل **معروضٌ على الصفحة**،
-ويحرسه اختبارٌ يمنع إخفاءه.
+This one does not need a long name. **Any** Arabic seller name produces a malformed
+QR.
 
-## ما أُبلِغ به أصحابُه
+## We found it in our own code first
 
-مقياسٌ يجد عيباً ولا يُبلغ صاحبه **نميمةٌ مُحكمة**. فكلُّ ما وُجد رُفع مسألةً
-عامة بالبرهان وسطور الإصلاح، في 2026-09-01:
+We went to measure other packages, noticed one of them writing BER lengths, went to
+check which reading was right — and found **our own** code was wrong. It was in
+three places, including our published QR checker tool, where the same bug is worse:
+a validator that reads lengths in one byte tells a merchant their *correct* QR is
+broken.
 
-| الحزمة | المسألة |
+One of ours survived because its only test was `expect(result).toBeDefined()`.
+
+All three were fixed before we measured anyone. The runner refuses to write
+`results.json` at all if one of our own engines fails a case.
+
+## Reported to the maintainers
+
+A benchmark that finds a defect and does not tell its author is just gossip. Every
+finding was filed as a public issue with a runnable reproduction and the fix:
+
+| package | issue |
 | --- | --- |
 | `zatca-xml-js` | [wes4m/zatca-xml-js#61](https://github.com/wes4m/zatca-xml-js/issues/61) |
 | `@axenda/zatca` | [axenda/zatca#19](https://github.com/axenda/zatca/issues/19) |
@@ -101,29 +125,101 @@ node --test tests/
 | `zatca-sdk` | [aashahin/zatca-sdk#1](https://github.com/aashahin/zatca-sdk/issues/1) |
 | `zatca-simplified-invoice-sdk` | [sharahsa0-creator/zatca-simplified-invoice-sdk#6](https://github.com/sharahsa0-creator/zatca-simplified-invoice-sdk/issues/6) |
 
-وثلاثٌ تعذّر الإبلاغ عنها: `@pioneersoft/zatca-einvoice` (المسائل معطَّلة في
-مستودعها)، و`@zatca/qr` و`zatca-qr-tlv` (لا مستودع معلن على npm).
+Three could not be reported: `@pioneersoft/zatca-einvoice` has issues disabled, and
+`@zatca/qr` and `zatca-qr-tlv` declare no repository on npm. A test enforces that no
+scored failure is published without either an issue link or a stated reason.
 
-والسجلّ في `disclosures.json`، ويحرسه اختبارٌ يمنع أن تُنشر إخفاقةٌ بلا
-إبلاغٍ أو مانعٍ مذكور.
+## The fix
 
-## ما لا يُقاس هنا
+```js
+const berLength = (n) =>
+  n < 0x80  ? [n] :
+  n <= 0xFF ? [0x81, n] :
+              [0x82, n >> 8, n & 0xFF];
 
-- **الوسوم 6-9** (هاش المستند، توقيع ECDSA، المفتاح العام، ختم الهيئة). تخصّ
-  المرحلة الثانية ولا تُبنى بلا شهادة ختمٍ حقيقية.
-- **قبولُ الهيئة فعلاً.** هذا المقياس يفحص البنية مقابل نصٍّ منشور، ولا يملك
-  وصولاً إلى مُحقِّق الهيئة. وما لم يُشغَّل عليه لا يُدّعى.
-- **ما لا يُصدّر مولّداً للمرحلة الأولى** — يُذكر في قائمة المتخطّى بسببه، ولا
-  يُنسب إليه إخفاق.
+const tlv = (tag, value) => {
+  const bytes = Buffer.from(value, "utf-8");
+  return Buffer.concat([Buffer.from([tag, ...berLength(bytes.length)]), bytes]);
+};
+```
 
-## الملفات
+A decoder must read the same forms. A single-byte reader sees `0x81` as a length of
+129 and silently truncates the value — the same bug from the other side.
+
+## Method
+
+Each package is driven through its own public API, and the Base64 it returns is
+decoded by `decode()` in [`run.mjs`](run.mjs) — a decoder written there that calls
+nobody's code. Judging a library with its own decoder proves nothing.
+
+The judgement is on **bytes**: the declared length, the form it was written in, tag
+order, and the value after decoding. Cases live in [`cases.json`](cases.json), each
+carrying the rule it tests and where that rule comes from — the spec text (4.1 and
+Table 3) or the forum resolution. Disagree with a case and you are disagreeing with
+a named source you can read.
+
+```bash
+cd zatca-qr-benchmark
+npm install
+node run.mjs --fetch && node build.mjs
+node --test tests/
+```
+
+## Where we got the adapters wrong
+
+Each package has a different interface, so each gets an adapter in `run.mjs`. **No
+package's code is modified.**
+
+On the first run **eight of thirteen scored 0/10**. A row of zeros is a pattern, not
+a result — so we read every package's type definitions instead of guessing:
+
+| package | what we assumed | what it actually is |
+| --- | --- | --- |
+| `@axenda/zatca` | `toBase64(tags)` | `toBase64` encodes a string; TLV is `tagsToBase64([new Tag(...)])` |
+| `zatca-xml-js` | named fields | takes a UBL invoice document |
+| `@pioneersoft/zatca-einvoice` | named fields | a fork of the above; UBL document |
+| `zatca-qr-generator` | `tlvEncode([...])` | `tlvEncode(tag, value)`, one tag at a time |
+| `zatca-qr-tlv` | amount as a string | takes **halalas** as an integer |
+| `@zatca/qr` | `vatRegistrationNumber` | `vatNumber` and `total` |
+| `zatca-simplified-invoice-sdk` | `invoiceTimestamp` | `timestamp` |
+| `zatca-sdk` | phase-1 generator | phase 2; requires signature fields |
+| `zatca` | a function | an async class: `new GenerateQrCode(...).toBase64()` |
+
+Nine adapters were wrong. All were fixed before anything was published. **If an
+adapter still misrepresents your package, please open an issue** — we do not assume
+the remaining ones are perfect.
+
+### One declared input transform
+
+`zatca` rejects `2022-04-25T15:30:00Z` — the exact form in ZATCA's own spec example
+— because its check requires fractional seconds. It also rejects `+03:00` offsets,
+which is Saudi local time.
+
+Left as-is it would score 0/10, and the table would say it *encodes* wrongly, which
+is not what was measured. So it is driven with the format it accepts, and the
+rejection shows up in the "timestamp verbatim" case alone. The transform is shown on
+the results page, and a test prevents hiding it.
+
+## Not measured here
+
+- **Tags 6-9** (invoice hash, ECDSA signature, public key, ZATCA stamp). Phase 2, and
+  not buildable without a real cryptographic stamp certificate.
+- **Whether ZATCA actually accepts a code.** This measures structure against
+  published text. We have no access to ZATCA's validator, and claim nothing we have
+  not run.
+- Packages exporting no phase-1 generator are listed as skipped with the reason, and
+  are not scored.
+
+## Files
 
 ```
-cases.json      الحالات والقواعد ومصادرها
-run.mjs         المحوّلات، والفاكّ المستقل، والحارس على محرّكاتنا
-build.mjs       يبني index.html — لا رقم فيه مكتوبٌ بيد
-downloads.json  أعداد التنزيلات بتاريخ قياسها
-disclosures.json سجلّ ما أُبلِغ به أصحابُه
-results.json    ناتج التشغيل
-tests/          خمسة عشر حارساً على المقياس نفسه
+cases.json        cases, rules, and the source each rule comes from
+run.mjs           adapters, the independent decoder, and the gate on our own engines
+build.mjs         builds index.html - no number in it is typed by hand
+downloads.json    npm download counts, with the date they were measured
+disclosures.json  what was reported, where, and what could not be
+results.json      run output
+tests/            fifteen guards on the benchmark itself
 ```
+
+MIT. Part of [Arabic invoicing tools](https://opusstudiohq-max.github.io/arabic-invoice-mcp/).
