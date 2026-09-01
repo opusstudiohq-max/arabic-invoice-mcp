@@ -37,8 +37,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
+#: `_layouts` و`_includes` قوالبُ Jekyll لا صفحاتٍ تُخدَم — تُقلَّم وإلا
+#: طالبتها البوابةُ بقرارِ فهرسةٍ لا معنى له. و`_site` ناتجُ بناءٍ محلي.
 PRUNED = {"node_modules", ".git", "cache", "data", "__pycache__", ".venv",
-          "fonts", "site", "examples", "samples", "tests"}
+          "fonts", "site", "_site", "_layouts", "_includes",
+          "examples", "samples", "tests"}
 
 NOINDEX = re.compile(r'<meta[^>]+name=["\']robots["\'][^>]*content=["\'][^"\']*noindex', re.I)
 LOC = re.compile(r"<loc>\s*([^<\s]+)\s*</loc>")

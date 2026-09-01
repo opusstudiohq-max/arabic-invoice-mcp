@@ -1,0 +1,22 @@
+# إعدادات GitHub Pages للصفحة الأولى.
+#
+# الافتراضي كان يُخرج `lang="en-US"` وعنواناً أوّلَ هو اسم المستودع، على
+# صفحةٍ محتواها عربي. وهذه القيم يقرؤها القالب في `_layouts/default.html`.
+lang: ar
+title: أدوات الفوترة العربية
+description: >-
+  مكوّنات دقيقة للمطوّرين وأدوات تعمل داخل المتصفّح للفوترة الإلكترونية
+  العربية — فاتورة PDF بنصٍّ مرتَّب صحيحاً، وفاحص رمز QR، ومقاييس مفتوحة.
+  مفتوحة المصدر، ولا ترفع بيانات أحد.
+url: https://opusstudiohq-max.github.io
+baseurl: /arabic-invoice-mcp
+
+# ما لا يُنشر: مصادرُ البناء والاختبارات وملفات التطوير.
+exclude:
+  - node_modules
+  - "**/node_modules"
+  - "**/tests"
+  - "**/*.test.mjs"
+  - "**/package-lock.json"
+  - Gemfile
+  - Gemfile.lock
