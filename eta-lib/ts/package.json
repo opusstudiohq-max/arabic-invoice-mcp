@@ -5,14 +5,37 @@
   "type": "module",
   "main": "./dist/serialization.js",
   "types": "./dist/serialization.d.ts",
-  "exports": { ".": { "types": "./dist/serialization.d.ts", "default": "./dist/serialization.js" } },
-  "files": ["dist", "README.md"],
+  "exports": {
+    ".": {
+      "types": "./dist/serialization.d.ts",
+      "default": "./dist/serialization.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "build": "tsc",
     "test": "npm run build && node tests/parity.test.mjs"
   },
-  "keywords": ["eta", "egypt", "einvoice", "e-invoice", "الفاتورة-الإلكترونية", "مصر", "canonical", "serialization", "tax"],
+  "keywords": [
+    "eta",
+    "egypt",
+    "einvoice",
+    "e-invoice",
+    "الفاتورة-الإلكترونية",
+    "مصر",
+    "canonical",
+    "serialization",
+    "tax"
+  ],
   "license": "MIT",
-  "engines": { "node": ">=18" },
-  "devDependencies": { "typescript": "^5.6.0" }
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
 }
