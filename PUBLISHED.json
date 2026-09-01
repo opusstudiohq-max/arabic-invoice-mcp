@@ -41,6 +41,18 @@
       "published_on": "2026-09-01",
       "source": "cheque-tool/dist/mutawafiq-cheque.html",
       "note": "لم تُنشر قبل اليوم رغم بنائها: قاعدة `dist/` في .gitignore العام كانت تبتلعها بصمت."
+    },
+    {
+      "name": "خريطة الموقع",
+      "url": "https://opusstudiohq-max.github.io/arabic-invoice-mcp/sitemap.xml",
+      "published_on": "2026-09-01",
+      "source": "المستودع العام"
+    },
+    {
+      "name": "robots.txt",
+      "url": "https://opusstudiohq-max.github.io/arabic-invoice-mcp/robots.txt",
+      "published_on": "2026-09-01",
+      "source": "المستودع العام"
     }
   ],
   "github_repos": [
@@ -52,5 +64,6 @@
     }
   ],
   "_urls": "روابط هذا القسم تُفحص باليد قبل تسجيلها — سُجّل رابطٌ خاطئ مرّة فأعطى 404 شهراً.",
-  "_names": "كل حزمة نُنشئها تُضاف هنا فور إنشائها. نُسي `nasq` و`fatura` عند إنشائهما، فلم تعرفهما البوابة ومرّ إعلانُ تبعيةٍ من npm لحزمةٍ غير منشورة."
+  "_names": "كل حزمة نُنشئها تُضاف هنا فور إنشائها. نُسي `nasq` و`fatura` عند إنشائهما، فلم تعرفهما البوابة ومرّ إعلانُ تبعيةٍ من npm لحزمةٍ غير منشورة.",
+  "_metadata": "وصف المستودع ومواضيعه و`homepage` أسطحُ ادعاءٍ ليست ملفات — يفحصها tools/check_repo_metadata.py. وكان الوصف يقول «160 اختباراً» شهراً."
 }
