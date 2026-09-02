@@ -167,3 +167,59 @@ test("التاريخ: صيغة صحيحة تمر؛ بلا timezone يفشل (م�
   assert.equal(V.validateTimestamp(td("2026-07-04T15:30:00Z")).passed, true);
   assert.equal(V.validateTimestamp(td("2026-07-04T15:30:00")).passed, false);
 });
+
+/**
+ * **الأداة كانت تُبارك أشهر عيبٍ في الميدان.**
+ *
+ * قِيس على المُشفّرات المعطوبة الأربعة التي رصدها مقياسنا: رمزٌ بطولٍ
+ * `0x80` عند 128 بايتاً — وهو خمسٌ من إحدى عشرة حزمة قِيست — كان يُصنَّف
+ * **«5/5 سليم»**. أي أن تاجراً رُفض رمزُه عند الهيئة يلصقه هنا فيُطمأن.
+ *
+ * و`0x80` في موضع الطول ليس «128» في BER بل **الطول غير المحدَّد**، ولا
+ * يجوز هنا. فقراءتُه 128 تُخفي العيب.
+ *
+ * وهذه الحالات تفحص أن كل شكلِ عطبٍ **يُرفض ويُسمّى**، لا أن يُرفض فحسب:
+ * فرسالة «تأكد أن البيانات هي محتوى QR» صحيحةٌ وعديمة النفع.
+ */
+const enc = new TextEncoder();
+const buildQr = (lenFn, chars) => {
+  const tlv = (t, v) => { const b = enc.encode(v); return [t, ...lenFn(b), ...b]; };
+  const bytes = [
+    ...tlv(1, "ش".repeat(chars)), ...tlv(2, "310122393500003"),
+    ...tlv(3, "2026-07-06T14:30:00Z"), ...tlv(4, "1150.00"), ...tlv(5, "150.00"),
+  ];
+  return Buffer.from(bytes).toString("base64");
+};
+const berLen = (b) => b.length < 0x80 ? [b.length]
+  : b.length <= 0xFF ? [0x81, b.length] : [0x82, b.length >> 8, b.length & 0xFF];
+
+test("رمزٌ سليم بترميز BER يمرّ 5/5 مهما طال الاسم", () => {
+  for (const chars of [10, 63, 64, 127, 128, 200]) {
+    const r = V.validateZatcaQR(buildQr(berLen, chars));
+    assert.equal(r.fatalError, null, `${chars} حرفاً: خطأ قاتل`);
+    assert.equal(r.valid, true, `${chars} حرفاً: حُكم عليه بالمخالفة وهو سليم`);
+  }
+});
+
+test("طولٌ 0x80 يُرفض ويُسمّى — أشهر سبب لرفض الرمز", () => {
+  const r = V.validateZatcaQR(buildQr((b) => [b.length & 0xFF], 64));
+  assert.equal(r.valid, false, "بُورك عيبٌ يرفضه مُحقِّق الهيئة");
+  const said = r.fatalError || (r.structuralErrors || [])[0] || "";
+  assert.match(said, /0x80/, "العيب لم يُسمَّ ببايته");
+  assert.match(said, /0x81/, "لم يُذكر الصواب");
+});
+
+test("طولٌ صفر (بترٌ فوق 255) يُرفض ويُسمّى", () => {
+  const r = V.validateZatcaQR(buildQr((b) => [b.length & 0xFF], 128));
+  assert.equal(r.valid, false);
+  const said = r.fatalError || (r.structuralErrors || [])[0] || "";
+  assert.match(said, /صفر/, "لم يُذكر أن الطول المعلن صفر");
+  assert.match(said, /0x82/, "لم يُذكر الصواب");
+});
+
+test("محرف الاستبدال مكان الطول يُرفض ويُسمّى", () => {
+  const r = V.validateZatcaQR(buildQr((b) => b.length < 0x80 ? [b.length] : [0xEF, 0xBF, 0xBD], 64));
+  assert.equal(r.valid, false);
+  const said = r.fatalError || (r.structuralErrors || [])[0] || "";
+  assert.match(said, /U\+FFFD|EF BF BD/, "لم يُسمَّ محرف الاستبدال");
+});

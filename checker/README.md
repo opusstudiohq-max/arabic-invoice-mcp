@@ -20,7 +20,7 @@ cd zatca-checker && python -m http.server 8123
 # ثم افتح http://localhost:8123
 ```
 
-## الاختبارات (13 تكافؤ + 6 لمسار التواصل + 8 للفحص الجماعي)
+## الاختبارات (17 للمحرّك + 6 لمسار التواصل + 8 للفحص الجماعي)
 ```bash
 node --test zatca-checker/tests/
 ```
