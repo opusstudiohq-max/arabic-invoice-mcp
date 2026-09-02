@@ -28,6 +28,23 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) =>
   ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const num = (n) => Number(n).toLocaleString("en-US");
 
+/**
+ * الفاكُّ الذي حكم على الجدول — **نصُّه نفسه** يُحقن في الصفحة.
+ *
+ * فلو كُتب فاكٌّ ثانٍ للمتصفّح لانجرف عن الأول بلا صوت، وهو العيبُ الذي
+ * يقيسه هذا المشروع. والحارس ⑲ يتحقق أن ما في الصفحة هو ما في الملف.
+ *
+ * و`export` تُنزع لأن الوسم `<script>` هنا ليس وحدةً، وإغلاقُ الوسم يُكسر
+ * لو ورد في نصٍّ — ولا يرد، لكنّ الحيطة أرخص من صفحةٍ مكسورة.
+ */
+const decoderSource = readFileSync(join(HERE, "decode.mjs"), "utf-8")
+  .replace(/^export /gm, "")
+  .replace(/<\/script>/gi, "<\\/script>");
+
+/** واجهةُ «افحص رمزك» — في ملفٍ مستقلّ فلا تُكتب داخل قالبٍ نصّي. */
+const widgetSource = readFileSync(join(HERE, "widget-en.js"), "utf-8")
+  .replace(/<\/script>/gi, "<\\/script>");
+
 const scored = r.engines.filter((e) => !e.skipped);
 const others = scored.filter((e) => !e.ours);
 const withReach = others.filter((e) => typeof e.monthly_downloads === "number");
@@ -146,6 +163,26 @@ const html = `<!DOCTYPE html>
              background:var(--card);color:var(--muted)}
   footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--line);
          color:var(--muted);font-size:.88rem}
+  .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);
+                   white-space:nowrap}
+  .checker{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:1rem}
+  .checker textarea{width:100%;box-sizing:border-box;font:.85rem/1.5 ui-monospace,SFMono-Regular,
+                    Menlo,Consolas,monospace;direction:ltr;background:var(--bg);color:var(--ink);
+                    border:1px solid var(--line);border-radius:6px;padding:.6rem;resize:vertical}
+  .checker-row{display:flex;gap:.5rem;flex-wrap:wrap;margin:.7rem 0 0}
+  .checker button{font:inherit;font-weight:600;padding:.5rem 1rem;border-radius:6px;cursor:pointer;
+                  border:1px solid var(--accent);background:var(--accent);color:var(--bg)}
+  .checker button.ghost{background:transparent;color:var(--accent)}
+  .checker button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  #qr-out:not(:empty){margin-top:1rem}
+  .verdict{border-radius:8px;padding:.7rem .9rem;font-weight:600}
+  .verdict.ok{background:var(--ok-bg);border:1px solid var(--ok);color:var(--ok)}
+  .verdict.bad{background:var(--bad-bg);border:1px solid var(--bad);color:var(--bad)}
+  .verdict p{margin:.5rem 0 0;font-weight:400;color:var(--ink)}
+  .verdict code{white-space:nowrap}
+  .tlv{width:100%;margin-top:.8rem;font-size:.85rem}
+  .tlv td,.tlv th{padding:.35rem .5rem;border-bottom:1px solid var(--line);text-align:left}
+  .tlv code{direction:ltr;unicode-bidi:isolate}
 </style>
 </head>
 <body>
@@ -187,6 +224,22 @@ const html = `<!DOCTYPE html>
   the value was bigger than 127, we were not properly convert it to TLV value
 </blockquote>
 <p class="lede"><a href="${esc(r.sources.forum)}">${esc(r.sources.forum)}</a></p>
+
+<h2>Check your own QR</h2>
+<p class="lede">
+  Paste the Base64 your encoder produces. Nothing is uploaded — this runs
+  <strong>the same decoder that scored the table below</strong>, in your browser.
+</p>
+<div class="checker">
+  <label class="visually-hidden" for="qr-input">QR Base64</label>
+  <textarea id="qr-input" rows="3" spellcheck="false"
+    placeholder="AQVTYWxsYQIPMzEwMTIyMzkzNTAwMDAzAxQyMDI2LTA5LTAyVDAxOjAwOjAwWgQGMTE1LjAwBQUxNS4wMA=="></textarea>
+  <div class="checker-row">
+    <button type="button" id="qr-check">Decode</button>
+    <button type="button" id="qr-sample" class="ghost">Load a broken example</button>
+  </div>
+  <div id="qr-out" role="status" aria-live="polite"></div>
+</div>
 
 <h2>Results</h2>
 <p class="lede">
@@ -335,6 +388,10 @@ node run.mjs --fetch &amp;&amp; node build.mjs</code></pre>
 </footer>
 
 </main>
+<script>
+${decoderSource}
+${widgetSource}
+</script>
 </body>
 </html>
 `;

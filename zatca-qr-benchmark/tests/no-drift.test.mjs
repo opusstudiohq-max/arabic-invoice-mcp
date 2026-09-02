@@ -256,3 +256,82 @@ test("⑰ جدولُ README يطابق النتائج صفّاً صفّاً", ()
     assert.equal(Number(m[2]), engine.total);
   }
 });
+
+/**
+ * **`disclosures.json` تُدمج في `results.json` عند تشغيل المقياس، لا عند
+ * البناء.** فمن حرّرها ثم بنى الصفحتين نشر جدولَ إبلاغٍ قديماً.
+ *
+ * وقع هذا فعلاً: أُضيفت أربعةُ مستودعاتٍ أُبلغ أصحابُها، وبُنيت الصفحتان،
+ * فبقي الجدول ستّةً. **ولم يشتكِ شيء** — لا بوابة، ولا أيٌّ من السبعة عشر.
+ * أمسكه عدُّ روابط المسائل في الملف المبنيّ: صفرٌ حيث يجب أربعة.
+ *
+ * وهو انجرافٌ صامتٌ في **الصفحة التي تُشير إليها مسائلُنا عند الغير** —
+ * فمن جاء منها لا يجد مستودعه، والمقياس يبدو كأنه لم يُبلغ أحداً.
+ */
+test("⑱ سجلُّ الإبلاغ في النتائج والصفحتين يطابق مصدره", () => {
+  const source = JSON.parse(readFileSync(join(ROOT, "disclosures.json"), "utf-8"));
+  const embedded = results.disclosures?.items ?? [];
+
+  assert.equal(embedded.length, source.items.length,
+    `النتائج تحمل ${embedded.length} بلاغاً والمصدر ${source.items.length}` +
+    " — أُعيد تشغيل `node run.mjs`؟");
+
+  for (const item of source.items) {
+    assert.ok(embedded.some((e) => e.url === item.url),
+      `«${item.url}» في المصدر وليس في النتائج`);
+
+    // ولا يكفي أن تكون في النتائج: الصفحةُ المنشورة هي ما يقرؤه الناس.
+    for (const [page, file] of [["العربية", "index.html"], ["الإنجليزية", "en/index.html"]]) {
+      const html = readFileSync(join(ROOT, file), "utf-8");
+      assert.ok(html.includes(item.url),
+        `«${item.url}» غائبٌ عن الصفحة ${page} — أُعيد البناء بعد التشغيل؟`);
+    }
+
+    // وحقلُ `npm` غائبٌ عمّا ليس على npm، فكان الصفُّ يُعرض `undefined`.
+    assert.ok(item.npm || item.name, `بلاغٌ بلا اسمٍ يُعرض: ${item.url}`);
+  }
+});
+
+/**
+ * **الصفحةُ تفحص رمز زائرها بالفاكِّ الذي حكم على الجدول — لا بنسخةٍ منه.**
+ *
+ * ولو كُتب فاكٌّ ثانٍ للمتصفّح لانجرف عن الأول بلا صوت: تُصلَّح قاعدةٌ في
+ * المُشغِّل وتبقى الصفحة تُطمئن زائرها على رمزٍ مكسور. وهو العيبُ الذي
+ * يقيسه هذا المشروع كلُّه — أن يُبارك فاكٌّ متساهلٌ ما يرفضه المُحقِّق.
+ *
+ * فالمصدر `decode.mjs` واحد: يستورده `run.mjs`، ويُحقن نصُّه في الصفحتين.
+ * وهذا الحارس يتحقق أن المحقون **هو هو**، لا شيءٌ يشبهه.
+ */
+test("⑲ فاكُّ الصفحتين هو فاكُّ المقياس نفسه", () => {
+  const source = readFileSync(join(ROOT, "decode.mjs"), "utf-8").replace(/^export /gm, "");
+
+  // أسطرٌ لا تُصادَف: كلُّ واحدٍ منها قاعدةُ رفضٍ اشتُريت بعيبٍ منشور.
+  const signatures = [
+    'throw fail("INDEFINITE"',
+    'throw fail("REPLACEMENT_CHAR"',
+    'throw fail("ZERO_LENGTH"',
+    "function decode(base64)",
+  ];
+
+  for (const [page, file, widget] of [
+    ["العربية", "index.html", "widget-ar.js"],
+    ["الإنجليزية", "en/index.html", "widget-en.js"],
+  ]) {
+    const html = readFileSync(join(ROOT, file), "utf-8");
+
+    assert.ok(html.includes(source),
+      `الفاكُّ في الصفحة ${page} ليس نصَّ decode.mjs — أُعيد البناء بعد تعديله؟`);
+
+    for (const line of signatures) {
+      assert.ok(html.includes(line),
+        `الصفحة ${page} لا تحمل «${line}» — قاعدةُ رفضٍ سقطت من المحقون`);
+    }
+
+    // والواجهةُ أيضاً: بلا مستمعِ الزرّ تُعرض الأداةُ ولا تفعل شيئاً،
+    // وهو أسوأ من غيابها — يظنّ الزائر أنه فحص.
+    const ui = readFileSync(join(ROOT, widget), "utf-8");
+    assert.ok(html.includes(ui), `واجهةُ ${page} ليست نصَّ ${widget}`);
+    assert.ok(html.includes('getElementById("qr-check")'),
+      `الصفحة ${page} فيها الأداة بلا مستمعِ فحص`);
+  }
+});

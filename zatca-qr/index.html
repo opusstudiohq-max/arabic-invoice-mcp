@@ -88,6 +88,30 @@
   .en h2{margin:0 0 .5rem;font-size:1.05rem}
   .en p{margin:.4rem 0}
   .en .fig{font-weight:700;color:var(--bad);font-variant-numeric:tabular-nums}
+  .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .checker{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:1rem}
+  .checker textarea{width:100%;box-sizing:border-box;font:.85rem/1.5 ui-monospace,Consolas,monospace;
+                    direction:ltr;background:var(--bg);color:var(--ink);border:1px solid var(--line);
+                    border-radius:6px;padding:.6rem;resize:vertical}
+  .checker-row{display:flex;gap:.5rem;flex-wrap:wrap;margin:.7rem 0 0}
+  .checker button{font:inherit;font-weight:600;padding:.5rem 1rem;border-radius:6px;cursor:pointer;
+                  border:1px solid var(--accent);background:var(--accent);color:var(--bg)}
+  .checker button.ghost{background:transparent;color:var(--accent)}
+  .checker button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  #qr-out:not(:empty){margin-top:1rem}
+  .verdict{border-radius:8px;padding:.7rem .9rem}
+  .verdict.ok{background:var(--ok-bg);border:1px solid var(--ok)}
+  .verdict.bad{background:var(--bad-bg);border:1px solid var(--bad)}
+  .verdict p{margin:.4rem 0}
+  .verdict p:first-child{font-weight:700}
+  /* «0x81 0x8A» انقسمت سطرين على عرضٍ ضيّق، فبدت قيمتين لا واحدة — قيس
+     بـRange: الاتجاه كان سليماً والعرضُ 37px هو ما كسرها. */
+  .verdict code{white-space:nowrap}
+  .verdict.ok p:first-child{color:var(--ok)}
+  .verdict.bad p:first-child{color:var(--bad)}
+  .tlv{width:100%;margin-top:.8rem;font-size:.85rem;border-collapse:collapse}
+  .tlv td,.tlv th{padding:.35rem .5rem;border-bottom:1px solid var(--line);text-align:right}
+  .tlv code{unicode-bidi:isolate}
 </style>
 </head>
 <body>
@@ -156,6 +180,22 @@
     وأداةُ الفحص المنشورة — <em>قبل</em> أن نقيس أحداً. والمقياس يرفض أن يُنتج
     صفحته أصلاً إن أخفق محرّكٌ من محرّكاتنا.
   </p>
+</div>
+
+<h2>افحص رمزك أنت</h2>
+<p class="lede">
+  الصق نصّ Base64 الذي يُنتجه مُشفّرك. لا يُرفع شيء — يعمل
+  <strong>الفاكُّ نفسه الذي حكم على الجدول أدناه</strong>، في متصفّحك.
+</p>
+<div class="checker">
+  <label class="visually-hidden" for="qr-input">رمز QR بصيغة Base64</label>
+  <textarea id="qr-input" rows="3" spellcheck="false" dir="ltr"
+    placeholder="AQVTYWxsYQIPMzEwMTIyMzkzNTAwMDAzAxQyMDI2LTA5LTAyVDAxOjAwOjAwWgQGMTE1LjAwBQUxNS4wMA=="></textarea>
+  <div class="checker-row">
+    <button type="button" id="qr-check">افحص</button>
+    <button type="button" id="qr-sample" class="ghost">حمِّل مثالاً مكسوراً</button>
+  </div>
+  <div id="qr-out" role="status" aria-live="polite"></div>
 </div>
 
 <h2>أو ثبّت واحدةً تفعلها أصلاً</h2>
@@ -624,5 +664,329 @@ node run.mjs --fetch &amp;&amp; node build.mjs</code></pre>
 </footer>
 
 </main>
+<script>
+/**
+ * الفاكُّ الصارم — **مصدرٌ واحد** يقرؤه المُشغِّل والصفحةُ المنشورة معاً.
+ *
+ * ### لماذا في ملفٍ وحده
+ *
+ * كان مكتوباً داخل `run.mjs`. ثم أردنا أن تفحص الصفحةُ رمزَ زائرِها، فلو
+ * كُتب فاكٌّ ثانٍ للمتصفّح لانجرف عن الأول بلا صوت — وهو العيبُ الذي يقيسه
+ * هذا المشروع نفسه، فيقع فيه.
+ *
+ * فصار هنا، يستورده `run.mjs`، ويُحقن نصُّه في الصفحتين عند البناء. ويحرس
+ * الاختبار ⑲ أن ما في الصفحة هو ما في هذا الملف.
+ *
+ * ### ولا يستدعي كود أحد
+ *
+ * الحكمُ على المحرّكات لا يصحّ بفاكٍّ مأخوذٍ من أحدها — يصير دائرياً. فهذا
+ * مكتوبٌ من نصّ المواصفة وقواعد BER وحدها.
+ *
+ * ### الرسائل
+ *
+ * يُرمى `Error` بحقلَي `code` و`tag` — فتُصاغ الرسالة بلغة كل صفحة، ولا
+ * يُترجَم المنطق مرّتين. و`message` بالعربية للمُشغِّل.
+ */
+
+/** أشكالُ الطول التي توجبها BER. `0x80` منها ليس طولاً بل الطولُ غير المحدَّد. */
+const LENGTH_FORMS = Object.freeze({
+  SHORT: "short",
+  LONG_1: "0x81",
+  LONG_2: "0x82",
+});
+
+/** بايتاتٌ من Base64 — في Node وفي المتصفّح. الأداةُ تُشحن للاثنين. */
+function base64ToBytes(base64) {
+  const clean = String(base64).trim().replace(/\s+/g, "");
+  if (typeof Buffer !== "undefined") return new Uint8Array(Buffer.from(clean, "base64"));
+  const binary = atob(clean);
+  const out = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) out[i] = binary.charCodeAt(i);
+  return out;
+}
+
+function fail(code, tag, detail, message) {
+  const error = new Error(message);
+  error.code = code;
+  error.tag = tag;
+  error.detail = detail;
+  return error;
+}
+
+/**
+ * يفكّ TLV بقواعد BER ويُعيد **الشكل الذي كُتب به الطول** أيضاً — فالسؤال
+ * هنا ليس «كم الطول» بل «كيف كُتب»، وهو موضع العيب كلّه.
+ */
+function decode(base64) {
+  const raw = base64ToBytes(base64);
+  const out = [];
+  let i = 0;
+  while (i < raw.length) {
+    if (i + 2 > raw.length) {
+      throw fail("TRUNCATED", null, i, `ثلاثية مبتورة عند البايت ${i}`);
+    }
+    const tag = raw[i];
+    let length = raw[i + 1], header = 2, form = LENGTH_FORMS.SHORT;
+
+    // **الفاكُّ المتساهل يمنح تمريرةً كاذبة.**
+    //
+    // كان يقرأ `0x80` طولاً قدره 128 فتنجح القيمة وتعود سليمة — فمرّت ستُّ
+    // حزمٍ في حالة «الذهاب والإياب» وهي تُنتج الشكل المكسور. أي أن المقياس
+    // **منح درجةً لكودٍ مكسور**، وهو أسوأ ما يقع لمقياس.
+    //
+    // و`0x80` في موضع الطول هو الطولُ غير المحدَّد في BER، ولا يجوز في
+    // ثلاثيةٍ محدَّدة. فيُرفض هنا كما يُرفض عند مُحقِّق الهيئة.
+    if (length === 0x80) {
+      throw fail("INDEFINITE", tag, 0x80,
+        `الوسم ${tag}: بايت الطول 0x80 — الطول غير المحدَّد لا يجوز هنا`);
+    }
+    if (length === 0xEF && raw[i + 2] === 0xBF && raw[i + 3] === 0xBD) {
+      throw fail("REPLACEMENT_CHAR", tag, null,
+        `الوسم ${tag}: موضع الطول يحمل محرف الاستبدال U+FFFD`);
+    }
+    if (length > 0x82) {
+      throw fail("BAD_LENGTH_BYTE", tag, length,
+        `الوسم ${tag}: بايت الطول 0x${length.toString(16)} غير صالح`);
+    }
+
+    if (length === 0x81) { length = raw[i + 2]; header = 3; form = LENGTH_FORMS.LONG_1; }
+    else if (length === 0x82) {
+      length = (raw[i + 2] << 8) | raw[i + 3];
+      header = 4;
+      form = LENGTH_FORMS.LONG_2;
+    }
+
+    if (length === 0 && tag <= 5) {
+      throw fail("ZERO_LENGTH", tag, null,
+        `الوسم ${tag}: الطول المُعلن صفر — بترُ طولٍ يتجاوز 255`);
+    }
+    if (i + header + length > raw.length) {
+      throw fail("OVERRUN", tag, length,
+        `الوسم ${tag} يُعلن ${length} بايتاً ويتجاوز نهاية البيانات`);
+    }
+    const slice = raw.subarray(i + header, i + header + length);
+    out.push({
+      tag, length, form,
+      value: tag >= 6
+        ? Array.from(slice).map((b) => b.toString(16).padStart(2, "0")).join("")
+        : new TextDecoder("utf-8").decode(slice),
+    });
+    i += header + length;
+  }
+  return out;
+}
+
+/**
+ * واجهةُ «افحص رمزك» على الصفحة العربية.
+ *
+ * تُقرأ عند البناء وتُحقن بعد نصّ `decode.mjs` — فالمنطقُ واحدٌ لا اثنان.
+ *
+ * ### فخٌّ يخصُّ هذه النسخة وحدها
+ *
+ * **حارسُ الاتجاه لا يرى ما يبنيه جافاسكربت** — توثيقُه يقول ذلك صراحةً:
+ * يفحص بنية HTML، والنصُّ هنا يُركَّب عند الضغط. فأيُّ `0x81` أو `01 8a`
+ * يُكتب داخل جملةٍ عربية سينقلب عند العرض ولا يشتكي شيء.
+ *
+ * فكلُّ قيمةٍ لاتينية هنا تُوضع في `<code dir="ltr">` عنصراً مستقلاً، لا
+ * نصّاً داخل جملة. وقيس ذلك في المتصفّح بـ`Range` لا بالنظر.
+ *
+ * ولا `${` ولا شرطة مائلة خلفية: الصفحة تُبنى داخل قالبٍ نصّي.
+ */
+(function () {
+  var TAG_NAMES = {
+    1: "اسم البائع", 2: "الرقم الضريبي", 3: "التاريخ والوقت",
+    4: "الإجمالي شامل الضريبة", 5: "مبلغ الضريبة",
+    6: "هاش الفاتورة", 7: "التوقيع الرقمي", 8: "المفتاح العام", 9: "توقيع الهيئة",
+  };
+
+  // ما يعنيه كلُّ رمزِ عطب، وما علاجه، ومن يُنتجه — والأخيرُ مقيسٌ في هذه
+  // الصفحة نفسها لا مُخمَّن. والقيمُ اللاتينية تُمرَّر مفصولةً لتُعزل.
+  var DIAGNOSIS = {
+    INDEFINITE: {
+      title: "بايت الطول ",
+      code: "0x80",
+      body: "القيمة 128 بايتاً، والمُشفّر كتب عددها في بايتٍ واحد. و",
+      code2: "0x80",
+      body2: " في قواعد BER ليس العدد 128، بل الطولُ غير المحدَّد. والصواب ",
+      code3: "0x81 0x80",
+      seen: "وهو أكثرُ عيبٍ قيس على هذه الصفحة.",
+    },
+    BAD_LENGTH_BYTE: {
+      title: "بايت الطول ليس طولاً",
+      body: "كلُّ بايتٍ يبلغ ",
+      code2: "0x80",
+      body2: " فأكثر في موضع الطول يصف كم بايتاً بعده يحمل الطول — لا الطولَ "
+           + "نفسه. فقيمةُ 138 بايتاً تُكتب ",
+      code3: "0x81 0x8A",
+      body3: " لا ",
+      code4: "0x8A",
+      seen: "يُنتجه كلُّ مُشفّرٍ يكتب الطول في بايتٍ واحد.",
+    },
+    REPLACEMENT_CHAR: {
+      title: "موضع الطول يحمل محرف الاستبدال",
+      body: "البايتات ",
+      code2: "EF BF BD",
+      body2: " أي U+FFFD. مرّ الطولُ بجولةِ ترميزٍ نصّي فضاع. والثلاثية تُبنى "
+           + "بايتاتٍ لا نصّاً.",
+      seen: "قيس في @axenda/zatca.",
+    },
+    ZERO_LENGTH: {
+      title: "الطول المُعلن صفر",
+      body: "طولٌ يتجاوز 255 كُتب في بايتٍ واحد فبُتر إلى صفر. وما فوق 255 "
+          + "يلزمه ",
+      code2: "0x82",
+      body2: " ثم بايتان بترتيب كبير-أولاً.",
+      seen: "قيس في حزمٍ عدّة عند 256 بايتاً.",
+    },
+    OVERRUN: {
+      title: "حقلٌ يُعلن بايتاتٍ أكثر مما هو موجود",
+      body: "الطولُ المُعلن يتجاوز نهاية البيانات — وغالبُه طولٌ كُتب بالشكل "
+          + "الخطأ، فأخذ القارئُ ما بعده جزءاً منه.",
+      seen: "",
+    },
+    TRUNCATED: {
+      title: "البيانات تنتهي في وسط حقل",
+      body: "وسمٌ بلا طول، أو طولٌ بلا قيمة. وقد يكون نصُّ Base64 ناقصاً — "
+          + "تحقق أن شيئاً لم يُقتطع عند النسخ.",
+      seen: "",
+    },
+  };
+
+  var input = document.getElementById("qr-input");
+  var out = document.getElementById("qr-out");
+  if (!input || !out) return;
+
+  function el(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  /** قيمةٌ لاتينية معزولة — لا تُكتب نصّاً داخل جملةٍ عربية أبداً. */
+  function ltr(text) {
+    var node = el("code", null, text);
+    node.setAttribute("dir", "ltr");
+    return node;
+  }
+
+  /** فقرةٌ تخلط عربيةً وقيماً لاتينية، وكلُّ لاتينيّةٍ فيها معزولة. */
+  function mixed(info, keys) {
+    var p = el("p");
+    keys.forEach(function (key) {
+      if (!info[key]) return;
+      if (key.indexOf("code") === 0) p.appendChild(ltr(info[key]));
+      else p.appendChild(document.createTextNode(info[key]));
+    });
+    return p;
+  }
+
+  function renderRows(parts) {
+    var table = el("table", "tlv");
+    var head = el("tr");
+    ["الوسم", "الحقل", "الطول", "شكل الطول", "القيمة"].forEach(function (h) {
+      head.appendChild(el("th", null, h));
+    });
+    table.appendChild(head);
+    parts.forEach(function (p) {
+      var row = el("tr");
+      row.appendChild(el("td", null, String(p.tag)));
+      row.appendChild(el("td", null, TAG_NAMES[p.tag] || "غير معروف"));
+      var len = el("td");
+      len.appendChild(ltr(String(p.length)));
+      len.appendChild(document.createTextNode(" بايتاً"));
+      row.appendChild(len);
+      var form = el("td");
+      form.appendChild(p.form === "short" ? ltr("بايت واحد") : ltr(p.form));
+      row.appendChild(form);
+      var value = el("td");
+      value.appendChild(el("code", null,
+        p.value.length > 40 ? p.value.slice(0, 40) + "…" : p.value));
+      row.appendChild(value);
+      table.appendChild(row);
+    });
+    return table;
+  }
+
+  function show(base64) {
+    out.textContent = "";
+    if (!base64.trim()) return;
+
+    var parts;
+    try {
+      parts = decode(base64);
+    } catch (error) {
+      var info = DIAGNOSIS[error.code];
+      var bad = el("div", "verdict bad");
+      if (info) {
+        bad.appendChild(mixed(info, ["title", "code"]));
+      } else {
+        bad.appendChild(el("p", null, "ليست ثلاثيةَ TLV صالحة"));
+      }
+      if (error.tag !== null && error.tag !== undefined) {
+        var where = el("p");
+        where.appendChild(document.createTextNode("في الحقل "));
+        where.appendChild(ltr(String(error.tag)));
+        where.appendChild(document.createTextNode(
+          " (" + (TAG_NAMES[error.tag] || "غير معروف") + ")."));
+        bad.appendChild(where);
+      }
+      if (info) {
+        bad.appendChild(mixed(info, ["body", "code2", "body2", "code3", "body3", "code4"]));
+        if (info.seen) bad.appendChild(el("p", null, info.seen));
+      } else {
+        bad.appendChild(el("p", null, error.message || String(error)));
+      }
+      out.appendChild(bad);
+      return;
+    }
+
+    var forms = parts.map(function (p) { return p.form; });
+    var usesLong = forms.indexOf("0x81") >= 0 || forms.indexOf("0x82") >= 0;
+    var ok = el("div", "verdict ok");
+    var head = el("p");
+    head.appendChild(document.createTextNode("بنيةٌ سليمة — "));
+    head.appendChild(ltr(String(parts.length)));
+    head.appendChild(document.createTextNode(" حقول."));
+    ok.appendChild(head);
+    if (usesLong) {
+      ok.appendChild(el("p", null,
+        "ويستعمل الشكل الطويل من BER، وهو الموضع الذي يُخطئ فيه أكثر المُشفّرات."));
+    } else {
+      ok.appendChild(el("p", null,
+        "وكلُّ حقلٍ دون 128 بايتاً، فالطولُ يسع بايتاً واحداً — وهي الحالة التي "
+        + "تعمل عند الجميع. جرّب اسم بائعٍ يقارب 64 حرفاً عربياً لتبلغ الحالة "
+        + "التي لا تعمل."));
+    }
+    ok.appendChild(el("p", null,
+      "والفحصُ للبنية وحدها: لا يتحقق من الرقم الضريبي لدى الهيئة، ولا يفحص التواقيع."));
+    out.appendChild(ok);
+    out.appendChild(renderRows(parts));
+  }
+
+  document.getElementById("qr-check").addEventListener("click", function () {
+    show(input.value);
+  });
+
+  document.getElementById("qr-sample").addEventListener("click", function () {
+    // اسمٌ من 138 بايتاً كُتب طولُه في بايتٍ واحد — يُبنى هنا لا يُلصق.
+    var name = "مؤسسة التقنية "
+             + "المتقدمة للتجارة "
+             + "والمقاولات العامة "
+             + "بالمنطقة الوسطى "
+             + "المحدودة";
+    var bytes = new TextEncoder().encode(name);
+    var raw = new Uint8Array(2 + bytes.length);
+    raw[0] = 1;
+    raw[1] = bytes.length & 0xff;
+    raw.set(bytes, 2);
+    var binary = "";
+    raw.forEach(function (b) { binary += String.fromCharCode(b); });
+    input.value = btoa(binary);
+    show(input.value);
+  });
+})();
+
+</script>
 </body>
 </html>

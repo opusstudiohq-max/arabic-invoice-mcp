@@ -41,56 +41,8 @@ const disclosures = (() => {
   catch { return null; }
 })();
 
-// ── الفاكّ المستقل ───────────────────────────────────────────────────────
-/**
- * يفكّ TLV بقواعد BER ويُعيد **الشكل الذي كُتب به الطول** أيضاً — فالسؤال
- * هنا ليس «كم الطول» بل «كيف كُتب»، وهو موضع العيب كلّه.
- */
-function decode(base64) {
-  const raw = Buffer.from(base64, "base64");
-  const out = [];
-  let i = 0;
-  while (i < raw.length) {
-    if (i + 2 > raw.length) throw new Error(`ثلاثية مبتورة عند البايت ${i}`);
-    const tag = raw[i];
-    let length = raw[i + 1], header = 2, form = "short";
-
-    // **الفاكُّ المتساهل يمنح تمريرةً كاذبة.**
-    //
-    // كان يقرأ `0x80` طولاً قدره 128 فتنجح القيمة وتعود سليمة — فمرّت ستُّ
-    // حزمٍ في حالة «الذهاب والإياب» وهي تُنتج الشكل المكسور. أي أن المقياس
-    // **منح درجةً لكودٍ مكسور**، وهو أسوأ ما يقع لمقياس.
-    //
-    // و`0x80` في موضع الطول هو الطولُ غير المحدَّد في BER، ولا يجوز في
-    // ثلاثيةٍ محدَّدة. فيُرفض هنا كما يُرفض عند مُحقِّق الهيئة.
-    if (length === 0x80) {
-      throw new Error(`الوسم ${tag}: بايت الطول 0x80 — الطول غير المحدَّد لا يجوز هنا`);
-    }
-    if (length === 0xEF && raw[i + 2] === 0xBF && raw[i + 3] === 0xBD) {
-      throw new Error(`الوسم ${tag}: موضع الطول يحمل محرف الاستبدال U+FFFD`);
-    }
-    if (length > 0x82) {
-      throw new Error(`الوسم ${tag}: بايت الطول 0x${length.toString(16)} غير صالح`);
-    }
-
-    if (length === 0x81) { length = raw[i + 2]; header = 3; form = "0x81"; }
-    else if (length === 0x82) { length = (raw[i + 2] << 8) | raw[i + 3]; header = 4; form = "0x82"; }
-
-    if (length === 0 && tag <= 5) {
-      throw new Error(`الوسم ${tag}: الطول المُعلن صفر — بترُ طولٍ يتجاوز 255`);
-    }
-    if (i + header + length > raw.length) {
-      throw new Error(`الوسم ${tag} يُعلن ${length} بايتاً ويتجاوز نهاية البيانات`);
-    }
-    const slice = raw.subarray(i + header, i + header + length);
-    out.push({
-      tag, length, form,
-      value: tag >= 6 ? slice.toString("hex") : new TextDecoder("utf-8").decode(slice),
-    });
-    i += header + length;
-  }
-  return out;
-}
+// ── الفاكّ المستقل — مصدرُه `decode.mjs`، تقرؤه الصفحةُ أيضاً ──────────
+import { decode } from "./decode.mjs";
 
 /** `"ش×64"` ⇒ سلسلةٌ فعلية. تُكتب هكذا في `cases.json` لتبقى الحالات مقروءة. */
 function expand(value) {

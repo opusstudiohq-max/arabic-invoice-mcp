@@ -35,6 +35,18 @@ const isoDate = (s) => `<bdi dir="ltr">${esc(s)}</bdi>`;
 const iso = (s) => `<bdi>${esc(s)}</bdi>`;
 const num = (n) => Number(n).toLocaleString("en-US");
 
+/**
+ * الفاكُّ الذي حكم على الجدول — **نصُّه نفسه** يُحقن في الصفحة، فلا يُكتب
+ * فاكٌّ ثانٍ ينجرف عن الأول بلا صوت. والحارس ⑲ يتحقق من ذلك.
+ */
+const decoderSource = readFileSync(join(HERE, "decode.mjs"), "utf-8")
+  .replace(/^export /gm, "")
+  .replace(/<\/script>/gi, "<\\/script>");
+
+/** واجهةُ «افحص رمزك» — في ملفٍ مستقلّ فلا تُكتب داخل قالبٍ نصّي. */
+const widgetSource = readFileSync(join(HERE, "widget-ar.js"), "utf-8")
+  .replace(/<\/script>/gi, "<\\/script>");
+
 /** عنوانُ حزمةِ الإصدار — المسار المتاح للتثبيت حتى يقع النشر على npm. */
 const REL = "https://github.com/opusstudiohq-max/arabic-invoice-mcp/releases/download/libs-v0.1.1/fatura-0.1.1.tgz";
 
@@ -240,6 +252,30 @@ const html = `<!DOCTYPE html>
   .en h2{margin:0 0 .5rem;font-size:1.05rem}
   .en p{margin:.4rem 0}
   .en .fig{font-weight:700;color:var(--bad);font-variant-numeric:tabular-nums}
+  .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+  .checker{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:1rem}
+  .checker textarea{width:100%;box-sizing:border-box;font:.85rem/1.5 ui-monospace,Consolas,monospace;
+                    direction:ltr;background:var(--bg);color:var(--ink);border:1px solid var(--line);
+                    border-radius:6px;padding:.6rem;resize:vertical}
+  .checker-row{display:flex;gap:.5rem;flex-wrap:wrap;margin:.7rem 0 0}
+  .checker button{font:inherit;font-weight:600;padding:.5rem 1rem;border-radius:6px;cursor:pointer;
+                  border:1px solid var(--accent);background:var(--accent);color:var(--bg)}
+  .checker button.ghost{background:transparent;color:var(--accent)}
+  .checker button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  #qr-out:not(:empty){margin-top:1rem}
+  .verdict{border-radius:8px;padding:.7rem .9rem}
+  .verdict.ok{background:var(--ok-bg);border:1px solid var(--ok)}
+  .verdict.bad{background:var(--bad-bg);border:1px solid var(--bad)}
+  .verdict p{margin:.4rem 0}
+  .verdict p:first-child{font-weight:700}
+  /* «0x81 0x8A» انقسمت سطرين على عرضٍ ضيّق، فبدت قيمتين لا واحدة — قيس
+     بـRange: الاتجاه كان سليماً والعرضُ 37px هو ما كسرها. */
+  .verdict code{white-space:nowrap}
+  .verdict.ok p:first-child{color:var(--ok)}
+  .verdict.bad p:first-child{color:var(--bad)}
+  .tlv{width:100%;margin-top:.8rem;font-size:.85rem;border-collapse:collapse}
+  .tlv td,.tlv th{padding:.35rem .5rem;border-bottom:1px solid var(--line);text-align:right}
+  .tlv code{unicode-bidi:isolate}
 </style>
 </head>
 <body>
@@ -308,6 +344,22 @@ const html = `<!DOCTYPE html>
     وأداةُ الفحص المنشورة — <em>قبل</em> أن نقيس أحداً. والمقياس يرفض أن يُنتج
     صفحته أصلاً إن أخفق محرّكٌ من محرّكاتنا.
   </p>
+</div>
+
+<h2>افحص رمزك أنت</h2>
+<p class="lede">
+  الصق نصّ Base64 الذي يُنتجه مُشفّرك. لا يُرفع شيء — يعمل
+  <strong>الفاكُّ نفسه الذي حكم على الجدول أدناه</strong>، في متصفّحك.
+</p>
+<div class="checker">
+  <label class="visually-hidden" for="qr-input">رمز QR بصيغة Base64</label>
+  <textarea id="qr-input" rows="3" spellcheck="false" dir="ltr"
+    placeholder="AQVTYWxsYQIPMzEwMTIyMzkzNTAwMDAzAxQyMDI2LTA5LTAyVDAxOjAwOjAwWgQGMTE1LjAwBQUxNS4wMA=="></textarea>
+  <div class="checker-row">
+    <button type="button" id="qr-check">افحص</button>
+    <button type="button" id="qr-sample" class="ghost">حمِّل مثالاً مكسوراً</button>
+  </div>
+  <div id="qr-out" role="status" aria-live="polite"></div>
 </div>
 
 <h2>أو ثبّت واحدةً تفعلها أصلاً</h2>
@@ -442,6 +494,10 @@ node run.mjs --fetch &amp;&amp; node build.mjs</code></pre>
 </footer>
 
 </main>
+<script>
+${decoderSource}
+${widgetSource}
+</script>
 </body>
 </html>
 `;

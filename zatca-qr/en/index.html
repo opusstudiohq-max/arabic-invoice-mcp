@@ -60,6 +60,26 @@
              background:var(--card);color:var(--muted)}
   footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--line);
          color:var(--muted);font-size:.88rem}
+  .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);
+                   white-space:nowrap}
+  .checker{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:1rem}
+  .checker textarea{width:100%;box-sizing:border-box;font:.85rem/1.5 ui-monospace,SFMono-Regular,
+                    Menlo,Consolas,monospace;direction:ltr;background:var(--bg);color:var(--ink);
+                    border:1px solid var(--line);border-radius:6px;padding:.6rem;resize:vertical}
+  .checker-row{display:flex;gap:.5rem;flex-wrap:wrap;margin:.7rem 0 0}
+  .checker button{font:inherit;font-weight:600;padding:.5rem 1rem;border-radius:6px;cursor:pointer;
+                  border:1px solid var(--accent);background:var(--accent);color:var(--bg)}
+  .checker button.ghost{background:transparent;color:var(--accent)}
+  .checker button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  #qr-out:not(:empty){margin-top:1rem}
+  .verdict{border-radius:8px;padding:.7rem .9rem;font-weight:600}
+  .verdict.ok{background:var(--ok-bg);border:1px solid var(--ok);color:var(--ok)}
+  .verdict.bad{background:var(--bad-bg);border:1px solid var(--bad);color:var(--bad)}
+  .verdict p{margin:.5rem 0 0;font-weight:400;color:var(--ink)}
+  .verdict code{white-space:nowrap}
+  .tlv{width:100%;margin-top:.8rem;font-size:.85rem}
+  .tlv td,.tlv th{padding:.35rem .5rem;border-bottom:1px solid var(--line);text-align:left}
+  .tlv code{direction:ltr;unicode-bidi:isolate}
 </style>
 </head>
 <body>
@@ -101,6 +121,22 @@
   the value was bigger than 127, we were not properly convert it to TLV value
 </blockquote>
 <p class="lede"><a href="https://zatca1.discourse.group/t/qr-code-rejected-when-tag-1-company-name-exceeds-127-characters/7202">https://zatca1.discourse.group/t/qr-code-rejected-when-tag-1-company-name-exceeds-127-characters/7202</a></p>
+
+<h2>Check your own QR</h2>
+<p class="lede">
+  Paste the Base64 your encoder produces. Nothing is uploaded — this runs
+  <strong>the same decoder that scored the table below</strong>, in your browser.
+</p>
+<div class="checker">
+  <label class="visually-hidden" for="qr-input">QR Base64</label>
+  <textarea id="qr-input" rows="3" spellcheck="false"
+    placeholder="AQVTYWxsYQIPMzEwMTIyMzkzNTAwMDAzAxQyMDI2LTA5LTAyVDAxOjAwOjAwWgQGMTE1LjAwBQUxNS4wMA=="></textarea>
+  <div class="checker-row">
+    <button type="button" id="qr-check">Decode</button>
+    <button type="button" id="qr-sample" class="ghost">Load a broken example</button>
+  </div>
+  <div id="qr-out" role="status" aria-live="polite"></div>
+</div>
 
 <h2>Results</h2>
 <p class="lede">
@@ -441,5 +477,282 @@ node run.mjs --fetch &amp;&amp; node build.mjs</code></pre>
 </footer>
 
 </main>
+<script>
+/**
+ * الفاكُّ الصارم — **مصدرٌ واحد** يقرؤه المُشغِّل والصفحةُ المنشورة معاً.
+ *
+ * ### لماذا في ملفٍ وحده
+ *
+ * كان مكتوباً داخل `run.mjs`. ثم أردنا أن تفحص الصفحةُ رمزَ زائرِها، فلو
+ * كُتب فاكٌّ ثانٍ للمتصفّح لانجرف عن الأول بلا صوت — وهو العيبُ الذي يقيسه
+ * هذا المشروع نفسه، فيقع فيه.
+ *
+ * فصار هنا، يستورده `run.mjs`، ويُحقن نصُّه في الصفحتين عند البناء. ويحرس
+ * الاختبار ⑲ أن ما في الصفحة هو ما في هذا الملف.
+ *
+ * ### ولا يستدعي كود أحد
+ *
+ * الحكمُ على المحرّكات لا يصحّ بفاكٍّ مأخوذٍ من أحدها — يصير دائرياً. فهذا
+ * مكتوبٌ من نصّ المواصفة وقواعد BER وحدها.
+ *
+ * ### الرسائل
+ *
+ * يُرمى `Error` بحقلَي `code` و`tag` — فتُصاغ الرسالة بلغة كل صفحة، ولا
+ * يُترجَم المنطق مرّتين. و`message` بالعربية للمُشغِّل.
+ */
+
+/** أشكالُ الطول التي توجبها BER. `0x80` منها ليس طولاً بل الطولُ غير المحدَّد. */
+const LENGTH_FORMS = Object.freeze({
+  SHORT: "short",
+  LONG_1: "0x81",
+  LONG_2: "0x82",
+});
+
+/** بايتاتٌ من Base64 — في Node وفي المتصفّح. الأداةُ تُشحن للاثنين. */
+function base64ToBytes(base64) {
+  const clean = String(base64).trim().replace(/\s+/g, "");
+  if (typeof Buffer !== "undefined") return new Uint8Array(Buffer.from(clean, "base64"));
+  const binary = atob(clean);
+  const out = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) out[i] = binary.charCodeAt(i);
+  return out;
+}
+
+function fail(code, tag, detail, message) {
+  const error = new Error(message);
+  error.code = code;
+  error.tag = tag;
+  error.detail = detail;
+  return error;
+}
+
+/**
+ * يفكّ TLV بقواعد BER ويُعيد **الشكل الذي كُتب به الطول** أيضاً — فالسؤال
+ * هنا ليس «كم الطول» بل «كيف كُتب»، وهو موضع العيب كلّه.
+ */
+function decode(base64) {
+  const raw = base64ToBytes(base64);
+  const out = [];
+  let i = 0;
+  while (i < raw.length) {
+    if (i + 2 > raw.length) {
+      throw fail("TRUNCATED", null, i, `ثلاثية مبتورة عند البايت ${i}`);
+    }
+    const tag = raw[i];
+    let length = raw[i + 1], header = 2, form = LENGTH_FORMS.SHORT;
+
+    // **الفاكُّ المتساهل يمنح تمريرةً كاذبة.**
+    //
+    // كان يقرأ `0x80` طولاً قدره 128 فتنجح القيمة وتعود سليمة — فمرّت ستُّ
+    // حزمٍ في حالة «الذهاب والإياب» وهي تُنتج الشكل المكسور. أي أن المقياس
+    // **منح درجةً لكودٍ مكسور**، وهو أسوأ ما يقع لمقياس.
+    //
+    // و`0x80` في موضع الطول هو الطولُ غير المحدَّد في BER، ولا يجوز في
+    // ثلاثيةٍ محدَّدة. فيُرفض هنا كما يُرفض عند مُحقِّق الهيئة.
+    if (length === 0x80) {
+      throw fail("INDEFINITE", tag, 0x80,
+        `الوسم ${tag}: بايت الطول 0x80 — الطول غير المحدَّد لا يجوز هنا`);
+    }
+    if (length === 0xEF && raw[i + 2] === 0xBF && raw[i + 3] === 0xBD) {
+      throw fail("REPLACEMENT_CHAR", tag, null,
+        `الوسم ${tag}: موضع الطول يحمل محرف الاستبدال U+FFFD`);
+    }
+    if (length > 0x82) {
+      throw fail("BAD_LENGTH_BYTE", tag, length,
+        `الوسم ${tag}: بايت الطول 0x${length.toString(16)} غير صالح`);
+    }
+
+    if (length === 0x81) { length = raw[i + 2]; header = 3; form = LENGTH_FORMS.LONG_1; }
+    else if (length === 0x82) {
+      length = (raw[i + 2] << 8) | raw[i + 3];
+      header = 4;
+      form = LENGTH_FORMS.LONG_2;
+    }
+
+    if (length === 0 && tag <= 5) {
+      throw fail("ZERO_LENGTH", tag, null,
+        `الوسم ${tag}: الطول المُعلن صفر — بترُ طولٍ يتجاوز 255`);
+    }
+    if (i + header + length > raw.length) {
+      throw fail("OVERRUN", tag, length,
+        `الوسم ${tag} يُعلن ${length} بايتاً ويتجاوز نهاية البيانات`);
+    }
+    const slice = raw.subarray(i + header, i + header + length);
+    out.push({
+      tag, length, form,
+      value: tag >= 6
+        ? Array.from(slice).map((b) => b.toString(16).padStart(2, "0")).join("")
+        : new TextDecoder("utf-8").decode(slice),
+    });
+    i += header + length;
+  }
+  return out;
+}
+
+/**
+ * واجهةُ «افحص رمزك» على الصفحة الإنجليزية.
+ *
+ * تُقرأ عند البناء وتُحقن بعد نصّ `decode.mjs` — فالمنطق واحدٌ لا اثنان،
+ * والرسائلُ وحدها تُترجم. ولا `${` ولا شرطة مائلة خلفية هنا: هذه الصفحة
+ * تُبنى داخل قالبٍ نصّي، وكلاهما ينفجر فيه.
+ */
+(function () {
+  var TAG_NAMES = {
+    1: "Seller name", 2: "VAT number", 3: "Timestamp",
+    4: "Total with VAT", 5: "VAT amount",
+    6: "Invoice hash", 7: "Digital signature", 8: "Public key", 9: "ZATCA signature",
+  };
+
+  // ما يعنيه كلُّ رمزِ عطبٍ يرميه الفاكّ، وما العلاج، ومن يُنتجه فعلاً.
+  // والأخيرُ مقيسٌ في هذه الصفحة نفسها — لا تخمين.
+  var DIAGNOSIS = {
+    INDEFINITE: {
+      title: "The length byte is 0x80 — the value is 128 bytes",
+      body: "Under BER, 0x80 is the indefinite form, not the number 128. Your encoder "
+          + "wrote the byte count into a single byte. It needs 0x81 followed by 0x80.",
+      seen: "This is the single most common defect measured on this page.",
+    },
+    BAD_LENGTH_BYTE: {
+      title: "The length byte is not a length",
+      body: "Any byte of 0x80 or above in the length position says how many following "
+          + "bytes carry the length — it is not the length itself. A value of 138 bytes "
+          + "must be written 0x81 0x8A, not 0x8A.",
+      seen: "Produced by every encoder that writes the length with one byte.",
+    },
+    REPLACEMENT_CHAR: {
+      title: "The length position holds EF BF BD (U+FFFD)",
+      body: "The length went through a text encoding round trip and was replaced by the "
+          + "Unicode replacement character. The TLV must be assembled as bytes, never "
+          + "as a string.",
+      seen: "Measured in @axenda/zatca.",
+    },
+    ZERO_LENGTH: {
+      title: "A declared length of zero",
+      body: "A length above 255 was truncated into a single byte and wrapped to 0. "
+          + "Above 255 bytes the length needs 0x82 followed by two big-endian bytes.",
+      seen: "Measured in several packages at 256 bytes.",
+    },
+    OVERRUN: {
+      title: "A field claims more bytes than exist",
+      body: "The declared length runs past the end of the data — usually a length written "
+          + "in the wrong form, so the reader takes the following bytes as part of it.",
+      seen: "",
+    },
+    TRUNCATED: {
+      title: "The data ends mid-field",
+      body: "A tag with no length, or a length with no value. The Base64 may be "
+          + "incomplete — check that nothing was cut when it was copied.",
+      seen: "",
+    },
+  };
+
+  var input = document.getElementById("qr-input");
+  var out = document.getElementById("qr-out");
+  if (!input || !out) return;
+
+  function el(tag, className, text) {
+    var node = document.createElement(tag);
+    if (className) node.className = className;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+
+  function renderRows(parts) {
+    var table = el("table", "tlv");
+    var head = el("tr");
+    ["tag", "field", "length", "length form", "value"].forEach(function (h) {
+      head.appendChild(el("th", null, h));
+    });
+    table.appendChild(head);
+    parts.forEach(function (p) {
+      var row = el("tr");
+      var cells = [
+        String(p.tag),
+        TAG_NAMES[p.tag] || "unknown",
+        String(p.length) + " bytes",
+        p.form === "short" ? "one byte" : p.form,
+        p.value.length > 48 ? p.value.slice(0, 48) + "…" : p.value,
+      ];
+      cells.forEach(function (c, i) {
+        var cell = el("td");
+        if (i === 4 || i === 3) {
+          var code = el("code", null, c);
+          cell.appendChild(code);
+        } else {
+          cell.textContent = c;
+        }
+        row.appendChild(cell);
+      });
+      table.appendChild(row);
+    });
+    return table;
+  }
+
+  function show(base64) {
+    out.textContent = "";
+    if (!base64.trim()) return;
+
+    var parts;
+    try {
+      parts = decode(base64);
+    } catch (error) {
+      var info = DIAGNOSIS[error.code] || {
+        title: "This is not a valid ZATCA TLV",
+        body: error.message || String(error),
+        seen: "",
+      };
+      var bad = el("div", "verdict bad", "Rejected: " + info.title);
+      if (error.tag !== null && error.tag !== undefined) {
+        bad.appendChild(el("p", null,
+          "Field " + error.tag + " (" + (TAG_NAMES[error.tag] || "unknown") + ")."));
+      }
+      bad.appendChild(el("p", null, info.body));
+      if (info.seen) bad.appendChild(el("p", null, info.seen));
+      out.appendChild(bad);
+      return;
+    }
+
+    var forms = parts.map(function (p) { return p.form; });
+    var usesLong = forms.indexOf("0x81") >= 0 || forms.indexOf("0x82") >= 0;
+    var ok = el("div", "verdict ok", "Valid TLV structure — " + parts.length + " fields");
+    ok.appendChild(el("p", null, usesLong
+      ? "It uses a BER long-form length, which is the case most encoders get wrong."
+      : "Every field is under 128 bytes, so the length fits in one byte. That is the "
+        + "case that works everywhere — try a seller name of about 64 Arabic letters "
+        + "to exercise the one that does not."));
+    ok.appendChild(el("p", null,
+      "Structure only. This does not check the VAT number against ZATCA, "
+      + "or verify signatures."));
+    out.appendChild(ok);
+    out.appendChild(renderRows(parts));
+  }
+
+  document.getElementById("qr-check").addEventListener("click", function () {
+    show(input.value);
+  });
+
+  document.getElementById("qr-sample").addEventListener("click", function () {
+    // اسمٌ من 138 بايتاً كُتب طولُه في بايتٍ واحد — يُبنى هنا لا يُلصق،
+    // فالقارئ يرى كيف يقع العطب لا نتيجته فقط.
+    var name = "مؤسسة التقنية "
+             + "المتقدمة للتجارة "
+             + "والمقاولات العامة "
+             + "بالمنطقة الوسطى "
+             + "المحدودة";
+    var bytes = new TextEncoder().encode(name);
+    var parts = [new Uint8Array([1, bytes.length & 0xff]), bytes];
+    var total = 0;
+    parts.forEach(function (p) { total += p.length; });
+    var raw = new Uint8Array(total);
+    var at = 0;
+    parts.forEach(function (p) { raw.set(p, at); at += p.length; });
+    var binary = "";
+    raw.forEach(function (b) { binary += String.fromCharCode(b); });
+    input.value = btoa(binary);
+    show(input.value);
+  });
+})();
+
+</script>
 </body>
 </html>
