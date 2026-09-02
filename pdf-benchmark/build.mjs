@@ -97,7 +97,12 @@ const html = `<!DOCTYPE html>
 <meta property="og:url" content="https://opusstudiohq-max.github.io/arabic-invoice-mcp/pdf/">
 <meta property="og:title" content="فاتورتك تطبع «05.432,1» بدل «1,234.50»">
 <meta property="og:description" content="${esc(baseline.pass)}/${esc(baseline.total)} — نتيجة أشهر مكتبة PDF في جافاسكربت على ${results.cases_total} حالة، كلٌّ بقاعدة من يونيكود. المقياس يُعاد تشغيله بأمرٍ واحد.">
+<meta property="og:image" content="https://opusstudiohq-max.github.io/arabic-invoice-mcp/pdf/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="${esc(baseline.pass)}/${esc(baseline.total)} — نتيجة أشهر مكتبة PDF في جافاسكربت على حالات عربية">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://opusstudiohq-max.github.io/arabic-invoice-mcp/pdf/og.png">
 <meta name="twitter:title" content="فاتورتك تطبع «05.432,1» بدل «1,234.50»">
 <meta name="twitter:description" content="مقياس مفتوح يبني ملفات PDF فعلية ويقرأ منها الرسوم. ${results.cases_total} حالة بقواعد يونيكود مسمّاة.">
 <style>

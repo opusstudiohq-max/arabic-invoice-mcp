@@ -39,7 +39,7 @@ const ENGINES = [
   {
     id: "mutawafiq",
     name: "مُتوافِق",
-    note: "محرّكنا — منقول عن نسخة بايثون بـ176 اختباراً، ومُثبت التكافؤ على 540 حالة",
+    note: "محرّكنا — منقول عن نسخة بايثون بـ184 اختباراً، ومُثبت التكافؤ على 540 حالة",
     local: true,
     run: (amount, currency) => ourTafgeet(amount, currency),
   },

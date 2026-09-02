@@ -73,7 +73,16 @@ test("النتائج مولَّدة والصفحة مطابقة لها — لا 
 
 test("الصفحة قائمة بذاتها ومسؤولة في صياغتها", () => {
   const html = readFileSync(join(BM, "index.html"), "utf-8");
-  const externals = [...html.matchAll(/(?:src|href)\s*=\s*["'](https?:)?\/\//g)].map(m => m[0]);
+
+  // `<link rel="canonical">` وحدَه مستثنى: **بيانٌ للزاحف لا موردٌ يُجلَب.**
+  // وقِيس ذلك ولم يُفترَض — حُمّلت الصفحة في Chrome بعد إضافته، فأصدرت
+  // طلباً واحداً هو ملفُّها نفسه، وصفراً غير محلّي. فغرضُ هذا الحارس —
+  // «تعمل بلا إنترنت» — سليمٌ معه.
+  //
+  // وما عداه يبقى ممنوعاً: `src` أيّاً كان، وأيُّ `link` يجلب (stylesheet,
+  // preload, icon, prefetch). فالاستثناءُ سطرٌ واحد لا بابٌ مفتوح.
+  const withoutCanonical = html.replace(/<link\b[^>]*\brel\s*=\s*["']canonical["'][^>]*>/gi, "");
+  const externals = [...withoutCanonical.matchAll(/(?:src|href)\s*=\s*["'](https?:)?\/\//g)].map(m => m[0]);
   assert.deepEqual(externals, [], "مورد خارجي — الصفحة يجب أن تعمل بلا إنترنت");
 
   // الجداول كلها داخل حاوية تمرير — وإلا مُرِّرت الصفحة أفقياً على الجوال

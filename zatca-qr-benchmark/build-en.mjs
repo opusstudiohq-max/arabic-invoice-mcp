@@ -117,7 +117,12 @@ const html = `<!DOCTYPE html>
 <meta property="og:url" content="${EN}">
 <meta property="og:title" content="Why ZATCA rejects your QR code: the TLV length breaks at 128 bytes">
 <meta property="og:description" content="${brokenShare}% of measured npm downloads ship the bug. A 64-character Arabic company name is 128 bytes — an ordinary Saudi trade name.">
+<meta property="og:image" content="${EN}og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="${brokenShare}% of measured ZATCA npm downloads ship the TLV length bug">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="${EN}og.png">
 <style>
   :root{--bg:#f7f8fa;--card:#fff;--ink:#16202b;--muted:#5d6b7a;--line:#e0e6ec;
         --ok:#0a7d5a;--ok-bg:#e8f5f0;--bad:#b4232a;--bad-bg:#fdeeee;--warn:#8a5a00;--accent:#0d5c47;}

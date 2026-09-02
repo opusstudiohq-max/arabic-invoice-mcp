@@ -178,7 +178,12 @@ const html = `<!DOCTYPE html>
 <meta property="og:url" content="https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/">
 <meta property="og:title" content="اسمُ منشأتك بأربعة وستين حرفاً؟ رمزُك مرفوض">
 <meta property="og:description" content="${brokenShare}% من تنزيلات مكتبات ZATCA الشهرية المقيسة تذهب إلى حزمٍ تكسر ترميز الطول عند 128 بايتاً — أي عند اسمٍ عربي من 64 حرفاً. مقياس مفتوح يُعاد تشغيله بأمرٍ واحد.">
+<meta property="og:image" content="https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="${brokenShare}% من تنزيلات مكتبات ZATCA المقيسة تشحن عيب ترميز الطول">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/og.png">
 <meta name="twitter:title" content="اسمُ منشأتك بأربعة وستين حرفاً؟ رمزُك مرفوض">
 <meta name="twitter:description" content="${scored.length} مكتبة قِيست على ${r.cases_total} حالة، كلٌّ بقاعدةٍ من المواصفة أو من حسم منتدى الهيئة.">
 <style>
