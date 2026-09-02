@@ -34,7 +34,7 @@ from _console import utf8_stdio
 utf8_stdio()
 
 ROOT = Path(__file__).resolve().parent.parent
-BASE = "https://opusstudiohq-max.github.io/arabic-invoice-mcp/"
+BASE = "https://mutawafiq.opus-studio.pro/"
 WANT = (1200, 630)
 
 #: صفحةٌ منشورة ⇒ (مسارُها هنا، مسارُها في المستودع العام).

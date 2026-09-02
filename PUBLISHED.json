@@ -21,51 +21,51 @@
   "github_pages": [
     {
       "name": "مقياس التفقيط العربي",
-      "url": "https://opusstudiohq-max.github.io/arabic-invoice-mcp/tafgeet/",
+      "url": "https://mutawafiq.opus-studio.pro/tafgeet/",
       "published_on": "2026-08-31",
       "source": "tafgeet-benchmark/index.html",
       "note": "اسم المجلد في المستودع العام `tafgeet/` لا `tafgeet-benchmark/`؛ كان مسجّلاً خطأً وأعطى 404."
     },
     {
       "name": "أداة الفاتورة الضريبية",
-      "url": "https://opusstudiohq-max.github.io/arabic-invoice-mcp/invoice/",
+      "url": "https://mutawafiq.opus-studio.pro/invoice/",
       "published_on": "2026-09-01",
       "source": "invoice-tool/dist/"
     },
     {
       "name": "فاحص QR",
-      "url": "https://opusstudiohq-max.github.io/arabic-invoice-mcp/checker/",
+      "url": "https://mutawafiq.opus-studio.pro/checker/",
       "published_on": "2026-08-21",
       "source": "zatca-checker/"
     },
     {
       "name": "أداة طباعة الشيكات (ملف واحد)",
-      "url": "https://opusstudiohq-max.github.io/arabic-invoice-mcp/cheque/dist/mutawafiq-cheque.html",
+      "url": "https://mutawafiq.opus-studio.pro/cheque/dist/mutawafiq-cheque.html",
       "published_on": "2026-09-01",
       "source": "cheque-tool/dist/mutawafiq-cheque.html",
       "note": "لم تُنشر قبل اليوم رغم بنائها: قاعدة `dist/` في .gitignore العام كانت تبتلعها بصمت."
     },
     {
       "name": "خريطة الموقع",
-      "url": "https://opusstudiohq-max.github.io/arabic-invoice-mcp/sitemap.xml",
+      "url": "https://mutawafiq.opus-studio.pro/sitemap.xml",
       "published_on": "2026-09-01",
       "source": "المستودع العام"
     },
     {
       "name": "robots.txt",
-      "url": "https://opusstudiohq-max.github.io/arabic-invoice-mcp/robots.txt",
+      "url": "https://mutawafiq.opus-studio.pro/robots.txt",
       "published_on": "2026-09-01",
       "source": "المستودع العام"
     },
     {
       "name": "مقياس النصّ العربي في PDF",
-      "url": "https://opusstudiohq-max.github.io/arabic-invoice-mcp/pdf/",
+      "url": "https://mutawafiq.opus-studio.pro/pdf/",
       "published_on": "2026-09-01",
       "source": "pdf-benchmark/"
     },
     {
       "name": "مقياس رمز QR السعودي",
-      "url": "https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/",
+      "url": "https://mutawafiq.opus-studio.pro/zatca-qr/",
       "published_on": "2026-09-01",
       "source": "zatca-qr-benchmark/index.html",
       "note": "اسم المجلد في المستودع العام `zatca-qr/`. سُجّل بعد التحقق من 200 على العنوان الحيّ، لا قبله."

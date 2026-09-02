@@ -98,8 +98,8 @@ const ruleRows = Object.entries(r.rules).map(([id, rule]) => `
   </tr>`).join("");
 
 const REL = "https://github.com/opusstudiohq-max/arabic-invoice-mcp/releases/download/libs-v0.2.0/fatura-zatca-0.2.0.tgz";
-const AR = "https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/";
-const EN = "https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/en/";
+const AR = "https://mutawafiq.opus-studio.pro/zatca-qr/";
+const EN = "https://mutawafiq.opus-studio.pro/zatca-qr/en/";
 
 const html = `<!DOCTYPE html>
 <html lang="en" dir="ltr">
@@ -383,7 +383,7 @@ node run.mjs --fetch &amp;&amp; node build.mjs</code></pre>
   <p>
     ${r.cases_total} cases · ${scored.length} engines · MIT ·
     <a href="${AR}">النسخة العربية</a> ·
-    <a href="https://opusstudiohq-max.github.io/arabic-invoice-mcp/">Arabic invoicing tools</a>
+    <a href="https://mutawafiq.opus-studio.pro/">Arabic invoicing tools</a>
   </p>
   <p>
     We build and repair Saudi e-invoicing integrations — scope and price agreed before

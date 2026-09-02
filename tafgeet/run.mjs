@@ -20,7 +20,7 @@ import { tafgeet as ourTafgeet } from "./engine.js";   // نسخة مُودَع�
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const CACHE = join(HERE, "cache");
-const UA = "OpusStudioBenchmark/1.0 (+https://opusstudiohq-max.github.io/arabic-invoice-mcp/; opus.studio.hq@gmail.com)";
+const UA = "OpusStudioBenchmark/1.0 (+https://mutawafiq.opus-studio.pro/; opus.studio.hq@gmail.com)";
 
 const data = JSON.parse(readFileSync(join(HERE, "cases.json"), "utf-8"));
 const ALL = [

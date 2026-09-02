@@ -9,7 +9,7 @@
 **91.7%** of the 44,915 monthly npm downloads measured here go to packages that
 fail at least one rule. Of 11 third-party packages measured, **2** pass every case.
 
-**[Arabic write-up and full results →](https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/)**
+**[Arabic write-up and full results →](https://mutawafiq.opus-studio.pro/zatca-qr/)**
 
 ---
 
@@ -222,4 +222,4 @@ results.json      run output
 tests/            fifteen guards on the benchmark itself
 ```
 
-MIT. Part of [Arabic invoicing tools](https://opusstudiohq-max.github.io/arabic-invoice-mcp/).
+MIT. Part of [Arabic invoicing tools](https://mutawafiq.opus-studio.pro/).

@@ -261,7 +261,7 @@ async function loadDownloads(names) {
   return fresh;
 }
 
-const UA = "OpusStudioBenchmark/1.0 (+https://opusstudiohq-max.github.io/arabic-invoice-mcp/; opus.studio.hq@gmail.com)";
+const UA = "OpusStudioBenchmark/1.0 (+https://mutawafiq.opus-studio.pro/; opus.studio.hq@gmail.com)";
 
 // ── تقييم حالة واحدة ────────────────────────────────────────────────────
 /**

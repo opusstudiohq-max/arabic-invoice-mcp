@@ -13,7 +13,7 @@ themselves, because a browser is a conforming bidi renderer: paste the broken
 string as *text* and the browser silently reorders it into something correct,
 and the demonstration evaporates.
 
-**[Arabic write-up and full results →](https://opusstudiohq-max.github.io/arabic-invoice-mcp/pdf/)**
+**[Arabic write-up and full results →](https://mutawafiq.opus-studio.pro/pdf/)**
 
 ---
 

@@ -3,7 +3,7 @@
 مقياسٌ مفتوح يبني رموز QR **فعلية** بثلاث عشرة مكتبة، ثم يفكّها **بايتاً
 بايت** بفاكٍّ مستقلٍّ لا يستدعي كود أحد.
 
-الصفحة: [`/zatca-qr/`](https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/)
+الصفحة: [`/zatca-qr/`](https://mutawafiq.opus-studio.pro/zatca-qr/)
 
 ## لماذا وُجد هذا المقياس
 
