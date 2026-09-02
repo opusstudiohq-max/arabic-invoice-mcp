@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-بوابة الاتجاه: لا رقمٌ مركّب بشرطة في نصٍّ عربي بلا عزل.
+بوابةُ ما لا يظهر إلا عند العرض: اتجاهُ الأرقام، وترميزُ markdown المتسرّب.
 
 ### لماذا هذه البوابة موجودة
 
@@ -57,6 +57,11 @@ PRUNED = {"node_modules", ".git", "cache", "data", "__pycache__", ".venv",
 #: تاريخٌ ISO، أو مدى «1-5»، أو أي سلسلةِ أرقامٍ تفصلها شرطات.
 SUSPECT = re.compile(r"\d+(?:\s*-\s*\d+)+")
 
+#: ترميزُ markdown في صفحةٍ **مبنيّة بالفعل**. وقع مرّتين في يومٍ واحد:
+#: `**عريض**` كُتب داخل HTML فظهر بنجومه، و«#» في صدر الصفحة الأولى لأن
+#: كرامداون لا يعالج ما داخل HTML خام. والمشترك: علامةُ ترميزٍ تصل القارئ.
+MARKDOWN_LEAK = re.compile(r"\*\*\S|\S\*\*|^#{1,4}\s+\S", re.M)
+
 #: عناصر يكون ما بداخلها معزولاً أصلاً.
 ISOLATING = {"bdi", "pre"}
 
@@ -90,6 +95,7 @@ class VisibleText(HTMLParser):
         self.stack: list[tuple[str, bool]] = []
         self.blocks: list[list[tuple[str, bool, int]]] = [[]]
         self.findings: list[tuple[int, str]] = []
+        self.leaks: list[tuple[int, str]] = []
         self.code_is_isolated = code_is_isolated
 
     def _isolating(self, tag: str, attrs) -> bool:
@@ -116,9 +122,11 @@ class VisibleText(HTMLParser):
         segments = self.blocks.pop()
         if not self.blocks:
             self.blocks.append([])
-        if not any(ARABIC.search(text) for text, _, _ in segments):
+        if not any(ARABIC.search(seg[0]) for seg in segments):
             return
-        for text, isolated, line in segments:
+        for text, isolated, line, in_code in segments:
+            for m in (() if in_code else MARKDOWN_LEAK.finditer(text)):
+                self.leaks.append((line, m.group(0).strip()[:24]))
             if isolated:
                 continue
             for m in SUSPECT.finditer(EXPLICIT_ISOLATE.sub("", text)):
@@ -144,8 +152,11 @@ class VisibleText(HTMLParser):
     def handle_data(self, data):
         if any(t in INVISIBLE for t, _ in self.stack):
             return
+        # كتلةُ الكود تعرض ما فيها حرفياً بالتصميم: «# 1)» فيها تعليقُ صدفة
+        # لا عنوانَ markdown. وأوّل تشغيلٍ للقاعدة أفشل كتلةً صحيحة.
+        in_code = any(t in ("pre", "code") for t, _ in self.stack)
         isolated = any(flag for _, flag in self.stack)
-        self.blocks[-1].append((data, isolated, self.getpos()[0]))
+        self.blocks[-1].append((data, isolated, self.getpos()[0], in_code))
 
     def close(self):
         super().close()
@@ -165,6 +176,12 @@ def check(path: Path) -> list[str]:
     except ValueError:
         where = path  # ملفٌ خارج الشجرة — يُفحص في اختبار الحارس نفسه
     seen, out = set(), []
+    for line, text in parser.leaks:
+        key = ("md", line, text)
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(f"{where}:{line} — «{text}» ترميزُ markdown ظاهرٌ في صفحةٍ مبنيّة")
     for line, text in parser.findings:
         if (line, text) in seen:
             continue
@@ -195,14 +212,15 @@ def main() -> int:
         problems.extend(check(page))
 
     if problems:
-        print(f"✖ {len(problems)} رقماً مركّباً بلا عزل في نصٍّ عربي:\n")
+        print(f"✖ {len(problems)} عيباً لا يظهر إلا عند العرض:\n")
         for p in problems:
             print("   " + p)
-        print("\nالعلاج: لُفّ المقطع في <bdi dir=\"ltr\"> — أو محارف العزل U+2066…U+2069.")
-        print("والسبب: الشرطة ES لا تلتحق بالرقم العربي الصنف (W4)، فينقلب الترتيب عند العرض.")
+        print("\nرقمٌ مركّب بلا عزل ⇒ لُفّه في <bdi dir=\"ltr\"> أو محارف U+2066…U+2069؛")
+        print("فالشرطة ES لا تلتحق بالرقم العربي الصنف (W4) فينقلب الترتيب عند العرض.")
+        print("وترميزُ markdown في صفحةٍ مبنيّة ⇒ <strong> بدلَه، أو احذف العلامة من مصدر البيانات.")
         return 1
 
-    print(f"✓ الاتجاه سليم — {len(pages)} صفحة، لا رقم مركّب بلا عزل")
+    print(f"✓ ما يظهر عند العرض سليم — {len(pages)} صفحة: لا رقمَ بلا عزل، ولا ترميزَ متسرّب")
     return 0
 
 

@@ -35,6 +35,9 @@ const isoDate = (s) => `<bdi dir="ltr">${esc(s)}</bdi>`;
 const iso = (s) => `<bdi>${esc(s)}</bdi>`;
 const num = (n) => Number(n).toLocaleString("en-US");
 
+/** عنوانُ حزمةِ الإصدار — المسار المتاح للتثبيت حتى يقع النشر على npm. */
+const REL = "https://github.com/opusstudiohq-max/arabic-invoice-mcp/releases/download/libs-v0.1.0/fatura-0.1.0.tgz";
+
 /**
  * يعزل الحرفيّات التقنية داخل نصٍّ عربي.
  *
@@ -302,6 +305,18 @@ const html = `<!DOCTYPE html>
     صفحته أصلاً إن أخفق محرّكٌ من محرّكاتنا.
   </p>
 </div>
+
+<h2>أو ثبّت واحدةً تفعلها أصلاً</h2>
+<p class="lede">
+  الأسطر الأربعة أعلاه تكفي لمن يريد الرمز وحده. ومن يريد معه <strong>نصّاً عربياً
+  ينجو في PDF</strong> — مبالغُ لا تنقلب وأسماءٌ لا تُبتر — فهاتان المكتبتان تفعلان
+  الاثنين. ولم تُنشرا على npm بعد، وتُثبَّتان اليوم من إصدار:
+</p>
+<pre><code>npm install ${REL}</code></pre>
+<p class="lede">
+  و<code>fatura</code> تسحب <code>nasq</code> معها. وجُرّبت السلسلة من هذا العنوان
+  في مشروعٍ نظيف: شكلُ الطول صحيح، والاسمُ سليمٌ بعد الفكّ، والمجاميع بالهللات.
+</p>
 
 <h2>النتيجة</h2>
 <div class="scroll">

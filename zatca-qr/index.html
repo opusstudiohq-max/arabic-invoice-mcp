@@ -157,6 +157,18 @@
   </p>
 </div>
 
+<h2>أو ثبّت واحدةً تفعلها أصلاً</h2>
+<p class="lede">
+  الأسطر الأربعة أعلاه تكفي لمن يريد الرمز وحده. ومن يريد معه <strong>نصّاً عربياً
+  ينجو في PDF</strong> — مبالغُ لا تنقلب وأسماءٌ لا تُبتر — فهاتان المكتبتان تفعلان
+  الاثنين. ولم تُنشرا على npm بعد، وتُثبَّتان اليوم من إصدار:
+</p>
+<pre><code>npm install https://github.com/opusstudiohq-max/arabic-invoice-mcp/releases/download/libs-v0.1.0/fatura-0.1.0.tgz</code></pre>
+<p class="lede">
+  و<code>fatura</code> تسحب <code>nasq</code> معها. وجُرّبت السلسلة من هذا العنوان
+  في مشروعٍ نظيف: شكلُ الطول صحيح، والاسمُ سليمٌ بعد الفكّ، والمجاميع بالهللات.
+</p>
+
 <h2>النتيجة</h2>
 <div class="scroll">
 <table>
@@ -437,7 +449,7 @@
       <td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num bad" title="لا يُفكّ: الوسم 180 يُعلن 216 بايتاً ويتجاوز نهاية البيانات">✗</td>
     </tr>
     <tr>
-      <td><strong>arabic-64-chars</strong><div class="rule">128 بايتاً بالضبط — **هنا ينكسر كل من قرأ نصّ المواصفة حرفياً**. واسمُ منشأةٍ سعودية من 64 حرفاً عاديّ تماماً.</div></td>
+      <td><strong>arabic-64-chars</strong><div class="rule">128 بايتاً بالضبط — هنا ينكسر كل من قرأ نصّ المواصفة حرفياً. واسمُ منشأةٍ سعودية من 64 حرفاً عاديّ تماماً.</div></td>
       <td><span class="tag">Q2</span></td>
       <td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num ok" title="">✓</td><td class="num bad" title="شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80">✗</td><td class="num bad" title="شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80">✗</td><td class="num bad" title="شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80">✗</td><td class="num bad" title="شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80">✗</td><td class="num bad" title="شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80">✗</td><td class="num bad" title="لا يُفكّ: الوسم 1 يُعلن 239 بايتاً ويتجاوز نهاية البيانات">✗</td><td class="num bad" title="شكل الطول «short» والمتوقَّع «0x81» — بايت الطول 0x80">✗</td><td class="num bad" title="لا يُفكّ: الوسم 1 يُعلن 239 بايتاً ويتجاوز نهاية البيانات">✗</td><td class="num bad" title="لا يُفكّ: الوسم 216 يُعلن 180 بايتاً ويتجاوز نهاية البيانات">✗</td>
     </tr>
@@ -510,7 +522,7 @@
   </tr>
   <tr>
     <td><span class="tag">Q6</span></td>
-    <td><strong>المبلغ كما يُطبع على الفاتورة</strong><div class="rule">الوسمان 4 و5 يحملان المبلغ **نصّاً كما يُطبع** على الفاتورة. فمن أعاد تنسيقه («<bdi dir="ltr">1000.00</bdi>» ⇐ «1000») خالف المطبوع، ورمزُه لا يطابق وجه الفاتورة.</div>
+    <td><strong>المبلغ كما يُطبع على الفاتورة</strong><div class="rule">الوسمان 4 و5 يحملان المبلغ نصّاً كما يُطبع على الفاتورة. فمن أعاد تنسيقه («<bdi dir="ltr">1000.00</bdi>» ⇐ «1000») خالف المطبوع، ورمزُه لا يطابق وجه الفاتورة.</div>
       <div class="rule src">المصدر: ZATCA — Electronic Invoice Security Features Implementation Standards, §4.1 والجدول 3</div></td>
   </tr>
   <tr>
@@ -536,7 +548,7 @@ node run.mjs --fetch &amp;&amp; node build.mjs</code></pre>
 
 <footer>
   <p>
-    شُغّل في <bdi dir="ltr">2026-09-01</bdi> · 10 حالة ·
+    شُغّل في <bdi dir="ltr">2026-09-02</bdi> · 10 حالة ·
     13 محرّكاً · <a href="../">أدوات الفوترة العربية</a>
   </p>
   <p>
