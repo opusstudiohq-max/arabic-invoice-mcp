@@ -44,7 +44,7 @@
 المستودع — و`fatura` تسحب `nasq` معها تلقائياً:
 
 ```bash
-npm install https://github.com/opusstudiohq-max/arabic-invoice-mcp/releases/download/libs-v0.1.0/fatura-0.1.0.tgz
+npm install https://github.com/opusstudiohq-max/arabic-invoice-mcp/releases/download/libs-v0.1.1/fatura-0.1.1.tgz
 ```
 
 ```js

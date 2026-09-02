@@ -168,3 +168,42 @@ test("⑨ الوسوم 6-9 تُفكّ سداسياً ولا يُزعم فحصه�
   assert.equal(decoded[5].tag, 6);
   assert.equal(decoded[5].value, "ab".repeat(32));
 });
+
+/**
+ * **الفكُّ المتساهل يُبارك العيب بدل أن يكشفه.**
+ *
+ * قِيس على أداتنا المنشورة أولاً فوُجدت تُصنّف رمزاً بطول `0x80` عند 128
+ * بايتاً **«5/5 سليم»** — وهو ما تُنتجه خمسٌ من إحدى عشرة حزمة قِيست، وهو
+ * أشهر سبب لرفض الرمز عند الهيئة. ثم وُجد العيب نفسه هنا.
+ *
+ * ومن استعمل هذا الفاكّ ليتحقق من رمزٍ **مرفوض** كان يُطمأن إليه.
+ */
+test("⑩ الفكّ يرفض أشكال الطول المكسورة ويُسمّيها", () => {
+  const enc = new TextEncoder();
+  const build = (lenBytes, chars) => {
+    const tlv = (t, v) => { const b = enc.encode(v); return [t, ...lenBytes(b), ...b]; };
+    return Buffer.from([
+      ...tlv(1, "ش".repeat(chars)), ...tlv(2, CASE.vatNumber),
+      ...tlv(3, CASE.timestamp), ...tlv(4, CASE.totalWithVat), ...tlv(5, CASE.vatAmount),
+    ]).toString("base64");
+  };
+
+  // 0x80 — الطول غير المحدَّد، ولا يجوز هنا
+  assert.throws(() => decodeZatcaQr(build((b) => [b.length & 0xFF], 64)), /0x80/);
+
+  // طولٌ بُتر فوق 255
+  assert.throws(() => decodeZatcaQr(build((b) => [b.length & 0xFF], 128)), /صفر/);
+
+  // محرف الاستبدال مكان الطول
+  assert.throws(
+    () => decodeZatcaQr(build((b) => b.length < 0x80 ? [b.length] : [0xEF, 0xBF, 0xBD], 64)),
+    /U\+FFFD|EF BF BD/);
+
+  // والسليم يمرّ على الحدّين
+  for (const chars of [63, 64, 127, 128, 200]) {
+    const ber = (b) => b.length < 0x80 ? [b.length]
+      : b.length <= 0xFF ? [0x81, b.length] : [0x82, b.length >> 8, b.length & 0xFF];
+    const decoded = decodeZatcaQr(build(ber, chars));
+    assert.equal(decoded[0].value, "ش".repeat(chars), `${chars} حرفاً عاد مبتوراً`);
+  }
+});

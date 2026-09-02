@@ -24,7 +24,7 @@
 المكتبتان مرفوعتان أصلَي إصدارٍ على المستودع العام، فتُثبَّتان اليوم:
 
 ```bash
-npm install https://github.com/opusstudiohq-max/arabic-invoice-mcp/releases/download/libs-v0.1.0/fatura-0.1.0.tgz
+npm install https://github.com/opusstudiohq-max/arabic-invoice-mcp/releases/download/libs-v0.1.1/fatura-0.1.1.tgz
 ```
 
 يُعاد إنتاجهما بـ`python tools/pack_release.py` — يبني، ويحوّل تبعية
@@ -58,7 +58,7 @@ npm publish --access public
 ```bash
 cd invoice-pdf
 npm pkg set dependencies.nasq="^0.1.0"
-npm test            # fatura — 40 اختباراً
+npm test            # fatura — 41 اختباراً
 npm publish --access public
 ```
 
