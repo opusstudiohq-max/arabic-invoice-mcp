@@ -38,17 +38,17 @@ Measured 2026-09-01. Downloads are npm's last-month figure, fetched the same day
 
 | package | downloads/mo | score |
 | --- | ---: | ---: |
-| [`zatca-xml-js`](https://www.npmjs.com/package/zatca-xml-js) | 21,943 | 7/10 |
+| [`zatca-xml-js`](https://www.npmjs.com/package/zatca-xml-js) | 21,943 | 6/10 |
 | [`@axenda/zatca`](https://www.npmjs.com/package/@axenda/zatca) | 17,376 | 6/10 |
 | [`@talha7k/zatca-qr`](https://www.npmjs.com/package/@talha7k/zatca-qr) | 1,991 | **10/10** |
 | [`@talha7k/zatca`](https://www.npmjs.com/package/@talha7k/zatca) | 1,729 | **10/10** |
-| [`@pioneersoft/zatca-einvoice`](https://www.npmjs.com/package/@pioneersoft/zatca-einvoice) | 646 | 6/10 |
+| [`@pioneersoft/zatca-einvoice`](https://www.npmjs.com/package/@pioneersoft/zatca-einvoice) | 646 | 5/10 |
 | [`@zatca/qr`](https://www.npmjs.com/package/@zatca/qr) | 503 | 6/10 |
-| [`zatca-sdk`](https://www.npmjs.com/package/zatca-sdk) | 300 | 7/10 |
+| [`zatca-sdk`](https://www.npmjs.com/package/zatca-sdk) | 300 | 6/10 |
 | [`zatca`](https://www.npmjs.com/package/zatca) | 190 | 2/10 |
-| [`zatca-qr-tlv`](https://www.npmjs.com/package/zatca-qr-tlv) | 123 | 7/10 |
-| [`zatca-qr-generator`](https://www.npmjs.com/package/zatca-qr-generator) | 104 | 7/10 |
-| [`zatca-simplified-invoice-sdk`](https://www.npmjs.com/package/zatca-simplified-invoice-sdk) | 10 | 7/10 |
+| [`zatca-qr-tlv`](https://www.npmjs.com/package/zatca-qr-tlv) | 123 | 6/10 |
+| [`zatca-qr-generator`](https://www.npmjs.com/package/zatca-qr-generator) | 104 | 6/10 |
+| [`zatca-simplified-invoice-sdk`](https://www.npmjs.com/package/zatca-simplified-invoice-sdk) | 10 | 6/10 |
 
 ## Four distinct failure modes, all measured from bytes
 

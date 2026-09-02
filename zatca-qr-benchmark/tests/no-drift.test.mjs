@@ -231,3 +231,28 @@ test("⑯ النسخة الإنجليزية قائمةٌ ومربوطة، وأر
     assert.ok(en.includes(engine.name_en), `«${engine.name_en}» غائبٌ عن الصفحة الإنجليزية`);
   }
 });
+
+/**
+ * **جدولُ الدرجات في README مكتوبٌ بيد** — والصفحتان تُبنيان من النتائج،
+ * فينجرف هو وحده. وقد انجرف فعلاً: شُدِّد الفاكّ فنزلت ستُّ حزمٍ درجةً،
+ * والجدول بقي على القديم حتى صُحّح.
+ *
+ * وهو الملفُّ الذي يراه من يصل من مسألةٍ رفعناها عنده — فانجرافُه يُكذّبنا
+ * عند أوّل من يتحقق.
+ */
+test("⑰ جدولُ README يطابق النتائج صفّاً صفّاً", () => {
+  const readme = readFileSync(join(ROOT, "README.md"), "utf-8");
+  // الصفوف تُقرأ سطراً سطراً لا بنمطٍ مركّب: النمطُ المركّب كُتب أوّلاً عبر
+  // صدفة فابتُلعت شرطاتُه المائلة، فصار تعبيراً غير صالح — واختبارٌ يسقط
+  // بخطأ نحوي يبدو كأنه أمسك عيباً، وهو لم يفحص شيئاً.
+  const rows = readme.split("\n").filter((l) => l.trim().startsWith("|"));
+  for (const engine of scored.filter((e) => e.npm)) {
+    const line = rows.find((l) => l.includes("`" + engine.npm + "`"));
+    // الصفوف الكاملة تُكتب `**10/10**`، فالتشديد اختياريّ حول العدد
+    const m = line && line.match(/(\d+)\s*\/\s*(\d+)(?:\*\*)?\s*\|?\s*$/);
+    assert.ok(m, `«${engine.npm}» غائبٌ عن جدول README`);
+    assert.equal(Number(m[1]), engine.pass,
+      `«${engine.npm}»: الجدول يقول ${m[1]}/${m[2]} والنتائج ${engine.pass}/${engine.total}`);
+    assert.equal(Number(m[2]), engine.total);
+  }
+});
