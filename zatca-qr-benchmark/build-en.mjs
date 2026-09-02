@@ -61,8 +61,11 @@ const findings = others.filter((e) => e.fail > 0).map((e) => `
       .join("")}</ul>
   </div>`).join("");
 
+// `npm` غائبةٌ عن المُبلَّغ عنها خارج npm — فيُعرض `name`، وتُعلَن البيئة
+// عموداً. وأوّلُ إضافةٍ لأربعةٍ منها أظهرت الصفَّ فارغاً بـ`undefined`.
 const disclosures = (r.disclosures?.items ?? []).map((d) => `
-  <tr><td><code>${esc(d.npm)}</code></td>
+  <tr><td><code>${esc(d.npm ?? d.name)}</code></td>
+      <td>${esc(d.ecosystem ?? "npm")}</td>
       <td><a href="${esc(d.url)}">${esc(d.url.replace("https://github.com/", ""))}</a></td></tr>`)
   .join("");
 
@@ -77,7 +80,7 @@ const ruleRows = Object.entries(r.rules).map(([id, rule]) => `
       <div class="rule">${esc(rule.text_en ?? "")}</div></td>
   </tr>`).join("");
 
-const REL = "https://github.com/opusstudiohq-max/arabic-invoice-mcp/releases/download/libs-v0.1.0/fatura-0.1.0.tgz";
+const REL = "https://github.com/opusstudiohq-max/arabic-invoice-mcp/releases/download/libs-v0.1.1/fatura-0.1.1.tgz";
 const AR = "https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/";
 const EN = "https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/en/";
 
@@ -152,9 +155,9 @@ const html = `<!DOCTYPE html>
   <h1>Why ZATCA rejects your QR code</h1>
   <p class="lede">
     The spec sentence everyone copies is <em>“The length shall be stored in one
-    byte.”</em> It stops being true at 128 bytes — and Arabic is two bytes per
-    character in UTF-8, so <strong>a 64-character Arabic company name is 128
-    bytes</strong>. That is an ordinary Saudi trade name, not an edge case.
+    byte.”</em> It stops being true at 128 bytes — and Arabic letters are two bytes
+    each in UTF-8, so <strong>a trade name of roughly 64 Arabic letters crosses 128
+    bytes</strong>. That is an ordinary Saudi company name, not an edge case.
   </p>
   <p class="lede" style="margin-top:.6rem">
     <a href="${AR}">اقرأ النسخة العربية &larr;</a>
@@ -246,6 +249,46 @@ const qr = encodeZatcaQr({
   anyone, and the runner refuses to write results at all if one of our engines fails.
 </p>
 
+<h2>It is not a JavaScript problem</h2>
+<p class="lede">
+  The scores above cover npm, because that is what this harness can execute. But the
+  same defect is in the most-starred ZATCA repositories on GitHub, in three other
+  languages — including libraries published by major Saudi platforms:
+</p>
+<div class="scroll">
+<table>
+  <thead><tr><th>repository</th><th>language</th><th>the length line</th></tr></thead>
+  <tbody>
+    <tr><td><code>SallaApp/ZATCA</code></td><td>PHP</td>
+        <td><code>pack("H*", sprintf("%02X", $len))</code></td></tr>
+    <tr><td><code>Saleh7/php-zatca-xml</code></td><td>PHP</td>
+        <td><code>pack("H*", sprintf("%02X", $len))</code></td></tr>
+    <tr><td><code>mrsool/zatca</code></td><td>Ruby</td>
+        <td><code>@value.bytesize.chr</code></td></tr>
+    <tr><td><code>Haraj-backend/zatca-sdk-go</code></td><td>Go</td>
+        <td><code>buf.WriteByte(byte(len(val)))</code></td></tr>
+  </tbody>
+</table>
+</div>
+<p>
+  All four measure the value in <strong>bytes</strong> — they clear the trap that
+  catches most implementations — and then write that count in a single byte. The Go
+  library states the premise outright:
+</p>
+<pre><code>// since the length could only be 1 byte, that means the maximum length for
+// every field values is 255.
+const maxValueLength = 255</code></pre>
+<p>
+  So the error is not a slip in one ecosystem. It is a <strong>common reading of a
+  spec sentence that says "one byte"</strong> — which is why it reaches
+  ${brokenShare}% of measured npm downloads and the top of GitHub alike.
+</p>
+<p class="note">
+  These four were <strong>read, not executed</strong> — there is no PHP, Ruby or Go
+  runtime on the machine that produced this page. The quotes are literal from each
+  repository's default branch. The npm scores above are executed.
+</p>
+
 <h2>Reported to the maintainers</h2>
 <p class="lede">
   A benchmark that finds a defect and does not tell its author is just gossip. Every
@@ -253,7 +296,7 @@ const qr = encodeZatcaQr({
 </p>
 <div class="scroll">
 <table>
-  <thead><tr><th>package</th><th>issue</th></tr></thead>
+  <thead><tr><th>package</th><th>ecosystem</th><th>issue</th></tr></thead>
   <tbody>${disclosures}</tbody>
 </table>
 </div>

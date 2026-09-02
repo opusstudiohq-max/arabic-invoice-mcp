@@ -37,6 +37,38 @@
       "repo": "sharahsa0-creator/zatca-simplified-invoice-sdk",
       "url": "https://github.com/sharahsa0-creator/zatca-simplified-invoice-sdk/issues/6",
       "defect": "الطول في بايتٍ واحد عند 128 بايتاً بلا خطأ؛ ويرفض ما فوق 255"
+    },
+    {
+      "name": "SallaApp/ZATCA",
+      "ecosystem": "PHP",
+      "repo": "SallaApp/ZATCA",
+      "url": "https://github.com/SallaApp/ZATCA/issues/74",
+      "read_not_run": true,
+      "defect": "pack(\"H*\", sprintf(\"%02X\", $len)) — بايتٌ واحد دائماً؛ وأطولُ اسمٍ في اختباراتهم ستةُ بايتات"
+    },
+    {
+      "name": "Saleh7/php-zatca-xml",
+      "ecosystem": "PHP",
+      "repo": "Saleh7/php-zatca-xml",
+      "url": "https://github.com/Saleh7/php-zatca-xml/issues/38",
+      "read_not_run": true,
+      "defect": "الكود نفسه حرفاً بحرف — بايتٌ واحد للطول"
+    },
+    {
+      "name": "mrsool/zatca",
+      "ecosystem": "Ruby",
+      "repo": "mrsool/zatca",
+      "url": "https://github.com/mrsool/zatca/issues/41",
+      "read_not_run": true,
+      "defect": "@value.bytesize.chr — البايتاتُ صحيحة، ثم chr تكتب بايتاً واحداً"
+    },
+    {
+      "name": "Haraj-backend/zatca-sdk-go",
+      "ecosystem": "Go",
+      "repo": "Haraj-backend/zatca-sdk-go",
+      "url": "https://github.com/Haraj-backend/zatca-sdk-go/issues/7",
+      "read_not_run": true,
+      "defect": "تعليقُهم يقول «since the length could only be 1 byte» — والفجوةُ 128-255 تمرّ من حارسهم بلا اختبار"
     }
   ],
   "not_reported": [

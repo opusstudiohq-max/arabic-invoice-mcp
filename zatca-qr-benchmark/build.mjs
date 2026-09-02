@@ -36,7 +36,7 @@ const iso = (s) => `<bdi>${esc(s)}</bdi>`;
 const num = (n) => Number(n).toLocaleString("en-US");
 
 /** عنوانُ حزمةِ الإصدار — المسار المتاح للتثبيت حتى يقع النشر على npm. */
-const REL = "https://github.com/opusstudiohq-max/arabic-invoice-mcp/releases/download/libs-v0.1.0/fatura-0.1.0.tgz";
+const REL = "https://github.com/opusstudiohq-max/arabic-invoice-mcp/releases/download/libs-v0.1.1/fatura-0.1.1.tgz";
 
 /**
  * يعزل الحرفيّات التقنية داخل نصٍّ عربي.
@@ -133,9 +133,12 @@ const findings = others.filter((e) => e.fail > 0).map((e) => {
 }).join("");
 
 /** سجلّ الإبلاغ: ما وُجد، وأين رُفع، وما تعذّر ولماذا. */
+// `npm` غائبةٌ عمّا أُبلغ خارج npm — فيُعرض `name`. وأوّلُ إضافةٍ لأربعةٍ
+// منها أظهرت الصفَّ بـ`undefined`، فرآه النظر لا الاختبار.
 const reported = (r.disclosures?.items ?? []).map((d) => `
   <tr>
-    <td><code>${esc(d.npm)}</code></td>
+    <td><code>${esc(d.npm ?? d.name)}</code>${
+      d.ecosystem ? ` <span class="tag">${esc(d.ecosystem)}</span>` : ""}</td>
     <td>${isoTech(d.defect)}</td>
     <td><a href="${esc(d.url)}">${esc(d.url.replace("https://github.com/", ""))}</a></td>
   </tr>`).join("");
@@ -262,7 +265,8 @@ const html = `<!DOCTYPE html>
   <p style="margin:.8rem 0 0;font-size:.92rem">
     وأشدُّ ما وُجد أثراً: <strong dir="ltr">${num(berReach)}</strong> تنزيلٍ شهري
     في حزمٍ تكسر ترميز الطول عند <strong>128 بايتاً</strong> —
-    أي عند <strong>اسمٍ عربي من 64 حرفاً</strong>، وهو طولُ اسم منشأةٍ سعودية عادي.
+    أي عند <strong>اسمٍ يقارب 64 حرفاً عربياً</strong>، وهو طولُ اسم منشأةٍ سعودية
+    عادي — فالحرفُ العربي بايتان والمسافةُ بايت.
   </p>
 </div>
 
@@ -332,6 +336,46 @@ const html = `<!DOCTYPE html>
 
 <h2>ما وُجد بالضبط</h2>
 ${findings}
+
+<h2>وليست علّةَ جافاسكربت</h2>
+<p class="lede" style="margin-bottom:1rem">
+  الدرجاتُ أعلاه تقيس npm، لأنها ما يستطيع هذا المُشغِّل تشغيله. لكنّ العيب نفسه
+  في <strong>أكثر مستودعات ZATCA نجوماً على GitHub</strong>، بثلاث لغاتٍ أخرى —
+  ومنها مكتباتُ منصّاتٍ سعودية كبرى:
+</p>
+<div class="scroll">
+<table>
+  <thead><tr><th>المستودع</th><th>اللغة</th><th>سطرُ الطول</th></tr></thead>
+  <tbody>
+    <tr><td><code>SallaApp/ZATCA</code></td><td>PHP</td>
+        <td><code dir="ltr">pack("H*", sprintf("%02X", $len))</code></td></tr>
+    <tr><td><code>Saleh7/php-zatca-xml</code></td><td>PHP</td>
+        <td><code dir="ltr">pack("H*", sprintf("%02X", $len))</code></td></tr>
+    <tr><td><code>mrsool/zatca</code></td><td>Ruby</td>
+        <td><code dir="ltr">@value.bytesize.chr</code></td></tr>
+    <tr><td><code>Haraj-backend/zatca-sdk-go</code></td><td>Go</td>
+        <td><code dir="ltr">buf.WriteByte(byte(len(val)))</code></td></tr>
+  </tbody>
+</table>
+</div>
+<p>
+  وأربعتُها تعدّ <strong>البايتات لا الأحرف</strong> — أي تجاوزت الفخّ الذي يُسقط
+  أكثر التطبيقات — ثم كتبت ذلك العدد في بايتٍ واحد. ومكتبةُ جو تقول القاعدة
+  الخاطئة نصّاً:
+</p>
+<pre><code dir="ltr">// since the length could only be 1 byte, that means the maximum length for
+// every field values is 255.
+const maxValueLength = 255</code></pre>
+<p>
+  فالخطأ ليس زلّةً في بيئةٍ بعينها، بل <strong>قراءةٌ شائعة لجملةٍ تقول «بايتٌ
+  واحد»</strong> — ولذلك يبلغ <strong dir="ltr">${brokenShare}%</strong> من
+  التنزيلات المقيسة، ويبلغ قمّةَ GitHub معاً.
+</p>
+<p class="note">
+  وهذه الأربعة <strong>قُرئت ولم تُشغَّل</strong> — لا PHP ولا روبي ولا جو على
+  الجهاز الذي بنى هذه الصفحة. والاقتباساتُ حرفيةٌ من الفرع الافتراضي لكلٍّ منها.
+  أما درجاتُ npm أعلاه فمُشغَّلة.
+</p>
 
 <h2>ما أُبلِغ به أصحابُه</h2>
 <p class="lede" style="margin-bottom:1rem">
