@@ -19,6 +19,10 @@ import urllib.error
 import urllib.request
 from pathlib import Path
 
+from _console import utf8_stdio
+
+utf8_stdio()
+
 ROOT = Path(__file__).resolve().parent.parent
 UA = {"User-Agent": "OpusStudio/1.0 (+opus.studio.hq@gmail.com)"}
 

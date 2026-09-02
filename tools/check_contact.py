@@ -29,6 +29,10 @@ import re
 import sys
 from pathlib import Path
 
+from _console import utf8_stdio
+
+utf8_stdio()
+
 ROOT = Path(__file__).resolve().parent.parent
 
 #: الأسطح المنشورة فعلاً. المسار هنا هو **ما يُنشر** لا ما يُحرَّر:

@@ -35,6 +35,10 @@ import re
 import sys
 from pathlib import Path
 
+from _console import utf8_stdio
+
+utf8_stdio()
+
 ROOT = Path(__file__).resolve().parent.parent
 
 #: `_layouts` و`_includes` قوالبُ Jekyll لا صفحاتٍ تُخدَم — تُقلَّم وإلا

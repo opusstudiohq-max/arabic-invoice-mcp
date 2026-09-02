@@ -43,6 +43,10 @@ import sys
 from html.parser import HTMLParser
 from pathlib import Path
 
+from _console import utf8_stdio
+
+utf8_stdio()
+
 ROOT = Path(__file__).resolve().parent.parent
 
 #: مجلداتٌ لا تُفحص — تبعيات وبناءات ومخرجات أدوات.
