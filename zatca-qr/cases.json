@@ -11,37 +11,51 @@
     "Q1": {
       "name": "الطول بعدد البايتات لا بعدد الأحرف",
       "text": "طول القيمة يُكتب بعدد بايتات ترميز UTF-8 لا بعدد الأحرف (§4.1). و«شركة» أربعة أحرف وثمانِ بايتات — فمن عدّ الأحرف أنتج رمزاً يفشل قارئه بلا رسالة تشخيص.",
-      "source": "spec"
+      "source": "spec",
+      "name_en": "Length counts UTF-8 bytes, not characters",
+      "text_en": "The declared length is the byte count of the UTF-8 encoding, not the character count. \"شركة\" is four characters and eight bytes; counting characters produces a code that fails at the reader with no diagnostic."
     },
     "Q2": {
       "name": "الطول بقواعد BER عند 128 بايتاً",
       "text": "نصّ المواصفة «The length shall be stored in one byte» تبسيطٌ ينكسر عند 128: البايت الواحد يحمل حتى 127، وما فوقه يلزمه 0x81 ثم بايت الطول. والحسم من منتدى الهيئة نفسه بنصّ صاحب المشكلة بعد إصلاحها: «our code assumed that the maximum length of the value is 1 byte … we were not properly convert it to TLV value». وحدُّ 128 يبلغه اسمٌ عربي من 64 حرفاً — فالحرف بايتان.",
-      "source": "forum"
+      "source": "forum",
+      "name_en": "BER length form at 128 bytes",
+      "text_en": "The spec sentence \"The length shall be stored in one byte\" breaks at 128: one byte carries up to 127, and beyond that 0x81 must precede the length byte. Settled on ZATCA's own forum. A 64-character Arabic name reaches 128 bytes — Arabic is two bytes per character."
     },
     "Q3": {
       "name": "الطول بقواعد BER فوق 255 بايتاً",
       "text": "ما جاوز 255 بايتاً يلزمه 0x82 ثم بايتان بترتيب كبير-أولاً. واسمٌ عربي من 128 حرفاً يبلغ 256 بايتاً.",
-      "source": "forum"
+      "source": "forum",
+      "name_en": "BER length form above 255 bytes",
+      "text_en": "Beyond 255 bytes the length needs 0x82 followed by two big-endian bytes. A 128-character Arabic name is 256 bytes."
     },
     "Q4": {
       "name": "ترتيب الوسوم 1 ثم 2 ثم 3 ثم 4 ثم 5",
       "text": "الجدول 3 يُرتّب الوسوم: اسم البائع، ثم الرقم الضريبي، ثم الطابع الزمني، ثم الإجمالي شامل الضريبة، ثم مبلغ الضريبة. والترتيب جزءٌ من البنية لا تفصيلٌ تجميلي.",
-      "source": "spec"
+      "source": "spec",
+      "name_en": "Tag order 1, 2, 3, 4, 5",
+      "text_en": "Table 3 orders the tags: seller name, VAT number, timestamp, total with VAT, VAT amount. Order is part of the structure, not decoration."
     },
     "Q5": {
       "name": "القيمة تصل كما كُتبت",
       "text": "الاسم المُدخَل يجب أن يخرج من الفكّ كما دخل — لا بتراً ولا تحريفاً في الترميز. وهذه القاعدة تكشف عيب الطول من الجهة الأخرى: طولٌ خاطئ يُنتج قيمةً مبتورة.",
-      "source": "spec"
+      "source": "spec",
+      "name_en": "The value survives the round trip",
+      "text_en": "The name that went in must come out of the decoder unchanged — no truncation, no mangling. This catches the length defect from the value side."
     },
     "Q6": {
       "name": "المبلغ كما يُطبع على الفاتورة",
       "text": "الوسمان 4 و5 يحملان المبلغ **نصّاً كما يُطبع** على الفاتورة. فمن أعاد تنسيقه («1000.00» ⇐ «1000») خالف المطبوع، ورمزُه لا يطابق وجه الفاتورة.",
-      "source": "spec"
+      "source": "spec",
+      "name_en": "The amount as printed on the invoice",
+      "text_en": "Tags 4 and 5 carry the amount as text exactly as printed. Reformatting it (\"1000.00\" to \"1000\") makes the code disagree with the face of the invoice."
     },
     "Q7": {
       "name": "الطابع الزمني كما أُعطي",
       "text": "الوسم 3 طابعٌ زمني بصيغة ISO 8601 مع منطقة زمنية. ومن أعاد صياغته صامتاً غيّر قيمةً تدخل في المطابقة.",
-      "source": "spec"
+      "source": "spec",
+      "name_en": "The timestamp as given",
+      "text_en": "Tag 3 is an ISO 8601 timestamp with a timezone. Silently rewriting it changes a value that takes part in matching."
     }
   },
   "cases": [
@@ -49,71 +63,162 @@
       "id": "ascii-baseline",
       "rule": "Q4",
       "why": "الحدّ الأدنى: حقول لاتينية قصيرة. من أخفق هنا لا يبني TLV أصلاً.",
-      "fields": { "sellerName": "Bobs Records", "vatNumber": "310122393500003", "timestamp": "2022-04-25T15:30:00Z", "totalWithVat": "1000.00", "vatAmount": "150.00" },
-      "expect": { "tags": [1, 2, 3, 4, 5] }
+      "fields": {
+        "sellerName": "Bobs Records",
+        "vatNumber": "310122393500003",
+        "timestamp": "2022-04-25T15:30:00Z",
+        "totalWithVat": "1000.00",
+        "vatAmount": "150.00"
+      },
+      "expect": {
+        "tags": [
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      }
     },
     {
       "id": "arabic-byte-length",
       "rule": "Q1",
       "why": "«شركة» أربعة أحرف وثمانِ بايتات — أشهر فخّ يُسقط التطبيقات الساذجة.",
-      "fields": { "sellerName": "شركة", "vatNumber": "310122393500003", "timestamp": "2022-04-25T15:30:00Z", "totalWithVat": "1000.00", "vatAmount": "150.00" },
-      "expect": { "tag1_declared_length": 8 }
+      "fields": {
+        "sellerName": "شركة",
+        "vatNumber": "310122393500003",
+        "timestamp": "2022-04-25T15:30:00Z",
+        "totalWithVat": "1000.00",
+        "vatAmount": "150.00"
+      },
+      "expect": {
+        "tag1_declared_length": 8
+      }
     },
     {
       "id": "arabic-63-chars",
       "rule": "Q1",
       "why": "126 بايتاً — تحت الحدّ مباشرة، فبايتٌ واحد يحمله.",
-      "fields": { "sellerName": "ش×63", "vatNumber": "310122393500003", "timestamp": "2022-04-25T15:30:00Z", "totalWithVat": "1000.00", "vatAmount": "150.00" },
-      "expect": { "tag1_declared_length": 126, "tag1_length_form": "short" }
+      "fields": {
+        "sellerName": "ش×63",
+        "vatNumber": "310122393500003",
+        "timestamp": "2022-04-25T15:30:00Z",
+        "totalWithVat": "1000.00",
+        "vatAmount": "150.00"
+      },
+      "expect": {
+        "tag1_declared_length": 126,
+        "tag1_length_form": "short"
+      }
     },
     {
       "id": "arabic-64-chars",
       "rule": "Q2",
       "why": "128 بايتاً بالضبط — **هنا ينكسر كل من قرأ نصّ المواصفة حرفياً**. واسمُ منشأةٍ سعودية من 64 حرفاً عاديّ تماماً.",
-      "fields": { "sellerName": "ش×64", "vatNumber": "310122393500003", "timestamp": "2022-04-25T15:30:00Z", "totalWithVat": "1000.00", "vatAmount": "150.00" },
-      "expect": { "tag1_declared_length": 128, "tag1_length_form": "0x81" }
+      "fields": {
+        "sellerName": "ش×64",
+        "vatNumber": "310122393500003",
+        "timestamp": "2022-04-25T15:30:00Z",
+        "totalWithVat": "1000.00",
+        "vatAmount": "150.00"
+      },
+      "expect": {
+        "tag1_declared_length": 128,
+        "tag1_length_form": "0x81"
+      }
     },
     {
       "id": "arabic-100-chars",
       "rule": "Q2",
       "why": "200 بايتاً — داخل مدى 0x81 وبعيداً عن الحدّ، فلا يُنجي من الخطأ حظُّ الحدود.",
-      "fields": { "sellerName": "ش×100", "vatNumber": "310122393500003", "timestamp": "2022-04-25T15:30:00Z", "totalWithVat": "1000.00", "vatAmount": "150.00" },
-      "expect": { "tag1_declared_length": 200, "tag1_length_form": "0x81" }
+      "fields": {
+        "sellerName": "ش×100",
+        "vatNumber": "310122393500003",
+        "timestamp": "2022-04-25T15:30:00Z",
+        "totalWithVat": "1000.00",
+        "vatAmount": "150.00"
+      },
+      "expect": {
+        "tag1_declared_length": 200,
+        "tag1_length_form": "0x81"
+      }
     },
     {
       "id": "arabic-128-chars",
       "rule": "Q3",
       "why": "256 بايتاً — يعبر مدى البايت الواحد كلّه إلى 0x82.",
-      "fields": { "sellerName": "ش×128", "vatNumber": "310122393500003", "timestamp": "2022-04-25T15:30:00Z", "totalWithVat": "1000.00", "vatAmount": "150.00" },
-      "expect": { "tag1_declared_length": 256, "tag1_length_form": "0x82" }
+      "fields": {
+        "sellerName": "ش×128",
+        "vatNumber": "310122393500003",
+        "timestamp": "2022-04-25T15:30:00Z",
+        "totalWithVat": "1000.00",
+        "vatAmount": "150.00"
+      },
+      "expect": {
+        "tag1_declared_length": 256,
+        "tag1_length_form": "0x82"
+      }
     },
     {
       "id": "roundtrip-long-arabic",
       "rule": "Q5",
       "why": "اسمٌ من 64 حرفاً يخرج كما دخل. القاعدة نفسها من جهة القيمة لا من جهة الطول.",
-      "fields": { "sellerName": "ش×64", "vatNumber": "310122393500003", "timestamp": "2022-04-25T15:30:00Z", "totalWithVat": "1000.00", "vatAmount": "150.00" },
-      "expect": { "tag1_value_intact": true }
+      "fields": {
+        "sellerName": "ش×64",
+        "vatNumber": "310122393500003",
+        "timestamp": "2022-04-25T15:30:00Z",
+        "totalWithVat": "1000.00",
+        "vatAmount": "150.00"
+      },
+      "expect": {
+        "tag1_value_intact": true
+      }
     },
     {
       "id": "realistic-saudi-name",
       "rule": "Q5",
       "why": "اسمٌ سعودي واقعي بطوله الطبيعي — لا سلسلةَ حرفٍ مكرّر.",
-      "fields": { "sellerName": "مؤسسة عبد الرحمن بن محمد العتيبي للتجارة والمقاولات العامة", "vatNumber": "310122393500003", "timestamp": "2022-04-25T15:30:00Z", "totalWithVat": "1150.00", "vatAmount": "150.00" },
-      "expect": { "tag1_value_intact": true }
+      "fields": {
+        "sellerName": "مؤسسة عبد الرحمن بن محمد العتيبي للتجارة والمقاولات العامة",
+        "vatNumber": "310122393500003",
+        "timestamp": "2022-04-25T15:30:00Z",
+        "totalWithVat": "1150.00",
+        "vatAmount": "150.00"
+      },
+      "expect": {
+        "tag1_value_intact": true
+      }
     },
     {
       "id": "amount-as-printed",
       "rule": "Q6",
       "why": "«1000.00» على وجه الفاتورة يجب أن يكون «1000.00» في الرمز — لا «1000».",
-      "fields": { "sellerName": "Bobs Records", "vatNumber": "310122393500003", "timestamp": "2022-04-25T15:30:00Z", "totalWithVat": "1000.00", "vatAmount": "150.00" },
-      "expect": { "tag4_value": "1000.00", "tag5_value": "150.00" }
+      "fields": {
+        "sellerName": "Bobs Records",
+        "vatNumber": "310122393500003",
+        "timestamp": "2022-04-25T15:30:00Z",
+        "totalWithVat": "1000.00",
+        "vatAmount": "150.00"
+      },
+      "expect": {
+        "tag4_value": "1000.00",
+        "tag5_value": "150.00"
+      }
     },
     {
       "id": "timestamp-verbatim",
       "rule": "Q7",
       "why": "الطابع الزمني يدخل في المطابقة — وإعادةُ صياغته صامتاً تغيير قيمة.",
-      "fields": { "sellerName": "Bobs Records", "vatNumber": "310122393500003", "timestamp": "2022-04-25T15:30:00Z", "totalWithVat": "1000.00", "vatAmount": "150.00" },
-      "expect": { "tag3_value": "2022-04-25T15:30:00Z" }
+      "fields": {
+        "sellerName": "Bobs Records",
+        "vatNumber": "310122393500003",
+        "timestamp": "2022-04-25T15:30:00Z",
+        "totalWithVat": "1000.00",
+        "vatAmount": "150.00"
+      },
+      "expect": {
+        "tag3_value": "2022-04-25T15:30:00Z"
+      }
     }
   ],
   "_scoring": "التسجيل على ما يقيسه هذا المشغّل قياساً تامّاً: بايتات الناتج بعد فكٍّ مستقل. ومحرّكٌ لا يُصدِّر دالةً للمرحلة الأولى لا يُسجَّل ولا يُنسب إليه إخفاق — يُذكر في قائمة المتخطّى بسببه."

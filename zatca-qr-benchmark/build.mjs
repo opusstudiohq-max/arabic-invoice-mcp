@@ -152,6 +152,8 @@ const html = `<!DOCTYPE html>
 <title>مقياس رمز QR السعودي — هل يقبله مُحقِّق الهيئة؟</title>
 <meta name="description" content="مقياس مفتوح يبني رموز QR فعلية بـ${scored.length} مكتبة npm ويفكّها بايتاً بايت. ${brokenShare}% من التنزيلات الشهرية المقيسة تذهب إلى حزمٍ تُخفق في قاعدةٍ أو أكثر. الحالات والقواعد ومصادرها منشورة.">
 <link rel="canonical" href="https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/">
+<link rel="alternate" hreflang="ar" href="https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/">
+<link rel="alternate" hreflang="en" href="https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/en/">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="ar_AR">
 <meta property="og:site_name" content="أدوات الفوترة العربية">
@@ -283,8 +285,9 @@ const html = `<!DOCTYPE html>
     and every finding was filed as a public issue with a runnable reproduction.
   </p>
   <p>
-    <a href="https://github.com/opusstudiohq-max/arabic-invoice-mcp/tree/main/zatca-qr-benchmark">Full
-    English write-up, method, and the adapters we got wrong &rarr;</a>
+    <a href="en/">Read this page in English &rarr;</a> &middot;
+    <a href="https://github.com/opusstudiohq-max/arabic-invoice-mcp/tree/main/zatca-qr-benchmark">method
+    and the adapters we got wrong</a>
   </p>
 </section>
 

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why ZATCA rejects your QR code: the TLV length breaks at 128 bytes</title>
+<meta name="description" content="91.7% of 44,915 monthly npm downloads for ZATCA packages go to code that encodes the TLV length wrong. An Arabic company name of 64 characters is 128 bytes — where the one-byte reading stops working. Open benchmark, 10 cases, rerun with one command.">
+<link rel="canonical" href="https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/en/">
+<link rel="alternate" hreflang="ar" href="https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/">
+<link rel="alternate" hreflang="en" href="https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/en/">
+<link rel="alternate" hreflang="x-default" href="https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/en/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="en_US">
+<meta property="og:url" content="https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/en/">
+<meta property="og:title" content="Why ZATCA rejects your QR code: the TLV length breaks at 128 bytes">
+<meta property="og:description" content="91.7% of measured npm downloads ship the bug. A 64-character Arabic company name is 128 bytes — an ordinary Saudi trade name.">
+<meta name="twitter:card" content="summary_large_image">
+<style>
+  :root{--bg:#f7f8fa;--card:#fff;--ink:#16202b;--muted:#5d6b7a;--line:#e0e6ec;
+        --ok:#0a7d5a;--ok-bg:#e8f5f0;--bad:#b4232a;--bad-bg:#fdeeee;--warn:#8a5a00;--accent:#0d5c47;}
+  @media(prefers-color-scheme:dark){
+    :root{--bg:#12161b;--card:#1a1f26;--ink:#e6eaef;--muted:#9aa6b4;--line:#2a323c;
+          --ok:#3fae8f;--ok-bg:#14261f;--bad:#ef7c84;--bad-bg:#2a1618;--warn:#d6a054;--accent:#3fae8f;}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:0 1rem 4rem;background:var(--bg);color:var(--ink);
+       font:16px/1.7 -apple-system,"Segoe UI",system-ui,sans-serif}
+  main{max-width:940px;margin:0 auto}
+  header{padding:3rem 0 1.5rem;border-bottom:1px solid var(--line)}
+  h1{font-size:clamp(1.5rem,4vw,2.1rem);margin:0 0 .6rem;letter-spacing:-.01em}
+  h2{font-size:1.2rem;margin:2.5rem 0 .9rem}
+  h3{font-size:.95rem;margin:0 0 .4rem}
+  .lede{color:var(--muted);max-width:68ch;margin:0}
+  .hero{background:var(--bad-bg);border:1px solid var(--bad);border-radius:12px;
+        padding:1.3rem 1.5rem;margin:1.6rem 0}
+  .figure{font-size:clamp(2rem,7vw,3rem);font-weight:700;line-height:1.1;color:var(--bad);
+          font-variant-numeric:tabular-nums}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;
+        padding:.9rem 1.1rem;margin-bottom:.8rem}
+  .card ul{margin:.3rem 0 0;padding-left:1.2rem;font-size:.9rem}
+  .scroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;background:var(--card);
+        border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  th,td{padding:.6rem .8rem;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--bg);font-size:.82rem;color:var(--muted);font-weight:600}
+  tr:last-child td{border-bottom:none}
+  tr.ours{background:var(--ok-bg)}
+  .num{text-align:right;font-variant-numeric:tabular-nums}
+  .ok{color:var(--ok)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+  .rule{font-size:.8rem;color:var(--muted);font-weight:400}
+  .tag{display:inline-block;padding:.05rem .4rem;border:1px solid var(--line);
+       border-radius:5px;font-size:.75rem;color:var(--muted)}
+  code{font-family:ui-monospace,Consolas,monospace;font-size:.88em;background:var(--bg);
+       border:1px solid var(--line);border-radius:4px;padding:.1em .35em}
+  pre{background:var(--card);border:1px solid var(--line);border-radius:10px;
+      padding:1rem;overflow-x:auto}
+  pre code{background:none;border:none;padding:0}
+  a{color:var(--accent)}
+  blockquote{margin:1rem 0;padding:.6rem 1rem;border-left:3px solid var(--accent);
+             background:var(--card);color:var(--muted)}
+  footer{margin-top:3rem;padding-top:1.5rem;border-top:1px solid var(--line);
+         color:var(--muted);font-size:.88rem}
+</style>
+</head>
+<body>
+<main>
+
+<header>
+  <h1>Why ZATCA rejects your QR code</h1>
+  <p class="lede">
+    The spec sentence everyone copies is <em>“The length shall be stored in one
+    byte.”</em> It stops being true at 128 bytes — and Arabic is two bytes per
+    character in UTF-8, so <strong>a 64-character Arabic company name is 128
+    bytes</strong>. That is an ordinary Saudi trade name, not an edge case.
+  </p>
+  <p class="lede" style="margin-top:.6rem">
+    <a href="https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/">اقرأ النسخة العربية &larr;</a>
+  </p>
+</header>
+
+<div class="hero">
+  <div class="figure">91.7%</div>
+  <p style="margin:.4rem 0 0">
+    of the <strong>44,915</strong> monthly npm downloads measured here go
+    to packages that fail at least one rule. Of 11 third-party packages,
+    <strong>2</strong> pass every case.
+  </p>
+</div>
+
+<h2>The rule</h2>
+<p class="lede">The TLV length is a BER length, not a plain byte:</p>
+<pre><code>length &lt; 128          one byte
+128 &le; length &le; 255    0x81, then the length byte
+256 &le; length          0x82, then two bytes, big-endian</code></pre>
+<p class="lede">
+  This is not our reading. It is settled on ZATCA’s own forum, by a developer whose
+  QR code was rejected and who traced it to exactly this:
+</p>
+<blockquote>
+  our code assumed that the maximum length of the value is 1 byte and therefore when
+  the value was bigger than 127, we were not properly convert it to TLV value
+</blockquote>
+<p class="lede"><a href="https://zatca1.discourse.group/t/qr-code-rejected-when-tag-1-company-name-exceeds-127-characters/7202">https://zatca1.discourse.group/t/qr-code-rejected-when-tag-1-company-name-exceeds-127-characters/7202</a></p>
+
+<h2>Results</h2>
+<p class="lede">
+  Measured 2026-09-01. Downloads are npm’s last-month figure,
+  fetched 2026-09-01.
+</p>
+<div class="scroll">
+<table>
+  <thead><tr><th>package</th><th class="num">downloads/mo</th><th class="num">score</th></tr></thead>
+  <tbody>
+  <tr class="">
+    <td><a href="https://www.npmjs.com/package/@talha7k/zatca-qr"><code>@talha7k/zatca-qr</code></a></td>
+    <td class="num">1,991</td>
+    <td class="num ok">
+      <strong>10/10</strong>
+    </td>
+  </tr>
+  <tr class="">
+    <td><a href="https://www.npmjs.com/package/@talha7k/zatca"><code>@talha7k/zatca</code></a></td>
+    <td class="num">1,729</td>
+    <td class="num ok">
+      <strong>10/10</strong>
+    </td>
+  </tr>
+  <tr class="ours">
+    <td><strong>fatura (ours)</strong> <span class="tag">ours</span></td>
+    <td class="num">—</td>
+    <td class="num ok">
+      <strong>10/10</strong>
+    </td>
+  </tr>
+  <tr class="ours">
+    <td><strong>arabic-invoice-mcp (ours, shipped build)</strong> <span class="tag">ours</span></td>
+    <td class="num">—</td>
+    <td class="num ok">
+      <strong>10/10</strong>
+    </td>
+  </tr>
+  <tr class="">
+    <td><a href="https://www.npmjs.com/package/zatca-xml-js"><code>zatca-xml-js</code></a></td>
+    <td class="num">21,943</td>
+    <td class="num warn">
+      <strong>7/10</strong>
+    </td>
+  </tr>
+  <tr class="">
+    <td><a href="https://www.npmjs.com/package/zatca-sdk"><code>zatca-sdk</code></a></td>
+    <td class="num">300</td>
+    <td class="num warn">
+      <strong>7/10</strong>
+    </td>
+  </tr>
+  <tr class="">
+    <td><a href="https://www.npmjs.com/package/zatca-qr-tlv"><code>zatca-qr-tlv</code></a></td>
+    <td class="num">123</td>
+    <td class="num warn">
+      <strong>7/10</strong>
+    </td>
+  </tr>
+  <tr class="">
+    <td><a href="https://www.npmjs.com/package/zatca-qr-generator"><code>zatca-qr-generator</code></a></td>
+    <td class="num">104</td>
+    <td class="num warn">
+      <strong>7/10</strong>
+    </td>
+  </tr>
+  <tr class="">
+    <td><a href="https://www.npmjs.com/package/zatca-simplified-invoice-sdk"><code>zatca-simplified-invoice-sdk</code></a></td>
+    <td class="num">10</td>
+    <td class="num warn">
+      <strong>7/10</strong>
+    </td>
+  </tr>
+  <tr class="">
+    <td><a href="https://www.npmjs.com/package/@axenda/zatca"><code>@axenda/zatca</code></a></td>
+    <td class="num">17,376</td>
+    <td class="num warn">
+      <strong>6/10</strong>
+    </td>
+  </tr>
+  <tr class="">
+    <td><a href="https://www.npmjs.com/package/@pioneersoft/zatca-einvoice"><code>@pioneersoft/zatca-einvoice</code></a></td>
+    <td class="num">646</td>
+    <td class="num warn">
+      <strong>6/10</strong>
+    </td>
+  </tr>
+  <tr class="">
+    <td><a href="https://www.npmjs.com/package/@zatca/qr"><code>@zatca/qr</code></a></td>
+    <td class="num">503</td>
+    <td class="num warn">
+      <strong>6/10</strong>
+    </td>
+  </tr>
+  <tr class="">
+    <td><a href="https://www.npmjs.com/package/zatca"><code>zatca</code></a></td>
+    <td class="num">190</td>
+    <td class="num bad">
+      <strong>2/10</strong>
+    </td>
+  </tr></tbody>
+</table>
+</div>
+
+<h2>What fails, and where</h2>
+
+  <div class="card">
+    <h3><code>zatca-xml-js</code> <span class="rule">21,943 downloads/mo</span></h3>
+    <ul><li><span class="tag">Q2</span> <code>arabic-64-chars</code></li><li><span class="tag">Q2</span> <code>arabic-100-chars</code></li><li><span class="tag">Q3</span> <code>arabic-128-chars</code></li></ul>
+  </div>
+  <div class="card">
+    <h3><code>@axenda/zatca</code> <span class="rule">17,376 downloads/mo</span></h3>
+    <ul><li><span class="tag">Q2</span> <code>arabic-64-chars</code></li><li><span class="tag">Q2</span> <code>arabic-100-chars</code></li><li><span class="tag">Q3</span> <code>arabic-128-chars</code></li></ul>
+  </div>
+  <div class="card">
+    <h3><code>zatca-qr-tlv</code> <span class="rule">123 downloads/mo</span></h3>
+    <ul><li><span class="tag">Q2</span> <code>arabic-64-chars</code></li><li><span class="tag">Q2</span> <code>arabic-100-chars</code></li><li><span class="tag">Q3</span> <code>arabic-128-chars</code></li></ul>
+  </div>
+  <div class="card">
+    <h3><code>zatca-sdk</code> <span class="rule">300 downloads/mo</span></h3>
+    <ul><li><span class="tag">Q2</span> <code>arabic-64-chars</code></li><li><span class="tag">Q2</span> <code>arabic-100-chars</code></li><li><span class="tag">Q3</span> <code>arabic-128-chars</code></li></ul>
+  </div>
+  <div class="card">
+    <h3><code>zatca-qr-generator</code> <span class="rule">104 downloads/mo</span></h3>
+    <ul><li><span class="tag">Q2</span> <code>arabic-64-chars</code></li><li><span class="tag">Q2</span> <code>arabic-100-chars</code></li><li><span class="tag">Q3</span> <code>arabic-128-chars</code></li></ul>
+  </div>
+  <div class="card">
+    <h3><code>zatca-simplified-invoice-sdk</code> <span class="rule">10 downloads/mo</span></h3>
+    <ul><li><span class="tag">Q2</span> <code>arabic-64-chars</code></li><li><span class="tag">Q2</span> <code>arabic-100-chars</code></li><li><span class="tag">Q3</span> <code>arabic-128-chars</code></li></ul>
+  </div>
+  <div class="card">
+    <h3><code>@pioneersoft/zatca-einvoice</code> <span class="rule">646 downloads/mo</span></h3>
+    <ul><li><span class="tag">Q2</span> <code>arabic-64-chars</code></li><li><span class="tag">Q2</span> <code>arabic-100-chars</code></li><li><span class="tag">Q3</span> <code>arabic-128-chars</code></li></ul>
+  </div>
+  <div class="card">
+    <h3><code>@zatca/qr</code> <span class="rule">503 downloads/mo</span></h3>
+    <ul><li><span class="tag">Q2</span> <code>arabic-64-chars</code></li><li><span class="tag">Q2</span> <code>arabic-100-chars</code></li><li><span class="tag">Q3</span> <code>arabic-128-chars</code></li></ul>
+  </div>
+  <div class="card">
+    <h3><code>zatca</code> <span class="rule">190 downloads/mo</span></h3>
+    <ul><li><span class="tag">Q1</span> <code>arabic-byte-length</code></li><li><span class="tag">Q1</span> <code>arabic-63-chars</code></li><li><span class="tag">Q2</span> <code>arabic-64-chars</code></li></ul>
+  </div>
+
+<h2>The fix</h2>
+<pre><code>const berLength = (n) =&gt;
+  n &lt; 0x80  ? [n] :
+  n &lt;= 0xFF ? [0x81, n] :
+              [0x82, n &gt;&gt; 8, n &amp; 0xFF];
+
+const tlv = (tag, value) =&gt; {
+  const bytes = Buffer.from(value, "utf-8");
+  return Buffer.concat([Buffer.from([tag, ...berLength(bytes.length)]), bytes]);
+};</code></pre>
+<p class="lede">
+  A decoder must read the same forms. A single-byte reader sees <code>0x81</code> as a
+  length of 129 and silently truncates the value — the same bug from the other side.
+</p>
+
+<h2>We found it in our own code first</h2>
+<p class="lede">
+  We went to measure other packages, noticed one writing BER lengths, went to check
+  which reading was right — and found <strong>our own</strong> code was wrong, in three
+  places including our published checker tool. All were fixed before we measured
+  anyone, and the runner refuses to write results at all if one of our engines fails.
+</p>
+
+<h2>Reported to the maintainers</h2>
+<p class="lede">
+  A benchmark that finds a defect and does not tell its author is just gossip. Every
+  finding was filed with a runnable reproduction and the fix:
+</p>
+<div class="scroll">
+<table>
+  <thead><tr><th>package</th><th>issue</th></tr></thead>
+  <tbody>
+  <tr><td><code>zatca-xml-js</code></td>
+      <td><a href="https://github.com/wes4m/zatca-xml-js/issues/61">wes4m/zatca-xml-js/issues/61</a></td></tr>
+  <tr><td><code>@axenda/zatca</code></td>
+      <td><a href="https://github.com/axenda/zatca/issues/19">axenda/zatca/issues/19</a></td></tr>
+  <tr><td><code>zatca</code></td>
+      <td><a href="https://github.com/abdo-host/ZATCA-JS/issues/1">abdo-host/ZATCA-JS/issues/1</a></td></tr>
+  <tr><td><code>zatca-qr-generator</code></td>
+      <td><a href="https://github.com/Wasim-Zaman/zatca-qr-generator/issues/1">Wasim-Zaman/zatca-qr-generator/issues/1</a></td></tr>
+  <tr><td><code>zatca-sdk</code></td>
+      <td><a href="https://github.com/aashahin/zatca-sdk/issues/1">aashahin/zatca-sdk/issues/1</a></td></tr>
+  <tr><td><code>zatca-simplified-invoice-sdk</code></td>
+      <td><a href="https://github.com/sharahsa0-creator/zatca-simplified-invoice-sdk/issues/6">sharahsa0-creator/zatca-simplified-invoice-sdk/issues/6</a></td></tr></tbody>
+</table>
+</div>
+
+<h2>Rules measured</h2>
+<div class="scroll">
+<table>
+  <thead><tr><th style="width:4rem">id</th><th>rule</th></tr></thead>
+  <tbody>
+  <tr>
+    <td><span class="tag">Q1</span></td>
+    <td><strong>Length counts UTF-8 bytes, not characters</strong>
+      <div class="rule">The declared length is the byte count of the UTF-8 encoding, not the character count. &quot;شركة&quot; is four characters and eight bytes; counting characters produces a code that fails at the reader with no diagnostic.</div></td>
+  </tr>
+  <tr>
+    <td><span class="tag">Q2</span></td>
+    <td><strong>BER length form at 128 bytes</strong>
+      <div class="rule">The spec sentence &quot;The length shall be stored in one byte&quot; breaks at 128: one byte carries up to 127, and beyond that 0x81 must precede the length byte. Settled on ZATCA's own forum. A 64-character Arabic name reaches 128 bytes — Arabic is two bytes per character.</div></td>
+  </tr>
+  <tr>
+    <td><span class="tag">Q3</span></td>
+    <td><strong>BER length form above 255 bytes</strong>
+      <div class="rule">Beyond 255 bytes the length needs 0x82 followed by two big-endian bytes. A 128-character Arabic name is 256 bytes.</div></td>
+  </tr>
+  <tr>
+    <td><span class="tag">Q4</span></td>
+    <td><strong>Tag order 1, 2, 3, 4, 5</strong>
+      <div class="rule">Table 3 orders the tags: seller name, VAT number, timestamp, total with VAT, VAT amount. Order is part of the structure, not decoration.</div></td>
+  </tr>
+  <tr>
+    <td><span class="tag">Q5</span></td>
+    <td><strong>The value survives the round trip</strong>
+      <div class="rule">The name that went in must come out of the decoder unchanged — no truncation, no mangling. This catches the length defect from the value side.</div></td>
+  </tr>
+  <tr>
+    <td><span class="tag">Q6</span></td>
+    <td><strong>The amount as printed on the invoice</strong>
+      <div class="rule">Tags 4 and 5 carry the amount as text exactly as printed. Reformatting it (&quot;1000.00&quot; to &quot;1000&quot;) makes the code disagree with the face of the invoice.</div></td>
+  </tr>
+  <tr>
+    <td><span class="tag">Q7</span></td>
+    <td><strong>The timestamp as given</strong>
+      <div class="rule">Tag 3 is an ISO 8601 timestamp with a timezone. Silently rewriting it changes a value that takes part in matching.</div></td>
+  </tr></tbody>
+</table>
+</div>
+
+<h2>Rerun it yourself</h2>
+<pre><code>git clone https://github.com/opusstudiohq-max/arabic-invoice-mcp
+cd arabic-invoice-mcp/zatca-qr-benchmark
+npm install
+node run.mjs --fetch &amp;&amp; node build.mjs</code></pre>
+<p class="lede">
+  Full method, the cases, and <strong>the nine adapters we got wrong on the first
+  run</strong>:
+  <a href="https://github.com/opusstudiohq-max/arabic-invoice-mcp/tree/main/zatca-qr-benchmark">the
+  English write-up</a>.
+</p>
+
+<footer>
+  <p>
+    10 cases · 13 engines · MIT ·
+    <a href="https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/">النسخة العربية</a> ·
+    <a href="https://opusstudiohq-max.github.io/arabic-invoice-mcp/">Arabic invoicing tools</a>
+  </p>
+  <p>
+    We build and repair Saudi e-invoicing integrations — scope and price agreed before
+    any work starts. <a href="mailto:yahya@opus-studio.pro?subject=ZATCA%20integration">yahya@opus-studio.pro</a>
+    (<code>yahya@opus-studio.pro</code>)
+  </p>
+</footer>
+
+</main>
+</body>
+</html>

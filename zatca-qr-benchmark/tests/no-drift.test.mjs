@@ -184,3 +184,50 @@ test("⑮ كل حزمةٍ مُخفقة إمّا أُبلِغ أصحابُها أ
     assert.ok((item.reason ?? "").length > 10, `مانعُ الإبلاغ عند «${item.npm}» غير مفهوم`);
   }
 });
+
+/**
+ * **الصفحة المفهرسة كانت عربية العنوان، والقناة تبحث بالإنجليزية.**
+ *
+ * قياسُ القنوات: الطلب عند مطوّرين داخل شركات، دليلُه 44,915 تنزيلاً شهرياً
+ * على npm — وهم يبحثون «zatca qr rejected» لا بالعربية. فصفحةٌ إنجليزية
+ * بعنوانٍ يطابق السؤال، و`hreflang` يربط الأختين فلا تتنافسان.
+ *
+ * وأرقامُها من `results.json` كأختها — لا رقمَ مكتوبٌ بيد في أيٍّ منهما.
+ */
+test("⑯ النسخة الإنجليزية قائمةٌ ومربوطة، وأرقامها من النتائج", () => {
+  const en = readFileSync(join(ROOT, "en", "index.html"), "utf-8");
+
+  assert.match(en, /<html lang="en"/, "الصفحة الإنجليزية ليست معلَنة الإنجليزية");
+  assert.match(en, /hreflang="ar"/, "لا رابط إلى النسخة العربية");
+  assert.match(page, /hreflang="en"/, "الصفحة العربية لا تُشير إلى الإنجليزية");
+  assert.match(page, /href="en\/"/, "لا رابطَ ظاهرٌ للقارئ إلى النسخة الإنجليزية");
+
+  // النسبة نفسها في الاثنتين، محسوبةً من النتائج لا منقولةً بينهما
+  const withReach = scored.filter((e) => !e.ours && typeof e.monthly_downloads === "number");
+  const total = withReach.reduce((n, e) => n + e.monthly_downloads, 0);
+  const broken = withReach.filter((e) => e.fail > 0)
+    .reduce((n, e) => n + e.monthly_downloads, 0);
+  const share = (broken / total * 100).toFixed(1);
+  assert.ok(en.includes(`${share}%`), `النسبة في الصفحة الإنجليزية تخالف المحسوبة (${share}%)`);
+  assert.ok(en.includes(total.toLocaleString("en-US")), "مجموع التنزيلات غائبٌ أو مخالف");
+
+  // وكل مسألةٍ مُبلَّغة معروضةٌ في الاثنتين
+  for (const item of results.disclosures?.items ?? []) {
+    assert.ok(en.includes(item.url), `مسألة «${item.npm}» غائبة عن الصفحة الإنجليزية`);
+  }
+
+  // **الصفحة الإنجليزية تُعرض بالإنجليزية.**
+  // أوّل بناءٍ عرض أسماءَ محرّكينا وأسماءَ القواعد **بالعربية** عليها —
+  // رآه النظر لا الاختبار. فيُشترط أن يحمل كلُّ قاعدةٍ اسماً إنجليزياً،
+  // وأن يكون هو المعروض.
+  for (const [id, rule] of Object.entries(cases.rules)) {
+    assert.ok(rule.name_en, `قاعدة «${id}» بلا اسمٍ إنجليزي`);
+    assert.ok(en.includes(rule.name_en), `اسم «${id}» الإنجليزي غائبٌ عن الصفحة`);
+    assert.ok(!en.includes(rule.name),
+      `اسم «${id}» العربي معروضٌ على الصفحة الإنجليزية`);
+  }
+  for (const engine of ours) {
+    assert.ok(engine.name_en, `محرّكنا «${engine.id}» بلا اسمٍ إنجليزي`);
+    assert.ok(en.includes(engine.name_en), `«${engine.name_en}» غائبٌ عن الصفحة الإنجليزية`);
+  }
+});

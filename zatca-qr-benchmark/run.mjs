@@ -115,7 +115,7 @@ const halalas = (amount) => Math.round(Number(amount) * 100);
 
 const ENGINES = [
   {
-    id: "fatura", name: "فاتورة", ours: true,
+    id: "fatura", name: "فاتورة", name_en: "fatura (ours)", ours: true,
     note: "نسختنا — أُصلحت بعد أن كشفها هذا المقياس نفسه",
     load: async () => {
       const m = await import("../invoice-pdf/dist/zatca-qr.js");
@@ -123,7 +123,8 @@ const ENGINES = [
     },
   },
   {
-    id: "mcp-ts", name: "خادم MCP — البناء المشحون", ours: true,
+    id: "mcp-ts", name: "خادم MCP — البناء المشحون",
+    name_en: "arabic-invoice-mcp (ours, shipped build)", ours: true,
     note: "البناء المشحون فعلاً لا نسخة المصدر. يُفحص هنا عمداً: من ينشر مقياساً يبدأ بنفسه",
     load: async () => {
       const m = await import("../arabic-invoice-mcp-ts/dist/index.js");
@@ -366,7 +367,7 @@ for (const engine of ENGINES) {
   catch (e) {
     results.push({
       id: engine.id, name: engine.name, npm: engine.npm, ours: !!engine.ours,
-      note: engine.note, adapter_note: engine.adapter_note,
+      note: engine.note, name_en: engine.name_en, adapter_note: engine.adapter_note,
       skipped: `تعذّر التحميل: ${String(e?.message ?? e).split("\n")[0].slice(0, 90)}`,
     });
     continue;
@@ -374,7 +375,7 @@ for (const engine of ENGINES) {
   if (typeof run !== "function") {
     results.push({
       id: engine.id, name: engine.name, npm: engine.npm, ours: !!engine.ours,
-      note: engine.note, adapter_note: engine.adapter_note,
+      note: engine.note, name_en: engine.name_en, adapter_note: engine.adapter_note,
       skipped: "لا يُصدّر مولّداً للمرحلة الأولى",
     });
     continue;
@@ -386,7 +387,8 @@ for (const engine of ENGINES) {
   const pass = rows.filter((r) => r.ok).length;
   results.push({
     id: engine.id, name: engine.name, npm: engine.npm, ours: !!engine.ours,
-    note: engine.note, adapter_note: engine.adapter_note, monthly_downloads: monthly,
+    note: engine.note, name_en: engine.name_en,
+    adapter_note: engine.adapter_note, monthly_downloads: monthly,
     total: rows.length, pass, fail: rows.length - pass,
     rate: +(pass / rows.length * 100).toFixed(1),
     rows,
