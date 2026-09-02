@@ -97,7 +97,7 @@ const ruleRows = Object.entries(r.rules).map(([id, rule]) => `
       <div class="rule">${esc(rule.text_en ?? "")}</div></td>
   </tr>`).join("");
 
-const REL = "https://github.com/opusstudiohq-max/arabic-invoice-mcp/releases/download/libs-v0.1.1/fatura-0.1.1.tgz";
+const REL = "https://github.com/opusstudiohq-max/arabic-invoice-mcp/releases/download/libs-v0.2.0/fatura-zatca-0.2.0.tgz";
 const AR = "https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/";
 const EN = "https://opusstudiohq-max.github.io/arabic-invoice-mcp/zatca-qr/en/";
 
@@ -278,7 +278,7 @@ const tlv = (tag, value) =&gt; {
   — these two libraries do both. Not on npm yet; installable today from a release:
 </p>
 <pre><code>npm install ${REL}</code></pre>
-<pre><code>import { encodeZatcaQr, computeTotals, formatMinor } from "fatura";
+<pre><code>import { encodeZatcaQr, computeTotals, formatMinor } from "fatura-zatca";
 
 const qr = encodeZatcaQr({
   sellerName: "&#1605;&#1572;&#1587;&#1587;&#1577; &#1593;&#1576;&#1583; &#1575;&#1604;&#1585;&#1581;&#1605;&#1606; &#1575;&#1604;&#1593;&#1578;&#1610;&#1576;&#1610; &#1604;&#1604;&#1578;&#1580;&#1575;&#1585;&#1577; &#1608;&#1575;&#1604;&#1605;&#1602;&#1575;&#1608;&#1604;&#1575;&#1578;",
@@ -289,7 +289,7 @@ const qr = encodeZatcaQr({
 });
 // a 140-byte name emits 0x81 0x8C — the form ZATCA's validator accepts</code></pre>
 <p class="lede">
-  <code>fatura</code> pulls <code>nasq</code> with it. Verified end to end from that
+  <code>fatura-zatca</code> pulls <code>nasq</code> with it. Verified end to end from that
   URL in a clean project: correct length form, name intact after decoding, totals in
   halalas.
 </p>

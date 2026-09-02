@@ -4,7 +4,7 @@
 الهيئة** — في ملف واحد جاهز للطباعة أو الإرسال.
 
 ```ts
-import { renderInvoice } from "fatura";
+import { renderInvoice } from "fatura-zatca";
 
 const { pdf, totals, qrPayload } = await renderInvoice({
   number: "INV-2026-0042",

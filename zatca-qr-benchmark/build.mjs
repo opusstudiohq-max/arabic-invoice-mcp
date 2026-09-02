@@ -48,7 +48,7 @@ const widgetSource = readFileSync(join(HERE, "widget-ar.js"), "utf-8")
   .replace(/<\/script>/gi, "<\\/script>");
 
 /** عنوانُ حزمةِ الإصدار — المسار المتاح للتثبيت حتى يقع النشر على npm. */
-const REL = "https://github.com/opusstudiohq-max/arabic-invoice-mcp/releases/download/libs-v0.1.1/fatura-0.1.1.tgz";
+const REL = "https://github.com/opusstudiohq-max/arabic-invoice-mcp/releases/download/libs-v0.2.0/fatura-zatca-0.2.0.tgz";
 
 /**
  * يعزل الحرفيّات التقنية داخل نصٍّ عربي.
@@ -370,7 +370,7 @@ const html = `<!DOCTYPE html>
 </p>
 <pre><code>npm install ${REL}</code></pre>
 <p class="lede">
-  و<code>fatura</code> تسحب <code>nasq</code> معها. وجُرّبت السلسلة من هذا العنوان
+  و<code>fatura-zatca</code> تسحب <code>nasq</code> معها. وجُرّبت السلسلة من هذا العنوان
   في مشروعٍ نظيف: شكلُ الطول صحيح، والاسمُ سليمٌ بعد الفكّ، والمجاميع بالهللات.
 </p>
 

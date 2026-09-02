@@ -162,7 +162,7 @@
     </td>
   </tr>
   <tr class="ours">
-    <td><strong>fatura (ours)</strong> <span class="tag">ours</span></td>
+    <td><strong>fatura-zatca (ours)</strong> <span class="tag">ours</span></td>
     <td class="num">—</td>
     <td class="num ok">
       <strong>10/10</strong>
@@ -301,8 +301,8 @@ const tlv = (tag, value) =&gt; {
   text that survives a PDF — amounts that do not reverse, names that do not truncate
   — these two libraries do both. Not on npm yet; installable today from a release:
 </p>
-<pre><code>npm install https://github.com/opusstudiohq-max/arabic-invoice-mcp/releases/download/libs-v0.1.1/fatura-0.1.1.tgz</code></pre>
-<pre><code>import { encodeZatcaQr, computeTotals, formatMinor } from "fatura";
+<pre><code>npm install https://github.com/opusstudiohq-max/arabic-invoice-mcp/releases/download/libs-v0.2.0/fatura-zatca-0.2.0.tgz</code></pre>
+<pre><code>import { encodeZatcaQr, computeTotals, formatMinor } from "fatura-zatca";
 
 const qr = encodeZatcaQr({
   sellerName: "&#1605;&#1572;&#1587;&#1587;&#1577; &#1593;&#1576;&#1583; &#1575;&#1604;&#1585;&#1581;&#1605;&#1606; &#1575;&#1604;&#1593;&#1578;&#1610;&#1576;&#1610; &#1604;&#1604;&#1578;&#1580;&#1575;&#1585;&#1577; &#1608;&#1575;&#1604;&#1605;&#1602;&#1575;&#1608;&#1604;&#1575;&#1578;",
@@ -313,7 +313,7 @@ const qr = encodeZatcaQr({
 });
 // a 140-byte name emits 0x81 0x8C — the form ZATCA's validator accepts</code></pre>
 <p class="lede">
-  <code>fatura</code> pulls <code>nasq</code> with it. Verified end to end from that
+  <code>fatura-zatca</code> pulls <code>nasq</code> with it. Verified end to end from that
   URL in a clean project: correct length form, name intact after decoding, totals in
   halalas.
 </p>

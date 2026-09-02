@@ -90,7 +90,7 @@ const halalas = (amount) => Math.round(Number(amount) * 100);
 
 const ENGINES = [
   {
-    id: "fatura", name: "فاتورة", name_en: "fatura (ours)", ours: true,
+    id: "fatura-zatca", name: "فاتورة", name_en: "fatura-zatca (ours)", ours: true,
     note: "نسختنا — أُصلحت بعد أن كشفها هذا المقياس نفسه",
     load: async () => {
       const m = await import("../invoice-pdf/dist/zatca-qr.js");

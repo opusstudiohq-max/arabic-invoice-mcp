@@ -9,7 +9,7 @@
  *   نَسْق   — ترتيب النصّ العربي (bidi مطابق لـ٩١٬٧٠٧ حالة من يونيكود)
  *   فاتورة — المجاميع بالهللات ورمز QR من نصّ المواصفة
  */
-import { renderInvoice, computeTotals, formatMinor } from "fatura";
+import { renderInvoice, computeTotals, formatMinor } from "fatura-zatca";
 // المحرّك يُستورد من البناء المشحون نفسه، لا يُنسخ — والنسخة تنحرف عن أصلها
 // بلا أثر ظاهر، وهو الصنف الذي يحرسه `tafgeet-benchmark/tests/no-drift`.
 import { tafgeet } from "../../arabic-invoice-mcp-ts/dist/tafgeet.js";

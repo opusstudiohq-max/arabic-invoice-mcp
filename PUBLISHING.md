@@ -10,7 +10,7 @@
 
 ## لماذا ترتيبٌ لا أمرٌ واحد
 
-`fatura` تعتمد على `nasq`. وهي اليوم تعلنها `file:../arabic-text` —
+`fatura-zatca` تعتمد على `nasq`. وهي اليوم تعلنها `file:../arabic-text` —
 **تصريحٌ صادق** ما دامت `nasq` غير منشورة، لأن مدى النسخ (`^0.1.0`) يعني
 «موجودة على npm» فيكسر `npm install` عند كل من ينسخ المستودع. وقد وقع
 ذلك فعلاً، ولم يظهر إلا حين طُلب تثبيتٌ نظيف.
@@ -24,7 +24,7 @@
 المكتبتان مرفوعتان أصلَي إصدارٍ على المستودع العام، فتُثبَّتان اليوم:
 
 ```bash
-npm install https://github.com/opusstudiohq-max/arabic-invoice-mcp/releases/download/libs-v0.1.1/fatura-0.1.1.tgz
+npm install https://github.com/opusstudiohq-max/arabic-invoice-mcp/releases/download/libs-v0.2.0/fatura-zatca-0.2.0.tgz
 ```
 
 يُعاد إنتاجهما بـ`python tools/pack_release.py` — يبني، ويحوّل تبعية
@@ -78,11 +78,11 @@ npm publish --access public
 ```bash
 cd invoice-pdf
 npm pkg set dependencies.nasq="^0.1.0"
-npm test            # fatura — 41 اختباراً
+npm test            # fatura-zatca — 41 اختباراً
 npm publish --access public
 ```
 
-ثم يُسجَّل `fatura` في `PUBLISHED.json`. وقبل النشر تُفشل البوابة هذا
+ثم يُسجَّل `fatura-zatca` في `PUBLISHED.json`. وقبل النشر تُفشل البوابة هذا
 التغيير عمداً — وذلك مقصود: **التصريح يسبق الواقع = عيب.**
 
 ## ③ eta-einvoice — التسلسل الكنسي

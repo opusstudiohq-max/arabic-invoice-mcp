@@ -31,7 +31,7 @@
 | المجلد | ماذا تفعل | ما يحرسها |
 | --- | --- | --- |
 | [`nasq/`](nasq/) | ترتيب النصّ العربي في PDF (UAX #9) | **91,707 حالة** من سلسلة يونيكود الرسمية |
-| [`fatura/`](fatura/) | فاتورة PDF: مجاميع بالهللات ورمز QR | 40 اختباراً تقرأ الرسوم من داخل الملف |
+| [`fatura-zatca/`](fatura-zatca/) | فاتورة PDF: مجاميع بالهللات ورمز QR | 41 اختباراً تقرأ الرسوم من داخل الملف |
 | [`eta-lib/`](eta-lib/) | مصر: التسلسل الكنسي والتجزئة، وتوقيع CAdES-BES | مطابقة العيّنة الرسمية **بايتاً ببايت** (JSON وXML)، و95 اختباراً |
 | [`python-lib/`](python-lib/) | خادم MCP: رمز QR، تفقيط، حسابات ضريبية | 183 اختباراً |
 | [`typescript-lib/`](typescript-lib/) | محرّك التفقيط — TypeScript | تكافؤٌ مع نسخة بايثون، والمقياس |
@@ -41,14 +41,14 @@
 ## التثبيت — اليوم، بلا حساب npm
 
 المكتبتان لم تُنشرا على npm بعد. وحتى ذلك، تُثبَّتان من إصدارٍ على هذا
-المستودع — و`fatura` تسحب `nasq` معها تلقائياً:
+المستودع — و`fatura-zatca` تسحب `nasq` معها تلقائياً:
 
 ```bash
-npm install https://github.com/opusstudiohq-max/arabic-invoice-mcp/releases/download/libs-v0.1.1/fatura-0.1.1.tgz
+npm install https://github.com/opusstudiohq-max/arabic-invoice-mcp/releases/download/libs-v0.2.0/fatura-zatca-0.2.0.tgz
 ```
 
 ```js
-import { encodeZatcaQr, computeTotals, formatMinor } from "fatura";
+import { encodeZatcaQr, computeTotals, formatMinor } from "fatura-zatca";
 
 const qr = encodeZatcaQr({
   sellerName: "مؤسسة عبد الرحمن بن محمد العتيبي للتجارة والمقاولات العامة والصيانة",

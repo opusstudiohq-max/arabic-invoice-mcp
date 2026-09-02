@@ -237,7 +237,7 @@ describe("4. ZATCA QR Code (buildZatcaQr)", () => {
   });
 
   /** التكافؤ مع نسخة فاتورة — نسختان تُنتجان رمزين مختلفين عيبٌ صامت. */
-  test("Matches the fatura encoder byte for byte", async () => {
+  test("Matches the fatura-zatca encoder byte for byte", async () => {
     const { buildZatcaTlv } = await import("../../invoice-pdf/dist/zatca-qr.js");
     for (const count of [10, 63, 64, 127, 128, 200]) {
       const name = "ش".repeat(count);

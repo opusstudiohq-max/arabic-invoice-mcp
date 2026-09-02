@@ -311,11 +311,11 @@
   },
   "engines": [
     {
-      "id": "fatura",
+      "id": "fatura-zatca",
       "name": "فاتورة",
       "ours": true,
       "note": "نسختنا — أُصلحت بعد أن كشفها هذا المقياس نفسه",
-      "name_en": "fatura (ours)",
+      "name_en": "fatura-zatca (ours)",
       "total": 10,
       "pass": 10,
       "fail": 0,

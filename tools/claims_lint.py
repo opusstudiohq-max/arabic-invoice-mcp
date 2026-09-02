@@ -227,8 +227,8 @@ TEST_COUNT_RE = re.compile(r"(\d{2,4})\s*(?:اختبار|اختباراً|اخت
 
 #: سطرٌ يُسمّي حزمةً بعينها — فعدده يخصّها لا يخصّ المشروع.
 NAMES_A_PACKAGE = re.compile(
-    r"`[\w./-]+/`"                        # مسار بين علامتَي كود: `fatura/`
-    r"|\b(?:nasq|fatura|eta-lib|python-lib|typescript-lib|arabic-text"
+    r"`[\w./-]+/`"                        # مسار بين علامتَي كود: `fatura-zatca/`
+    r"|\b(?:nasq|fatura-zatca|eta-lib|python-lib|typescript-lib|arabic-text"
     r"|invoice-pdf|arabic-invoice-mcp|tafgeet-benchmark|مُتوافِق)\b"
 )
 
@@ -240,7 +240,7 @@ NAMES_A_PACKAGE = re.compile(
 PACKAGE_ROOTS = (
     "eta-lib/", "arabic-text/", "invoice-pdf/", "invoice-tool/", "tafgeet-benchmark/", "pdf-benchmark/",
     # أسماء المجلدات نفسها في المستودع العام — نسخة البوابة واحدة في الاثنين
-    "nasq/", "fatura/", "invoice/", "invoice-tool/", "tafgeet/", "pdf/", "pdf-benchmark/", "typescript-lib/", "python-lib/", "checker/",
+    "nasq/", "fatura-zatca/", "invoice/", "invoice-tool/", "tafgeet/", "pdf/", "pdf-benchmark/", "typescript-lib/", "python-lib/", "checker/",
 )
 
 
@@ -271,7 +271,7 @@ def check_test_counts(expected: int | None = None) -> list[str]:
                 # المشروع. صفحةٌ تعدّد حزمها في جدول تقول «38» لهذه و«183»
                 # لتلك — وكلاهما صواب. وقاعدةٌ تُفشل الصواب تُكسب الخطأ ثقتها.
                 # ⚠️ وهذا الإعفاء **فتح ثغرة**: صار العدد المنسوب لحزمةٍ لا
-                # يُفحص أصلاً، فانجرف `fatura` من 38 إلى 40 عبر جلستين
+                # يُفحص أصلاً، فانجرف `fatura-zatca` من 38 إلى 40 عبر جلستين
                 # معلَناً 38 في ثلاثة مواضع. يسدّها `tools/check_test_counts.py`
                 # بتشغيل كل سويت وقراءة عددها منها.
                 if NAMES_A_PACKAGE.search(line):
@@ -452,7 +452,7 @@ def check_package_dependencies(registry_path: Path | None = None) -> list[str]:
     تبعيةٌ باسمٍ من أسمائنا وبمدى نسخٍ تعني «هذه على npm» — وهي إن لم تكن
     منشورة **تكسر `npm install` عند كل من ينسخ المستودع**.
 
-    وقد وقعت: `fatura` أعلنت `"nasq": "^0.1.0"` ولم يظهر شيء، لأن وصلةً
+    وقد وقعت: `fatura-zatca` أعلنت `"nasq": "^0.1.0"` ولم يظهر شيء، لأن وصلةً
     رمزية متبقّية من تثبيتٍ سابق كانت تحلّها عندنا وحدنا. والتصريح الصادق
     `file:../…` — أو النشرُ الفعلي.
 

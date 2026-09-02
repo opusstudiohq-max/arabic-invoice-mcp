@@ -1,6 +1,6 @@
 {
-  "name": "fatura",
-  "version": "0.1.1",
+  "name": "fatura-zatca",
+  "version": "0.2.0",
   "description": "Arabic tax-invoice PDF: correct bidi text, halala-exact totals, and a ZATCA Phase-1 QR built from the authority's own specification text | فاتورة ضريبية عربية بصيغة PDF — نصّ مرتَّب صحيحاً، ومجاميع بالهللات، ورمز QR مبنيّ على نصّ المواصفة",
   "type": "module",
   "main": "./dist/index.js",
