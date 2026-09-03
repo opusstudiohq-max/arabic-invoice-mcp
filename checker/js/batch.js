@@ -28,6 +28,16 @@
       return;
     }
 
+    // شريحةٌ لا عدد، ونسبةٌ مُقرَّبة لا قيمة — فحجمُ محفظةِ مكتبٍ بعينه
+    // قد يدلّ عليه، والشريحةُ تكفينا لمعرفة من نخدم: فردٌ أم مكتب.
+    function bucketN(n) {
+      return n <= 10 ? '1-10' : n <= 50 ? '11-50' : n <= 200 ? '51-200' : '200+';
+    }
+    function bucketPct(bad, total) {
+      const p = total ? (bad / total) * 100 : 0;
+      return p < 13 ? 0 : p < 38 ? 25 : p < 63 ? 50 : p < 88 ? 75 : 100;
+    }
+
     let compliant = 0, atRisk = 0, unreadable = 0;
     const detailed = [];
     const trs = rows.map(({ name, qr }) => {
@@ -55,6 +65,13 @@
           fix ? `<div class="detail-fix">الإصلاح: ${esc(fix)}</div>` : ''
         }</td></tr>`;
     }).join('');
+
+    if (typeof window.mtrack === 'function') {
+      window.mtrack('batch_check', {
+        n: bucketN(rows.length),
+        failpct: bucketPct(atRisk + unreadable, rows.length),
+      });
+    }
 
     const total = rows.length;
     const pct = Math.round((compliant / total) * 100);

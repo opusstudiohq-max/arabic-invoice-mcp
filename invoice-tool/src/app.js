@@ -139,6 +139,15 @@ async function build() {
     $("download").href = url;
     $("download").download = state.lastName;
     $("download").hidden = false;
+
+    // بعد نجاح البناء وحده. `buyer` منطقيٌّ لا اسم، والبنودُ شريحةٌ لا عدد.
+    if (typeof window.mtrack === "function") {
+      const n = (invoice.lines || []).length;
+      window.mtrack("invoice_made", {
+        buyer: Boolean(invoice.buyer && invoice.buyer.name),
+        lines: n <= 1 ? "1" : n <= 5 ? "2-5" : n <= 20 ? "6-20" : "20+",
+      });
+    }
     setStatus(qrPayload
       ? "جاهزة — ورمز QR للمرحلة الأولى مُدرَج."
       : "جاهزة — بلا رمز QR: رمزُ الهيئة يلزمه رقم ضريبي سعودي (15 رقماً يبدأ بـ3).",

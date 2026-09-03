@@ -120,7 +120,44 @@ def main() -> int:
     if not loaded:
         print("   – لم تُركَّب في صفحةٍ بعد. الشرطُ نائمٌ حتى تُركَّب.")
 
-    print("\n④ أداةُ الشيكات تعمل بلا إنترنت — فلا قياسَ فيها:")
+    print("\n④ لا استدعاءَ لـmtrack يقرأ من حقلٍ مباشرةً:")
+    # المخطَّط في `mtq.js` يُسقط النصَّ الحرّ وقتَ التشغيل — وهذا حزامٌ ثانٍ
+    # **وقتَ الكتابة**: من يكتب `mtrack(e,{x: input.value})` يُخفق البناء،
+    # فلا ينتظر أن يحميه المخطَّط ولا يعتاد الاتّكال عليه.
+    DOM_READ = re.compile(r"\.value\b|innerText|textContent|getElementById|querySelector")
+    sites = 0
+    roots = [ROOT / d for d in ("zatca-checker", "invoice-tool", "cheque-tool",
+                                "zatca-qr-benchmark", "pdf-benchmark", "tafgeet-benchmark")]
+    for root in roots:
+        if not root.exists():
+            continue
+        for f in sorted(root.rglob("*.js")) + sorted(root.rglob("*.mjs")):
+            if "node_modules" in f.parts or "/dist/" in f.as_posix():
+                continue
+            txt = f.read_text(encoding="utf-8", errors="replace")
+            for m in re.finditer(r"mtrack\s*\(", txt):
+                # نقتطع من القوس حتى إغلاقه المتوازن
+                i, depth = m.end() - 1, 0
+                for j in range(i, min(len(txt), i + 1200)):
+                    if txt[j] == "(":
+                        depth += 1
+                    elif txt[j] == ")":
+                        depth -= 1
+                        if depth == 0:
+                            break
+                args = txt[i:j + 1]
+                sites += 1
+                rel = f.relative_to(ROOT).as_posix()
+                bad = DOM_READ.search(args)
+                if bad:
+                    print("   ⛔ {:<40} يقرأ «{}» داخل الحدث".format(rel, bad.group(0)))
+                    fails.append("{}: استدعاءُ mtrack يقرأ من الصفحة مباشرةً".format(rel))
+                else:
+                    print("   ✅ {:<40} مشتقٌّ لا مقروء".format(rel))
+    if not sites:
+        print("   – لا استدعاءَ بعد.")
+
+    print("\n⑤ أداةُ الشيكات تعمل بلا إنترنت — فلا قياسَ فيها:")
     ch = ROOT / (OFFLINE_ONLY[1] if IS_PUBLIC else OFFLINE_ONLY[0])
     if ch.exists():
         if SCRIPT_REF.search(ch.read_text(encoding="utf-8", errors="replace")):

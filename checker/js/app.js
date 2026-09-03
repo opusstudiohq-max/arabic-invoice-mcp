@@ -104,8 +104,35 @@
   // ═══════════════════════════════════════════════════════════
   // Render
   // ═══════════════════════════════════════════════════════════
+  /**
+   * أثمنُ ما نقيسه: **ما الذي يُخفق في فواتير الناس فعلاً.**
+   *
+   * ويُرسَل رقمان لا أكثر: الدرجة، وأرقامُ الحقول المُخفقة مثل «24» أي
+   * أخفق الحقلان 2 و4. **ولا شيءَ من محتوى الفاتورة** — لا اسم بائع، ولا
+   * رقم ضريبي، ولا مبلغ، ولا سلسلة Base64. والمخطَّط في `mtq.js` يرفضها
+   * بنيوياً حتى لو مُرِّرت خطأً، فهذا حزامٌ ثانٍ لا أوّل.
+   */
+  function trackCheck(result) {
+    if (typeof window.mtrack !== 'function') return;
+    if (result && result.fatalError) {
+      window.mtrack('qr_check', { score: 0, failed: '', fatal: true });
+      return;
+    }
+    const failed = (result.checks || [])
+      .filter(c => !c.passed && c.tag >= 1 && c.tag <= 5)
+      .map(c => c.tag)
+      .sort()
+      .join('');
+    window.mtrack('qr_check', {
+      score: typeof result.score === 'number' ? result.score : 0,
+      failed,
+      fatal: false,
+    });
+  }
+
   function renderResult(result) {
     resultsSection.classList.add('visible');
+    trackCheck(result);
 
     if (result.fatalError) {
       showFatalError(result.fatalError, 'تأكد من نسخ نص QR code كاملاً من الفاتورة.');
