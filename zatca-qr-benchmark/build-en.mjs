@@ -399,24 +399,25 @@ ${decoderSource}
 ${widgetSource}
 </script>
 <p class="mtq-note" style="max-width:70ch;margin:2.5rem auto 0;padding:0 1rem;font-size:.78rem;line-height:1.9;opacity:.62;text-align:center">We count visits without cookies or identity — a count and a path, nothing more. بلا كوكيز. Your invoice never leaves your browser, and that has not changed.</p>
+
 <!-- crosslinks:begin -->
 <nav class="crosslinks" aria-label="أدوات أخرى" style="margin:3rem auto 0;padding:1.1rem 1rem 0;max-width:70ch;border-top:1px solid rgba(128,128,128,.28);font-size:.82rem;line-height:2.1;text-align:center;opacity:.85">
   <strong style="font-weight:600">أدواتٌ أخرى:</strong>
-  <a href="/">الصفحة الأولى</a>
+  <a href="/" style="white-space:nowrap">الصفحة الأولى</a>
   <span aria-hidden="true"> · </span>
-  <a href="/checker/">فاحص رمز QR</a>
+  <a href="/checker/" style="white-space:nowrap">فاحص رمز QR</a>
   <span aria-hidden="true"> · </span>
-  <a href="/checker/batch.html">الفحص الجماعي</a>
+  <a href="/checker/batch.html" style="white-space:nowrap">الفحص الجماعي</a>
   <span aria-hidden="true"> · </span>
-  <a href="/invoice/">أداة الفاتورة</a>
+  <a href="/invoice/" style="white-space:nowrap">أداة الفاتورة</a>
   <span aria-hidden="true"> · </span>
-  <a href="/cheque/dist/mutawafiq-cheque.html">طباعة الشيكات</a>
+  <a href="/cheque/dist/mutawafiq-cheque.html" style="white-space:nowrap">طباعة الشيكات</a>
   <span aria-hidden="true"> · </span>
-  <a href="/zatca-qr/">مقياس رمز QR</a>
+  <a href="/zatca-qr/" style="white-space:nowrap">مقياس رمز QR</a>
   <span aria-hidden="true"> · </span>
-  <a href="/pdf/">مقياس النصّ في PDF</a>
+  <a href="/pdf/" style="white-space:nowrap">مقياس النصّ في PDF</a>
   <span aria-hidden="true"> · </span>
-  <a href="/tafgeet/">مقياس التفقيط</a>
+  <a href="/tafgeet/" style="white-space:nowrap">مقياس التفقيط</a>
 </nav>
 <!-- crosslinks:end -->
 </body>
