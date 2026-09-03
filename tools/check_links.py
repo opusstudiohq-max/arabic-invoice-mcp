@@ -13,6 +13,7 @@
 from __future__ import annotations
 
 import importlib.util
+import posixpath
 import re
 import sys
 from pathlib import Path
@@ -29,6 +30,23 @@ ROOT = Path(__file__).resolve().parent.parent
 #: إضافةٍ هناك بمسارٍ جذريٍّ تحتاج سطراً هنا.
 WORK_LAYOUT = {
     "js/mtq.js": "analytics/mtq.js",
+    # مساراتُ الموقع كما يكتبها شريطُ الروابط المتقاطعة. وهي جذريةٌ عمداً:
+    # الصفحات تقع على أعماقٍ مختلفة (`/checker/` و`/zatca-qr/en/`)، فرابطٌ
+    # نسبيٌّ واحد لا يصحّ فيها جميعاً. ومصدرُها `tools/build_crosslinks.py`،
+    # ويربط بينهما اختبارٌ فيُفشل أيَّ مسارٍ يُضاف هناك ولا يُذكر هنا.
+    "checker": "zatca-checker",
+    "checker/batch.html": "zatca-checker/batch.html",
+    "invoice": "invoice-tool/dist",
+    "cheque/dist/mutawafiq-cheque.html": "cheque-tool/dist/mutawafiq-cheque.html",
+    "zatca-qr": "zatca-qr-benchmark",
+    "pdf": "pdf-benchmark",
+    "tafgeet": "tafgeet-benchmark",
+    # وأسماءُ المكتبات: المستودعان يسمّيان المجلدات بغير اسم، وهو سببُ
+    # وجود هذا الحارس أصلاً — أربعةُ روابطَ ماتت في الصفحة الأولى لذلك.
+    "nasq": "arabic-text",
+    "fatura-zatca": "invoice-pdf",
+    "python-lib": "arabic-invoice-mcp",
+    "typescript-lib": "arabic-invoice-mcp-ts",
 }
 
 _spec = importlib.util.spec_from_file_location("claims_lint", ROOT / "tools" / "claims_lint.py")
@@ -75,6 +93,30 @@ def internal_links(text: str):
             yield target
 
 
+def resolve_site_path(site_rel: str) -> Path:
+    """يحلّ مساراً **كما يقع على الموقع** إلى موضعه في مستودع العمل.
+
+    والمطابقةُ بالبادئة لا بالمساواة: `invoice` وحدها تكفي لحلّ
+    `invoice/fonts/OFL.txt`، فلا تُسرد كلُّ ورقةٍ في الخريطة.
+
+    والخريطةُ **بديلٌ لا أصل**: في المستودع العام يقع الملفُّ حيث يشير
+    تماماً، فيُقبل مباشرةً ولا تُستشار. وأوّلُ صياغةٍ طبّقتها دائماً
+    فأفشلت الحارسَ هناك — إذ لا `analytics/` في العام.
+    """
+    site_rel = posixpath.normpath(site_rel).strip("/")
+    if not site_rel or site_rel == ".":
+        return ROOT
+    direct = ROOT / site_rel
+    if direct.exists():
+        return direct
+    parts = site_rel.split("/")
+    for i in range(len(parts), 0, -1):
+        mapped = WORK_LAYOUT.get("/".join(parts[:i]))
+        if mapped:
+            return ROOT.joinpath(mapped, *parts[i:])
+    return direct
+
+
 def check() -> list[str]:
     problems: list[str] = []
     for path in _cl.iter_public_files():
@@ -89,20 +131,22 @@ def check() -> list[str]:
             if not clean:
                 continue
 
-            # **المسارُ الجذريّ يُحَلّ إلى جذر الموقع، لا إلى مجلد الصفحة.**
+            # **الرابطُ يُحَلّ من حيث يقع الملف بعد النسخ، لا من حيث
+            # يعيش الآن.** فـ`pages/` يُنسخ إلى جذر المستودع العام:
+            # `pages/README.md` يصير `./README.md`، و`pages/_layouts/x.html`
+            # يصير `./_layouts/x.html`. وبغير ذلك يُفشل الحارسُ صواباً.
+            rel_parts = list(path.relative_to(ROOT).parts)
+            if rel_parts and rel_parts[0] == "pages":
+                rel_parts.pop(0)
+            here = "/".join(rel_parts[:-1])
+
+            # والمسارُ الجذريّ يُحَلّ إلى جذر الموقع لا إلى مجلد الصفحة.
             # وكان `(path.parent / "/js/x")` يُنتج جذرَ القرص على ويندوز —
-            # أي أن كل رابطٍ جذريٍّ كان يُفحص خطأً، ولم يظهر ذلك لأن أصولنا
-            # لم تحمل واحداً حتى اليوم.
-            if clean.startswith("/"):
-                site_rel = clean.lstrip("/")
-                resolved = ROOT / site_rel
-                # الخريطةُ **بديلٌ لا أصل**: في المستودع العام يقع الملفُّ
-                # حيث يشير، فيُقبل مباشرةً. وأوّلُ صياغةٍ طبّقت الخريطة دائماً
-                # فأفشلت الحارسَ هناك — إذ لا `analytics/` في العام.
-                if not resolved.exists() and site_rel in WORK_LAYOUT:
-                    resolved = ROOT / WORK_LAYOUT[site_rel]
-            else:
-                resolved = (path.parent / clean).resolve()
+            # أي أن كل رابطٍ جذريٍّ كان يُفحص خطأً، ولم يظهر لأن أصولنا لم
+            # تحمل واحداً حتى ذلك اليوم.
+            site_rel = clean.lstrip("/") if clean.startswith("/") else (
+                f"{here}/{clean}" if here else clean)
+            resolved = resolve_site_path(site_rel)
 
             if not resolved.exists():
                 rel = path.relative_to(ROOT).as_posix()
