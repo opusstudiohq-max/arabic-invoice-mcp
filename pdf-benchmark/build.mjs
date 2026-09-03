@@ -161,6 +161,7 @@ const html = `<!DOCTYPE html>
   .cta{background:var(--ok-bg);border:1px solid var(--ok);border-radius:10px;
        padding:1rem 1.2rem;margin:1.5rem 0}
 </style>
+<script src="/js/mtq.js" defer></script>
 </head>
 <body>
 <main>
@@ -267,6 +268,7 @@ node run.mjs</code></pre>
 </footer>
 
 </main>
+<p class="mtq-note" style="max-width:70ch;margin:2.5rem auto 0;padding:0 1rem;font-size:.78rem;line-height:1.9;opacity:.62;text-align:center">نعدّ الزيارات بلا كوكيز ولا هوية — عدداً ومساراً لا أكثر. والفاتورةُ التي تكتبها لا تغادر متصفّحك، ولم يتغيّر ذلك.</p>
 </body>
 </html>
 `;

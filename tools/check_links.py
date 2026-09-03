@@ -23,6 +23,14 @@ utf8_stdio()
 
 ROOT = Path(__file__).resolve().parent.parent
 
+#: مسارٌ جذريّ كما تكتبه الصفحة ⇒ موضعُه في **مستودع العمل** قبل النسخ.
+#: في المستودع العام يقع حيث يشير تماماً، فلا يُطابَق شيءٌ وتُستعمل القيمة
+#: كما هي. والخريطةُ هنا انعكاسٌ لخطة النسخ في `sync_public.py` — فأيُّ
+#: إضافةٍ هناك بمسارٍ جذريٍّ تحتاج سطراً هنا.
+WORK_LAYOUT = {
+    "js/mtq.js": "analytics/mtq.js",
+}
+
 _spec = importlib.util.spec_from_file_location("claims_lint", ROOT / "tools" / "claims_lint.py")
 _cl = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(_cl)
@@ -80,7 +88,22 @@ def check() -> list[str]:
             clean = target.split("#")[0].split("?")[0]
             if not clean:
                 continue
-            resolved = (path.parent / clean).resolve()
+
+            # **المسارُ الجذريّ يُحَلّ إلى جذر الموقع، لا إلى مجلد الصفحة.**
+            # وكان `(path.parent / "/js/x")` يُنتج جذرَ القرص على ويندوز —
+            # أي أن كل رابطٍ جذريٍّ كان يُفحص خطأً، ولم يظهر ذلك لأن أصولنا
+            # لم تحمل واحداً حتى اليوم.
+            if clean.startswith("/"):
+                site_rel = clean.lstrip("/")
+                resolved = ROOT / site_rel
+                # الخريطةُ **بديلٌ لا أصل**: في المستودع العام يقع الملفُّ
+                # حيث يشير، فيُقبل مباشرةً. وأوّلُ صياغةٍ طبّقت الخريطة دائماً
+                # فأفشلت الحارسَ هناك — إذ لا `analytics/` في العام.
+                if not resolved.exists() and site_rel in WORK_LAYOUT:
+                    resolved = ROOT / WORK_LAYOUT[site_rel]
+            else:
+                resolved = (path.parent / clean).resolve()
+
             if not resolved.exists():
                 rel = path.relative_to(ROOT).as_posix()
                 problems.append(f"{rel} ⇒ «{target}»")

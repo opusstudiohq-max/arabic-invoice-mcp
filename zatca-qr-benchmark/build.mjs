@@ -282,6 +282,7 @@ const html = `<!DOCTYPE html>
   .tlv td,.tlv th{padding:.35rem .5rem;border-bottom:1px solid var(--line);text-align:right}
   .tlv code{unicode-bidi:isolate}
 </style>
+<script src="/js/mtq.js" defer></script>
 </head>
 <body>
 <main>
@@ -503,6 +504,7 @@ node run.mjs --fetch &amp;&amp; node build.mjs</code></pre>
 ${decoderSource}
 ${widgetSource}
 </script>
+<p class="mtq-note" style="max-width:70ch;margin:2.5rem auto 0;padding:0 1rem;font-size:.78rem;line-height:1.9;opacity:.62;text-align:center">نعدّ الزيارات بلا كوكيز ولا هوية — عدداً ومساراً لا أكثر. والفاتورةُ التي تكتبها لا تغادر متصفّحك، ولم يتغيّر ذلك.</p>
 </body>
 </html>
 `;
