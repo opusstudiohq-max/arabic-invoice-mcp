@@ -21,9 +21,9 @@
  *
  *   npm install && node run.mjs && node build.mjs
  */
-import { readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { createRequire } from "node:module";
 
 const require = createRequire(import.meta.url);
@@ -102,7 +102,13 @@ const ENGINES = [
     name_en: "arabic-invoice-mcp (ours, shipped build)", ours: true,
     note: "البناء المشحون فعلاً لا نسخة المصدر. يُفحص هنا عمداً: من ينشر مقياساً يبدأ بنفسه",
     load: async () => {
-      const m = await import("../arabic-invoice-mcp-ts/dist/index.js");
+      const candidates = [
+        join(HERE, "..", "arabic-invoice-mcp-ts", "dist", "index.js"),
+        join(HERE, "..", "typescript-lib", "dist", "index.js"),
+      ];
+      const dist = candidates.find(existsSync);
+      if (!dist) throw new Error("arabic-invoice-mcp: dist/index.js not found in arabic-invoice-mcp-ts or typescript-lib; build it first");
+      const m = await import(pathToFileURL(dist).href);
       return (f) => m.buildZatcaQr(
         F(f).sellerName, f.vatNumber, f.timestamp, f.totalWithVat, f.vatAmount).base64_data;
     },

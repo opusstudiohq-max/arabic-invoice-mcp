@@ -20,12 +20,25 @@ const dropNoindex = (html) => html
   .replace(/<meta name="robots" content="noindex">\s*/g, "")
   .replace(/<link rel="canonical"[^>]*>\s*/g, "");
 
+/**
+ * محرّك التفقيط يُستورد من البناء المشحون. اسم مجلده يختلف بين مستودع العمل
+ * (`arabic-invoice-mcp-ts`) والمستودع العام (`typescript-lib`) — نجرّب الاثنين.
+ */
+const TAFGEET = ["arabic-invoice-mcp-ts", "typescript-lib"]
+  .map((d) => join(HERE, "..", d, "dist", "tafgeet.js"))
+  .find((p) => existsSync(p));
+if (!TAFGEET) {
+  console.error("✖ لا يوجد dist/tafgeet.js — ابنِ typescript-lib أولاً (npm install && npm run build)");
+  process.exit(1);
+}
+
 const OUT = join(HERE, "dist");
 mkdirSync(join(OUT, "fonts"), { recursive: true });
 
 const result = await build({
   entryPoints: [join(HERE, "src", "app.js")],
   bundle: true,
+  alias: { "tafgeet-engine": TAFGEET },
   format: "esm",
   target: ["es2020"],
   minify: true,

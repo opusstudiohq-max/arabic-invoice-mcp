@@ -10,12 +10,14 @@
  *   فاتورة — المجاميع بالهللات ورمز QR من نصّ المواصفة
  */
 import { renderInvoice, computeTotals, formatMinor } from "fatura-zatca";
+import { validateSeller } from "./validate.js";
 // المحرّك يُستورد من البناء المشحون نفسه، لا يُنسخ — والنسخة تنحرف عن أصلها
 // بلا أثر ظاهر، وهو الصنف الذي يحرسه `tafgeet-benchmark/tests/no-drift`.
-import { tafgeet } from "../../arabic-invoice-mcp-ts/dist/tafgeet.js";
+// المسار يُحَلّ في build.mjs (اسم المجلد يختلف بين مستودع العمل والعام)
+import { tafgeet } from "tafgeet-engine";
 
 const $ = (id) => document.getElementById(id);
-const state = { fontBytes: null, lastPdf: null, lastName: "invoice.pdf" };
+const state = { fontBytes: null, lastPdf: null, lastName: "invoice.pdf", touched: false };
 
 // ── الخطّ ────────────────────────────────────────────────────────────────
 //
@@ -49,6 +51,11 @@ function lineRow(values = {}) {
   });
   row.addEventListener("input", refresh);
   return row;
+}
+
+/** القيم الخام لحقول البائع، للفحص قبل أي تعويض افتراضي. */
+function sellerInput() {
+  return { name: $("sellerName").value, vatNumber: $("sellerVat").value };
 }
 
 /** يقرأ النموذج ويبني كائن الفاتورة. المبالغ **بالهللات**. */
@@ -105,8 +112,9 @@ function refresh() {
         <tr class="total"><td>الإجمالي شامل الضريبة</td><td class="num">${formatMinor(t.total)}</td></tr>
       </table>
       <p class="words">فقط ${tafgeet(t.total / 100, "SAR")} لا غير</p>`;
-    $("build").disabled = false;
-    setStatus("");
+    const problems = validateSeller(sellerInput());
+    $("build").disabled = problems.length > 0;
+    setStatus(state.touched ? problems.join(" ") : "", problems.length ? "error" : "");
   } catch (e) {
     box.innerHTML = `<p class="error">${e.message}</p>`;
     $("build").disabled = true;
@@ -121,6 +129,12 @@ function setStatus(text, kind = "") {
 
 // ── البناء ───────────────────────────────────────────────────────────────
 async function build() {
+  const problems = validateSeller(sellerInput());
+  if (problems.length) {
+    state.touched = true;
+    setStatus(problems.join(" "), "error");
+    return;
+  }
   const invoice = readForm();
   setStatus("جارٍ البناء…");
   try {
@@ -165,6 +179,9 @@ export function start() {
   $("lines").append(lineRow({ description: "", quantity: 1, price: "" }));
   $("addLine").addEventListener("click", () => { $("lines").append(lineRow()); refresh(); });
   $("build").addEventListener("click", build);
-  document.querySelectorAll("input, textarea").forEach((el) => el.addEventListener("input", refresh));
+  document.querySelectorAll("input, textarea").forEach((el) => el.addEventListener("input", () => {
+    state.touched = true;
+    refresh();
+  }));
   refresh();
 }

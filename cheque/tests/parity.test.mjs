@@ -9,19 +9,24 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
+import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 import { tafgeet, chequeWords, CURRENCY_DECIMALS } from "../js/tafgeet.js";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, "..", "..");
+// مستودع العمل يسمّي المجلد `arabic-invoice-mcp` والعام `python-lib`
+const SERVER_PY = ["arabic-invoice-mcp", "python-lib"]
+  .map((d) => path.join(ROOT, d, "src", "arabic_invoice_mcp", "server.py"))
+  .find((p) => existsSync(p));
 
 /** يجمع مخرَج بايثون لكل الحالات دفعة واحدة — استدعاء واحد بدل مئات. */
 function pythonTafgeet(cases) {
   const script = `
 import sys, json, importlib.util
 spec = importlib.util.spec_from_file_location(
-    "srv", r"${path.join(ROOT, "arabic-invoice-mcp", "src", "arabic_invoice_mcp", "server.py")}")
+    "srv", r"${SERVER_PY}")
 m = importlib.util.module_from_spec(spec); sys.modules["srv"] = m
 spec.loader.exec_module(m)
 cases = json.loads(sys.stdin.read())
