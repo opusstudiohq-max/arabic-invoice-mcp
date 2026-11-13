@@ -17,6 +17,8 @@
 
 ## أدوات تعمل الآن
 
+[![Arabic Invoice MCP on StartupScores](https://startupscores.com/badge/arabic-invoice-mcp.svg?style=shield&v=combo&theme=dark)](https://startupscores.com/open-source/arabic-invoice-mcp)
+
 | الأداة | ماذا تفعل |
 | --- | --- |
 | **[أداة الفاتورة الضريبية](invoice/)** | تملأ نموذجاً فتنزل فاتورة PDF عربية بمجاميعها ورمزها — داخل متصفحك، بلا رفع |
